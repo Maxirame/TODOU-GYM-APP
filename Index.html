@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutina | Dashboard PC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="vista-semana">
+        <div id="banner-stats">
+            <div style="display: flex; gap: 30px; align-items: center;">
+                <button class="btn-perfil" onclick="abrirCuenta()">
+                    <div class="icono-perfil" id="letra-avatar">M</div>
+                    <div style="text-align: left;">
+                        <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">CUENTA</span>
+                        <span style="font-size: 16px; font-weight: 800; color: var(--text-main);">
+                            <span id="nombre-usuario">Maximiliano</span>
+                        </span>
+                    </div>
+                </button>
+                <button onclick="editarNombre()" class="icono-editar" title="Editar Nombre" style="background: transparent;">✎ EDITAR</button>
+                
+                <div style="margin-left: 20px;">
+                    <h1 style="color: var(--text-main); margin: 0;">Panel de Control</h1>
+                    <p style="margin: 5px 0 0 0;">Supera tus límites. Entrena inteligente.</p>
+                </div>
+            </div>
+            <div class="stats-info">
+                <div style="text-align: right;">
+                    <h3 style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Días de Gloria</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin: 0;">Histórico global</p>
+                </div>
+                <p id="contador-total">0</p>
+                <button class="btn-reset-total" onclick="reiniciarContadorHistorico()" title="Reiniciar a cero">↺</button>
+            </div>
+        </div>
+
+        <div id="contenedor-tarjetas"></div>
+        <button class="btn-reiniciar" onclick="reiniciarSemana()">🔄 RESETEAR SEMANA</button>
+    </div>
+
+    <div id="vista-dia">
+        <div class="header-dia">
+            <button class="btn-volver" onclick="volverSemana()">❮ VOLVER</button>
+            <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
+            
+            <button class="btn-guardar-historial" onclick="guardarDiaEnHistorial()">💾 GUARDAR ENTRENAMIENTO</button>
+
+            <div class="cronometro-container">
+                <span id="display-cronometro">00:00:00</span>
+                <button id="btn-comenzar-pausa" class="btn-crono" onclick="toggleCronometro()">▶ COMENZAR</button>
+                <button class="btn-crono btn-crono-reset" onclick="resetCronometro()">⏹ RESET</button>
+            </div>
+        </div>
+
+        <div class="layout-dia">
+            <div class="columna-fija">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; text-transform: uppercase;">Añadir Ejercicio</h3>
+                    
+                    <input type="text" id="inputEjercicio" list="listaEjercicios" placeholder="Ej: Press Banca" style="width: 100%; margin-bottom: 15px;">
+                    <datalist id="listaEjercicios">
+                        <option value="Press Banca">
+                        <option value="Dominadas Supinas">
+                        <option value="Curl de Bíceps">
+                        <option value="Sentadillas">
+                        <option value="Press Militar">
+                        <option value="Extensiones de Tríceps">
+                    </datalist>
+
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-weight: 800; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Series a realizar:</span>
+                        <input type="number" id="inputSeries" placeholder="Nº" min="1" style="flex: 1;">
+                    </div>
+                    
+                    <button class="btn-accion" onclick="agregarEjercicio()">+ AÑADIR A LA RUTINA</button>
+                </div>
+
+                <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                    <h3 style="text-align: center; font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px;">Modo Bestia</h3>
+                    <div id="contenedor-motivacion" style="flex: 1; display: flex; align-items: center; justify-content: center;"></div>
+                </div>
+            </div>
+
+            <div class="columna-scroll">
+                <h3 style="text-transform: uppercase; margin: 0; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">Tus Ejercicios</h3>
+                <div id="listaEjerciciosUI"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vista-cuenta">
+        <div class="header-dia" style="margin-bottom: 30px; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-volver" onclick="volverDesdeCuenta()" style="margin: 0;">❮ VOLVER AL PANEL</button>
+                <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Maximiliano</span></h1>
+            </div>
+            <button class="btn-borrar-historial" onclick="borrarHistorialCompleto()">🗑 BORRAR TODO EL HISTORIAL</button>
+        </div>
+
+        <h3 style="color: var(--accent-neon); text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Tu Historial de Batallas</h3>
+        <div id="contenedor-historial" class="historial-grid"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
