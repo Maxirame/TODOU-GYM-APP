@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutina | Dashboard PC</title>
+    <title>Rutina | Social Gym</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div id="vista-semana">
+    <div id="vista-auth">
+        <div class="card auth-card">
+            <h1>GYM SOCIAL</h1>
+            <p>Inicia sesión para sincronizar tus entrenamientos en la nube</p>
+            
+            <input type="email" id="auth-email" placeholder="Correo electrónico (Ej: maxi@gym.com)">
+            <input type="password" id="auth-pass" placeholder="Contraseña (Mín. 6 caracteres)">
+            
+            <button class="btn-accion" onclick="iniciarSesion()">INICIAR SESIÓN</button>
+            <button class="btn-volver" onclick="registrarUsuario()" style="width: 100%; margin-top: 15px; border-style: dashed;">Crear nueva cuenta</button>
+            
+            <p id="auth-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <div id="vista-semana" style="display: none;">
         <div id="banner-stats">
             <div style="display: flex; gap: 30px; align-items: center;">
                 <button class="btn-perfil" onclick="abrirCuenta()">
@@ -17,7 +32,7 @@
                     <div style="text-align: left;">
                         <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">CUENTA</span>
                         <span style="font-size: 16px; font-weight: 800; color: var(--text-main);">
-                            <span id="nombre-usuario">Maximiliano</span>
+                            <span id="nombre-usuario">Atleta</span>
                         </span>
                     </div>
                 </button>
@@ -42,7 +57,7 @@
         <button class="btn-reiniciar" onclick="reiniciarSemana()">🔄 RESETEAR SEMANA</button>
     </div>
 
-    <div id="vista-dia">
+    <div id="vista-dia" style="display: none;">
         <div class="header-dia">
             <button class="btn-volver" onclick="volverSemana()">❮ VOLVER</button>
             <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
@@ -63,12 +78,12 @@
                     
                     <input type="text" id="inputEjercicio" list="listaEjercicios" placeholder="Ej: Press Banca" style="width: 100%; margin-bottom: 15px;">
                     <datalist id="listaEjercicios">
-                        <option value="Press Banca">
-                        <option value="Dominadas Supinas">
-                        <option value="Curl de Bíceps">
-                        <option value="Sentadillas">
-                        <option value="Press Militar">
-                        <option value="Extensiones de Tríceps">
+                        <option value="Press Banca"></option>
+                        <option value="Dominadas Supinas"></option>
+                        <option value="Curl de Bíceps"></option>
+                        <option value="Sentadillas"></option>
+                        <option value="Press Militar"></option>
+                        <option value="Extensiones de Tríceps"></option>
                     </datalist>
 
                     <div style="display: flex; align-items: center; gap: 15px;">
@@ -92,19 +107,22 @@
         </div>
     </div>
 
-    <div id="vista-cuenta">
+    <div id="vista-cuenta" style="display: none;">
         <div class="header-dia" style="margin-bottom: 30px; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                 <button class="btn-volver" onclick="volverDesdeCuenta()" style="margin: 0;">❮ VOLVER AL PANEL</button>
-                <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Maximiliano</span></h1>
+                <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Atleta</span></h1>
             </div>
-            <button class="btn-borrar-historial" onclick="borrarHistorialCompleto()">🗑 BORRAR TODO EL HISTORIAL</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-borrar-historial" onclick="borrarHistorialCompleto()">🗑 BORRAR HISTORIAL</button>
+                <button class="btn-borrar-historial" onclick="cerrarSesion()" style="border-color: var(--warning); color: var(--warning);">CERRAR SESIÓN</button>
+            </div>
         </div>
 
         <h3 style="color: var(--accent-neon); text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Tu Historial de Batallas</h3>
         <div id="contenedor-historial" class="historial-grid"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
