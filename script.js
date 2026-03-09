@@ -1,83 +1,160 @@
-// --- BASE DE DATOS Y ARREGLOS ---
-const diasDeLaSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+// ==========================================
+// 1. IMPORTACIONES DE FIREBASE
+// ==========================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// --- CONFIGURACIÓN DE IMÁGENES ---
-// Modifica este número según la cantidad de imágenes que tengas en la carpeta "motivacion"
+// Tu Llave Maestra
+const firebaseConfig = {
+  apiKey: "AIzaSyA91qTTlkWMA5H9cEvI1yja5j3WmkzEbqY",
+  authDomain: "gym-app-social.firebaseapp.com",
+  projectId: "gym-app-social",
+  storageBucket: "gym-app-social.firebasestorage.app",
+  messagingSenderId: "788607838572",
+  appId: "1:788607838572:web:85ea3b15fdf467671aab49"
+};
+
+// Inicializamos el motor
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ==========================================
+// 2. VARIABLES DE MEMORIA DE LA APP
+// ==========================================
+const diasDeLaSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const TOTAL_IMAGENES_MOTIVACION = 8; 
 
-let baseDeDatosLocal = JSON.parse(localStorage.getItem('gymSemanaDB')) || {};
-let estadoDias = JSON.parse(localStorage.getItem('gymEstadoDias')) || {};
-let totalEntrenamientos = parseInt(localStorage.getItem('gymTotalDias')) || 0;
-let fallosHistoricos = JSON.parse(localStorage.getItem('gymFallos')) || {}; 
-let pesosMaximos = JSON.parse(localStorage.getItem('gymPesosMaximos')) || {}; 
-let historialGlobal = JSON.parse(localStorage.getItem('gymHistorialGlobal')) || []; 
+let baseDeDatosLocal = {};
+let estadoDias = {};
+let totalEntrenamientos = 0;
+let fallosHistoricos = {}; 
+let pesosMaximos = {}; 
+let historialGlobal = []; 
 let diaActivo = null;
-
-// Caché del cronómetro para optimización de DOM
 let domElementCrono = null;
 
-// --- LÓGICA DE NOMBRE DE USUARIO ---
-function cargarNombre() {
-    let nombreGuardado = localStorage.getItem('gymUserName') || 'Maximiliano';
-    document.getElementById('nombre-usuario').innerText = nombreGuardado;
-    document.getElementById('titulo-perfil-nombre').innerText = nombreGuardado;
-    document.getElementById('letra-avatar').innerText = nombreGuardado.charAt(0).toUpperCase();
+// ==========================================
+// 3. SISTEMA DE AUTENTICACIÓN (LOGIN)
+// ==========================================
+
+// El "Vigilante" que revisa si estás logueado
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        document.getElementById('vista-auth').style.display = 'none';
+        document.getElementById('vista-semana').style.display = 'flex';
+        await cargarDatosDeNube(user.uid);
+    } else {
+        document.getElementById('vista-auth').style.display = 'flex';
+        document.getElementById('vista-semana').style.display = 'none';
+        document.getElementById('vista-dia').style.display = 'none';
+        document.getElementById('vista-cuenta').style.display = 'none';
+    }
+});
+
+window.iniciarSesion = async function() {
+    const email = document.getElementById('auth-email').value;
+    const pass = document.getElementById('auth-pass').value;
+    const errorMsg = document.getElementById('auth-error');
+    if(!email || !pass) { errorMsg.innerText = "Completa los campos"; return; }
+    
+    try {
+        errorMsg.innerText = "Cargando...";
+        await signInWithEmailAndPassword(auth, email, pass);
+    } catch (error) {
+        errorMsg.innerText = "Error: Verifica tu correo o contraseña.";
+    }
 }
 
-function editarNombre() {
-    let nombreActual = localStorage.getItem('gymUserName') || 'Maximiliano';
-    let nuevoNombre = prompt("Ingresa el nombre del usuario:", nombreActual);
+window.registrarUsuario = async function() {
+    const email = document.getElementById('auth-email').value;
+    const pass = document.getElementById('auth-pass').value;
+    const errorMsg = document.getElementById('auth-error');
+    if(!email || !pass) { errorMsg.innerText = "Completa los campos"; return; }
+    
+    try {
+        errorMsg.innerText = "Creando cuenta...";
+        await createUserWithEmailAndPassword(auth, email, pass);
+        setTimeout(() => window.editarNombre(), 1500); // Le pedimos el nombre tras registrarse
+    } catch (error) {
+        errorMsg.innerText = "Error: La contraseña debe tener al menos 6 caracteres.";
+    }
+}
+
+window.cerrarSesion = function() {
+    signOut(auth);
+}
+
+// ==========================================
+// 4. SINCRONIZACIÓN CON FIREBASE (NUBE)
+// ==========================================
+
+async function guardarDatosEnNube() {
+    if (!auth.currentUser) return;
+    const userRef = doc(db, "usuarios", auth.currentUser.uid);
+    
+    // Subimos todo al perfil del usuario actual
+    await setDoc(userRef, {
+        baseDeDatosLocal,
+        estadoDias,
+        totalEntrenamientos,
+        fallosHistoricos,
+        pesosMaximos,
+        historialGlobal,
+        nombre: document.getElementById('nombre-usuario').innerText
+    }, { merge: true });
+}
+
+async function cargarDatosDeNube(uid) {
+    const userRef = doc(db, "usuarios", uid);
+    const docSnap = await getDoc(userRef);
+    
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        baseDeDatosLocal = data.baseDeDatosLocal || {};
+        estadoDias = data.estadoDias || {};
+        totalEntrenamientos = data.totalEntrenamientos || 0;
+        fallosHistoricos = data.fallosHistoricos || {};
+        pesosMaximos = data.pesosMaximos || {};
+        historialGlobal = data.historialGlobal || [];
+        
+        if(data.nombre) {
+            document.getElementById('nombre-usuario').innerText = data.nombre;
+            document.getElementById('titulo-perfil-nombre').innerText = data.nombre;
+            document.getElementById('letra-avatar').innerText = data.nombre.charAt(0).toUpperCase();
+        } else {
+            document.getElementById('nombre-usuario').innerText = "Atleta";
+        }
+    } else {
+        // Es un usuario nuevo, la libreta está en blanco
+        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; 
+        fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
+        document.getElementById('nombre-usuario').innerText = "Atleta";
+    }
+    renderizarSemana();
+}
+
+window.editarNombre = function() {
+    let nombreActual = document.getElementById('nombre-usuario').innerText;
+    let nuevoNombre = prompt("Ingresa tu nombre de atleta:", nombreActual);
     
     if (nuevoNombre !== null && nuevoNombre.trim() !== "") {
-        localStorage.setItem('gymUserName', nuevoNombre.trim());
-        cargarNombre();
+        const finalName = nuevoNombre.trim();
+        document.getElementById('nombre-usuario').innerText = finalName;
+        document.getElementById('titulo-perfil-nombre').innerText = finalName;
+        document.getElementById('letra-avatar').innerText = finalName.charAt(0).toUpperCase();
+        guardarDatosEnNube();
     }
 }
 
-// --- LÓGICA DE WHATSAPP ---
-function avisarBro(event) {
-    event.stopPropagation();
-    window.open("https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw", '_blank');
-}
+// ==========================================
+// 5. LÓGICA DE LA APP (ADAPTADA A LA NUBE)
+// ==========================================
 
-// --- LÓGICA DEL CRONÓMETRO ---
-let startTime, elapsedTime = 0, timerInterval, isRunning = false;
-
-function formatTime(ms) {
-    let totalSeconds = Math.floor(ms / 1000);
-    let hours = Math.floor(totalSeconds / 3600); let minutes = Math.floor((totalSeconds % 3600) / 60); let seconds = totalSeconds % 60;
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-function actualizarDisplayCrono() {
-    if (!domElementCrono) domElementCrono = document.getElementById('display-cronometro');
-    if (domElementCrono) domElementCrono.innerText = formatTime(elapsedTime + (isRunning ? Date.now() - startTime : 0));
-}
-
-function toggleCronometro() {
-    const btn = document.getElementById('btn-comenzar-pausa');
-    if (isRunning) {
-        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false;
-        btn.innerHTML = '▶ REANUDAR'; btn.classList.remove('btn-crono-pausa');
-    } else {
-        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true;
-        btn.innerHTML = '⏸ PAUSAR'; btn.classList.add('btn-crono-pausa');
-    }
-}
-
-function resetCronometro() {
-    if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) {
-        clearInterval(timerInterval); isRunning = false; elapsedTime = 0;
-        const btn = document.getElementById('btn-comenzar-pausa');
-        btn.innerHTML = '▶ COMENZAR'; btn.classList.remove('btn-crono-pausa'); actualizarDisplayCrono();
-    }
-}
-
-// --- NAVEGACIÓN PRINCIPAL (OPTIMIZADA) ---
-function renderizarSemana() {
+window.renderizarSemana = function() {
     const contenedorTarjetas = document.getElementById('contenedor-tarjetas');
-    let acumuladorHTML = ''; // Optimizando el pintado del DOM
-    
+    let acumuladorHTML = ''; 
     diasDeLaSemana.forEach(dia => {
         const completado = estadoDias[dia] || false;
         const claseColor = completado ? 'dia-verde' : '';
@@ -97,62 +174,64 @@ function renderizarSemana() {
     document.getElementById('contador-total').innerText = totalEntrenamientos;
 }
 
-function marcarCompletado(dia, estaMarcado) {
+window.marcarCompletado = function(dia, estaMarcado) {
     if (estaMarcado && !estadoDias[dia]) totalEntrenamientos++;
     estadoDias[dia] = estaMarcado; 
-    localStorage.setItem('gymEstadoDias', JSON.stringify(estadoDias)); localStorage.setItem('gymTotalDias', totalEntrenamientos);
+    guardarDatosEnNube();
     renderizarSemana();
 }
 
-function reiniciarSemana() {
+window.reiniciarSemana = function() {
     if(confirm('¿Listo para destruir una nueva semana? Tus marcas se conservan.')) {
-        estadoDias = {}; localStorage.setItem('gymEstadoDias', JSON.stringify(estadoDias)); renderizarSemana();
+        estadoDias = {}; 
+        guardarDatosEnNube();
+        renderizarSemana();
     }
 }
 
-function reiniciarContadorHistorico() {
+window.reiniciarContadorHistorico = function() {
     if(confirm('⚠️ ¿Seguro que querés reiniciar tus días de gloria a cero?')) {
-        totalEntrenamientos = 0; localStorage.setItem('gymTotalDias', totalEntrenamientos); renderizarSemana();
+        totalEntrenamientos = 0; 
+        guardarDatosEnNube();
+        renderizarSemana();
     }
 }
 
 function cargarImagenMotivacion() {
     const contenedor = document.getElementById('contenedor-motivacion');
-    // Elige un número al azar entre 1 y el TOTAL que definiste arriba
     const numeroAlAzar = Math.floor(Math.random() * TOTAL_IMAGENES_MOTIVACION) + 1;
-    // Construye la ruta de la imagen (Ej: motivacion/3.jpg)
     const rutaImagen = `motivacion/${numeroAlAzar}.jpg`;
-    
     contenedor.innerHTML = `<img src="${rutaImagen}" alt="Motivación Gym" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-neon);">`;
 }
 
-function abrirDia(dia) {
+window.abrirDia = function(dia) {
     diaActivo = dia;
     document.getElementById('titulo-dia').innerText = `${dia} de Guerra`;
     document.getElementById('vista-semana').style.display = 'none';
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
-    cargarImagenMotivacion(); actualizarInterfazDia(); actualizarDisplayCrono();
+    cargarImagenMotivacion(); 
+    actualizarInterfazDia(); 
+    actualizarDisplayCrono();
 }
 
-function volverSemana() {
+window.volverSemana = function() {
     diaActivo = null;
     document.getElementById('vista-dia').style.display = 'none';
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-semana').style.display = 'flex';
 }
 
-// --- LÓGICA DE CUENTA E HISTORIAL (OPTIMIZADA) ---
-function abrirCuenta() {
+window.abrirCuenta = function() {
     document.getElementById('vista-semana').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'none';
     document.getElementById('vista-cuenta').style.display = 'flex';
     renderizarHistorial();
 }
 
-function volverDesdeCuenta() { volverSemana(); }
+window.volverDesdeCuenta = function() { volverSemana(); }
 
-function guardarDiaEnHistorial() {
+window.guardarDiaEnHistorial = function() {
     const rutinaActual = baseDeDatosLocal[diaActivo];
     if (!diaActivo || !rutinaActual || rutinaActual.length === 0) {
         alert("No tienes ejercicios cargados hoy para guardar."); return;
@@ -164,14 +243,14 @@ function guardarDiaEnHistorial() {
         tiempo: document.getElementById('display-cronometro').innerText
     });
     
-    localStorage.setItem('gymHistorialGlobal', JSON.stringify(historialGlobal));
+    guardarDatosEnNube();
     alert(`¡Día guardado con éxito! Puedes verlo en tu Cuenta.\nTiempo registrado: ${document.getElementById('display-cronometro').innerText}`);
 }
 
-function borrarHistorialCompleto() {
+window.borrarHistorialCompleto = function() {
     if(confirm('⚠️ ¿Estás completamente seguro de borrar TODO tu historial guardado? Esta acción no se puede deshacer.')) {
         historialGlobal = [];
-        localStorage.setItem('gymHistorialGlobal', JSON.stringify(historialGlobal));
+        guardarDatosEnNube();
         renderizarHistorial();
         alert('Historial borrado con éxito.');
     }
@@ -184,7 +263,7 @@ function renderizarHistorial() {
         return;
     }
 
-    let acumuladorHTML = ''; // Optimizando el pintado
+    let acumuladorHTML = ''; 
     historialGlobal.forEach(registro => {
         let htmlEjercicios = '';
         registro.rutina.forEach(ej => {
@@ -209,12 +288,11 @@ function renderizarHistorial() {
     contenedor.innerHTML = acumuladorHTML;
 }
 
-// --- LÓGICA DE LA RUTINA DIARIA (OPTIMIZADA) ---
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
     const contenedor = document.getElementById('listaEjerciciosUI');
-    let acumuladorHTML = ''; // Optimizando el pintado
+    let acumuladorHTML = ''; 
 
     rutinaHoy.forEach((ej, indexEjercicio) => {
         const valorFallo = fallosHistoricos[ej.nombre] || '';
@@ -252,7 +330,7 @@ function actualizarInterfazDia() {
     contenedor.innerHTML = acumuladorHTML;
 }
 
-function agregarEjercicio() {
+window.agregarEjercicio = function() {
     const nombre = document.getElementById('inputEjercicio').value.trim();
     const series = parseInt(document.getElementById('inputSeries').value);
     if (!nombre || !series) { alert("¡Hey! Completá el nombre y las series."); return; }
@@ -264,29 +342,44 @@ function agregarEjercicio() {
     });
     
     document.getElementById('inputEjercicio').value = ''; document.getElementById('inputSeries').value = '';
-    guardarYRefrescarDia();
+    guardarDatosEnNube();
+    actualizarInterfazDia();
 }
 
-// --- MANEJO DE MEMORIA ---
-function guardarRepes(indexEjercicio, indexSerie, valor) {
+window.guardarRepes = function(indexEjercicio, indexSerie, valor) {
     const ej = baseDeDatosLocal[diaActivo][indexEjercicio];
     if (!ej.repesRealizadas) ej.repesRealizadas = new Array(ej.series).fill('');
     ej.repesRealizadas[indexSerie] = valor;
-    localStorage.setItem('gymSemanaDB', JSON.stringify(baseDeDatosLocal));
+    guardarDatosEnNube();
 }
 
-function guardarPesoSerie(indexEjercicio, indexSerie, valor) {
+window.guardarPesoSerie = function(indexEjercicio, indexSerie, valor) {
     const ej = baseDeDatosLocal[diaActivo][indexEjercicio];
     if (!ej.pesosRealizados) ej.pesosRealizados = new Array(ej.series).fill('');
     ej.pesosRealizados[indexSerie] = valor;
-    localStorage.setItem('gymSemanaDB', JSON.stringify(baseDeDatosLocal));
+    guardarDatosEnNube();
 }
 
-function guardarFallo(nombreEjercicio, valor) { fallosHistoricos[nombreEjercicio] = valor; localStorage.setItem('gymFallos', JSON.stringify(fallosHistoricos)); }
-function guardarPesoMaximo(nombreEjercicio, valor) { pesosMaximos[nombreEjercicio] = valor; localStorage.setItem('gymPesosMaximos', JSON.stringify(pesosMaximos)); }
-function eliminarEjercicio(index) { baseDeDatosLocal[diaActivo].splice(index, 1); guardarYRefrescarDia(); }
-function guardarYRefrescarDia() { localStorage.setItem('gymSemanaDB', JSON.stringify(baseDeDatosLocal)); actualizarInterfazDia(); }
+window.guardarFallo = function(nombreEjercicio, valor) { fallosHistoricos[nombreEjercicio] = valor; guardarDatosEnNube(); }
+window.guardarPesoMaximo = function(nombreEjercicio, valor) { pesosMaximos[nombreEjercicio] = valor; guardarDatosEnNube(); }
+window.eliminarEjercicio = function(index) { baseDeDatosLocal[diaActivo].splice(index, 1); guardarDatosEnNube(); actualizarInterfazDia(); }
 
-// --- ARRANQUE DE LA APP ---
-cargarNombre();
-renderizarSemana();
+window.toggleCronometro = function() {
+    const btn = document.getElementById('btn-comenzar-pausa');
+    if (isRunning) {
+        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false;
+        btn.innerHTML = '▶ REANUDAR'; btn.classList.remove('btn-crono-pausa');
+    } else {
+        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true;
+        btn.innerHTML = '⏸ PAUSAR'; btn.classList.add('btn-crono-pausa');
+    }
+}
+
+window.resetCronometro = function() {
+    if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) {
+        clearInterval(timerInterval); isRunning = false; elapsedTime = 0;
+        const btn = document.getElementById('btn-comenzar-pausa');
+        btn.innerHTML = '▶ COMENZAR'; btn.classList.remove('btn-crono-pausa'); actualizarDisplayCrono();
+    }
+}
+window.avisarBro = avisarBro;
