@@ -122,31 +122,58 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* =========================================
    MEDIA QUERIES (MAGIA RESPONSIVE MOBILE)
    ========================================= */
-@media (max-width: 1024px) {
-    body { padding: 15px; height: auto; overflow: auto; display: block; }
+@media (max-width: 768px) {
+    body { padding: 12px; height: auto; overflow: auto; display: block; }
+    h1 { font-size: 22px; }
     
     /* Semana Mobile */
-    #banner-stats { flex-direction: column; text-align: center; gap: 20px; padding: 20px;}
-    .stats-info { flex-direction: column; gap: 10px;}
-    .stats-info div { text-align: center !important;}
-    #contenedor-tarjetas { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); overflow-y: visible;}
-    .tarjeta-dia { min-height: 200px; }
+    #banner-stats { flex-direction: column; text-align: center; gap: 15px; padding: 20px 15px;}
+    #banner-stats > div { flex-direction: column; width: 100%; gap: 15px; } 
+    .btn-perfil { width: 100%; justify-content: center; }
+    
+    .stats-info { flex-direction: row; gap: 20px; justify-content: center; width: 100%; align-items: center;}
+    #contador-total { font-size: 45px; } 
+    
+    /* 2 Columnas para los días */
+    #contenedor-tarjetas { grid-template-columns: repeat(2, 1fr); overflow-y: visible; gap: 12px;}
+    .tarjeta-dia { min-height: 160px; padding: 15px 10px; }
+    .nombre-dia { font-size: 18px; }
+    .checkbox-dia { width: 32px; height: 32px; margin-top: 10px; }
+    .checkbox-dia:checked::after { font-size: 18px; }
+    .btn-wsp { width: 32px; height: 32px; margin-top: 10px; }
+    .btn-wsp svg { width: 18px; height: 18px; }
 
     /* Día Mobile */
-    #vista-dia { height: auto; display: none; } /* Mantiene el none por defecto */
-    .header-dia { justify-content: center; }
-    .cronometro-container { margin-left: 0; width: 100%; }
-    .layout-dia { flex-direction: column; overflow: visible; }
+    #vista-dia { height: auto; display: none; }
+    .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
+    .btn-guardar-historial { margin-left: 0; width: 100%; padding: 15px; }
+    
+    .cronometro-container { margin-left: 0; width: 100%; justify-content: center; flex-direction: column; gap: 10px;}
+    #display-cronometro { font-size: 32px; margin-bottom: 5px;}
+    .btn-crono { width: 100%; padding: 12px; }
+
+    .layout-dia { flex-direction: column; overflow: visible; gap: 20px;}
     .columna-fija { max-width: 100%; overflow: visible; padding-right: 0;}
-    .columna-scroll { overflow: visible; }
+    .columna-scroll { overflow: visible; padding: 15px;}
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0;}
     
     /* Ejercicios Mobile */
-    .ejercicio-cabecera { flex-direction: column; align-items: flex-start; }
-    .contenedor-records { width: 100%; justify-content: space-between;}
-    .btn-eliminar { width: 100%; margin-top: 10px;}
+    .ejercicio-item { padding: 15px; }
+    .ejercicio-cabecera { flex-direction: column; align-items: flex-start; gap: 12px; border-bottom: none; padding-bottom: 0;}
+    .titulo-ejercicio { font-size: 18px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; width: 100%;}
+    
+    .contenedor-records { width: 100%; grid-template-columns: 1fr 1fr; display: grid; gap: 10px;}
+    .caja-record { flex-direction: column; width: 100%; text-align: center;}
+    .caja-record label { width: 100%; padding: 5px; font-size: 10px;}
+    .caja-record input { width: 100%; padding: 10px; font-size: 16px;}
+    .btn-eliminar { width: 100%; margin-top: 5px; grid-column: span 2; padding: 12px;}
+    
+    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px;}
+    .input-datos { font-size: 18px; padding: 5px;}
     
     /* Cuenta Mobile */
     #vista-cuenta { height: auto; display: none; }
-    .historial-grid { overflow-y: visible; padding-right: 0;}
+    .historial-grid { overflow-y: visible; padding-right: 0; grid-template-columns: 1fr;}
+    .fecha-historial { flex-direction: column; align-items: flex-start; font-size: 18px;}
+    .badge-dia { width: 100%; text-align: center; margin-top: 10px;}
 }
