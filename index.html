@@ -17,8 +17,8 @@
             <input type="email" id="auth-email" placeholder="Correo electrónico (Ej: maxi@gym.com)">
             <input type="password" id="auth-pass" placeholder="Contraseña (Mín. 6 caracteres)">
             
-            <button class="btn-accion" onclick="iniciarSesion()">INICIAR SESIÓN</button>
-            <button class="btn-volver" onclick="registrarUsuario()" style="width: 100%; margin-top: 15px; border-style: dashed;">Crear nueva cuenta</button>
+            <button class="btn-accion" id="btn-login">INICIAR SESIÓN</button>
+            <button class="btn-volver" id="btn-register" style="width: 100%; margin-top: 15px; border-style: dashed;">Crear nueva cuenta</button>
             
             <p id="auth-error" class="error-msg"></p>
         </div>
@@ -27,7 +27,7 @@
     <div id="vista-semana" style="display: none;">
         <div id="banner-stats">
             <div style="display: flex; gap: 30px; align-items: center;">
-                <button class="btn-perfil" onclick="abrirCuenta()">
+                <button class="btn-perfil" id="btn-abrir-cuenta">
                     <div class="icono-perfil" id="letra-avatar">M</div>
                     <div style="text-align: left;">
                         <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">CUENTA</span>
@@ -36,7 +36,7 @@
                         </span>
                     </div>
                 </button>
-                <button onclick="editarNombre()" class="icono-editar" title="Editar Nombre" style="background: transparent;">✎ EDITAR</button>
+                <button id="btn-editar-nombre" class="icono-editar" title="Editar Nombre" style="background: transparent;">✎ EDITAR</button>
                 
                 <div style="margin-left: 20px;">
                     <h1 style="color: var(--text-main); margin: 0;">Panel de Control</h1>
@@ -49,25 +49,25 @@
                     <p style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin: 0;">Histórico global</p>
                 </div>
                 <p id="contador-total">0</p>
-                <button class="btn-reset-total" onclick="reiniciarContadorHistorico()" title="Reiniciar a cero">↺</button>
+                <button class="btn-reset-total" id="btn-reiniciar-historico" title="Reiniciar a cero">↺</button>
             </div>
         </div>
 
         <div id="contenedor-tarjetas"></div>
-        <button class="btn-reiniciar" onclick="reiniciarSemana()">🔄 RESETEAR SEMANA</button>
+        <button class="btn-reiniciar" id="btn-reiniciar-semana">🔄 RESETEAR SEMANA</button>
     </div>
 
     <div id="vista-dia" style="display: none;">
         <div class="header-dia">
-            <button class="btn-volver" onclick="volverSemana()">❮ VOLVER</button>
+            <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
             <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
             
-            <button class="btn-guardar-historial" onclick="guardarDiaEnHistorial()">💾 GUARDAR ENTRENAMIENTO</button>
+            <button class="btn-guardar-historial" id="btn-guardar-dia">💾 GUARDAR ENTRENAMIENTO</button>
 
             <div class="cronometro-container">
                 <span id="display-cronometro">00:00:00</span>
-                <button id="btn-comenzar-pausa" class="btn-crono" onclick="toggleCronometro()">▶ COMENZAR</button>
-                <button class="btn-crono btn-crono-reset" onclick="resetCronometro()">⏹ RESET</button>
+                <button id="btn-comenzar-pausa" class="btn-crono">▶ COMENZAR</button>
+                <button class="btn-crono btn-crono-reset" id="btn-reset-crono">⏹ RESET</button>
             </div>
         </div>
 
@@ -91,7 +91,7 @@
                         <input type="number" id="inputSeries" placeholder="Nº" min="1" style="flex: 1;">
                     </div>
                     
-                    <button class="btn-accion" onclick="agregarEjercicio()">+ AÑADIR A LA RUTINA</button>
+                    <button class="btn-accion" id="btn-agregar-ejercicio">+ AÑADIR A LA RUTINA</button>
                 </div>
 
                 <div class="card" style="flex: 1; display: flex; flex-direction: column;">
@@ -110,12 +110,12 @@
     <div id="vista-cuenta" style="display: none;">
         <div class="header-dia" style="margin-bottom: 30px; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <button class="btn-volver" onclick="volverDesdeCuenta()" style="margin: 0;">❮ VOLVER AL PANEL</button>
+                <button class="btn-volver" id="btn-volver-desde-cuenta" style="margin: 0;">❮ VOLVER AL PANEL</button>
                 <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Atleta</span></h1>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn-borrar-historial" onclick="borrarHistorialCompleto()">🗑 BORRAR HISTORIAL</button>
-                <button class="btn-borrar-historial" onclick="cerrarSesion()" style="border-color: var(--warning); color: var(--warning);">CERRAR SESIÓN</button>
+                <button class="btn-borrar-historial" id="btn-borrar-todo">🗑 BORRAR HISTORIAL</button>
+                <button class="btn-borrar-historial" id="btn-cerrar-sesion" style="border-color: var(--warning); color: var(--warning);">CERRAR SESIÓN</button>
             </div>
         </div>
 
@@ -126,3 +126,5 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+</html>
+
