@@ -17,7 +17,7 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-/* --- ESTRUCTURA MAESTRA (AQUÍ ESTÁ EL ARREGLO DEL SCROLL) --- */
+/* --- ESTRUCTURA MAESTRA --- */
 body { 
     font-family: 'Montserrat', sans-serif; background-color: var(--bg-body); color: var(--text-main); 
     padding: 20px 40px; max-width: 1600px; margin: auto; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
@@ -78,33 +78,37 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .checkbox-dia:checked { background: var(--accent-neon); border-color: var(--accent-neon); }
 .checkbox-dia:checked::after { content: '✔'; position: absolute; color: #000; font-size: 22px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-/* --- INTERIOR DEL DÍA (COLUMNAS BLINDADAS) --- */
+/* --- INTERIOR DEL DÍA (COLUMNAS) --- */
 .header-dia { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-shrink: 0;}
 .btn-guardar-historial { background: rgba(217, 245, 34, 0.1); color: var(--accent-neon); border: 1px solid var(--accent-neon); padding: 10px 20px; border-radius: 8px; font-size: 14px;}
-.cronometro-container { margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border-color); }
+.cronometro-container { margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease;}
 #display-cronometro { font-size: 28px; font-weight: 900; color: var(--text-main); font-variant-numeric: tabular-nums; letter-spacing: 1px;}
 .btn-crono { padding: 10px 15px; font-size: 14px; border: none; background: transparent; color: var(--accent-neon); border: 2px solid var(--accent-neon); }
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
-.layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; }
-.columna-fija { width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; }
-.columna-scroll { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
-#listaEjerciciosUI { flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 15px;}
+.layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
+.columna-fija { width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
+.columna-scroll { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; min-height: 0;}
+#listaEjerciciosUI { flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 10px; min-height: 0;}
 
-/* --- EJERCICIOS --- */
-.ejercicio-item { background: var(--bg-body); padding: 25px; margin-bottom: 20px; border-radius: 16px; border: 1px solid var(--border-color);}
-.ejercicio-cabecera { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
-.titulo-ejercicio { font-size: 22px; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
-.contenedor-records { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;}
-.caja-record { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;}
-.caja-record label { background: var(--border-color); padding: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-main);}
-.caja-record input { border: none; border-radius: 0; width: 65px; background: transparent; padding: 10px; text-align: center; color: var(--accent-neon); font-size: 16px;}
-.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
-.caja-serie { display: flex; flex-direction: column; align-items: center; background: var(--bg-card); padding: 12px 8px; border-radius: 12px; border: 1px solid var(--border-color); transition: border 0.2s;}
-.numero-serie { font-size: 14px; font-weight: 800; color: var(--accent-neon); margin-bottom: 8px; }
-.input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 5px; font-size: 20px; background: transparent; margin-bottom: 5px; color: var(--text-main);}
-.etiqueta-input { font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px;}
+/* --- EJERCICIOS COMPACTOS --- */
+.ejercicio-item { background: var(--bg-body); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border-color);}
+.ejercicio-cabecera { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;}
+.titulo-ejercicio { font-size: 18px; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
+
+.contenedor-records { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
+.caja-record { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;}
+.caja-record label { background: var(--border-color); padding: 6px 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-main);}
+.caja-record input { border: none; border-radius: 0; width: 55px; background: transparent; padding: 6px; text-align: center; color: var(--accent-neon); font-size: 14px;}
+
+/* Diseño horizontal para Repes x Peso */
+.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.caja-serie { display: flex; flex-direction: column; align-items: flex-start; background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); transition: border 0.2s;}
+.numero-serie { font-size: 12px; font-weight: 800; color: var(--accent-neon); margin-bottom: 5px; }
+.inputs-fila { display: flex; gap: 5px; width: 100%; align-items: center;}
+.input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 5px; font-size: 16px; background: transparent; color: var(--text-main); width: 100%;}
+.etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold;}
 
 /* --- CUENTA --- */
 .historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; }
@@ -117,9 +121,12 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .mini-serie { background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid var(--border-color); color: var(--text-muted);}
 .mini-serie strong { color: var(--text-main); }
 
-/* --- RESPONSIVE MOBILE --- */
+/* =========================================
+   MEDIA QUERIES (MAGIA RESPONSIVE MOBILE)
+   ========================================= */
 @media (max-width: 768px) {
-    body { padding: 12px; height: auto; overflow: auto; display: block; }
+    /* Dejamos espacio abajo para que el cronómetro flotante no tape los botones */
+    body { padding: 12px; padding-bottom: 90px; height: auto; overflow: auto; display: block; }
     #banner-stats { flex-direction: column; text-align: center; gap: 15px; padding: 20px 15px;}
     #banner-stats > div { flex-direction: column; width: 100%; gap: 15px; } 
     .btn-perfil { width: 100%; justify-content: center; }
@@ -127,18 +134,43 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #contador-total { font-size: 45px; } 
     #contenedor-tarjetas { grid-template-columns: repeat(2, 1fr); overflow-y: visible; gap: 12px;}
     .tarjeta-dia { min-height: 160px; padding: 15px 10px; }
+    
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
     .btn-guardar-historial { margin-left: 0; width: 100%; padding: 15px; }
-    .cronometro-container { margin-left: 0; width: 100%; justify-content: center; flex-direction: column; gap: 10px;}
+    
+    /* EL CRONÓMETRO FLOTANTE PARA MOBILE */
+    .cronometro-container { 
+        position: fixed; 
+        bottom: 15px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        width: 92%; 
+        z-index: 1000; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.9); 
+        background: rgba(24, 24, 27, 0.95); 
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        justify-content: center;
+        flex-direction: row; /* Fuerza a que los botones estén al lado en móvil */
+        gap: 10px;
+        padding: 12px 15px;
+    }
+    #display-cronometro { font-size: 24px; margin-bottom: 0;}
+    .btn-crono { width: auto; padding: 8px 12px; font-size: 12px;}
+
     .layout-dia { flex-direction: column; overflow: visible; gap: 20px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
     .columna-scroll { overflow: visible; padding: 15px;}
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0;}
+    
     .ejercicio-cabecera { flex-direction: column; align-items: flex-start; gap: 12px; border-bottom: none; padding-bottom: 0;}
     .titulo-ejercicio { font-size: 18px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; width: 100%;}
+    
     .contenedor-records { width: 100%; grid-template-columns: 1fr 1fr; display: grid; gap: 10px;}
     .caja-record { flex-direction: column; width: 100%; text-align: center;}
     .caja-record label { width: 100%; padding: 5px; font-size: 10px;}
     .caja-record input { width: 100%; padding: 10px; font-size: 16px;}
     .btn-eliminar { width: 100%; margin-top: 5px; grid-column: span 2; padding: 12px;}
+    
+    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;}
 }
