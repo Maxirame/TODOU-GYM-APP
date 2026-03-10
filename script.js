@@ -225,24 +225,24 @@ function actualizarInterfazDia() {
         const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
         
-        // Buscamos la info. Si no hay, devolvemos un objeto con imgMusculo vacío
-        const infoTecnica = infoEjercicios[ej.nombre] || { imgMusculo: "" };
+        // Buscamos la info. Si no hay, devolvemos un objeto vacío
+        const infoTecnica = infoEjercicios[ej.nombre] || {};
         
-        // Ahora preguntamos: ¿Tiene imagen?
-        const htmlBack = infoTecnica.imgMusculo ? `
+        // Ahora preguntamos: ¿Tiene un ID de YouTube cargado?
+        const htmlBack = infoTecnica.youtubeId ? `
             <div class="header-back-carta">
-                <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Músculo Principal</h4>
+                <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica Correcta</h4>
                 <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-top: 10px;">
-                <img src="${infoTecnica.imgMusculo}" alt="Músculo trabajado" style="max-width: 100%; max-height: 180px; object-fit: contain; opacity: 0.9; filter: drop-shadow(0 0 10px rgba(217, 245, 34, 0.2));" onerror="this.style.display='none'">
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 5px;">
+                <iframe width="100%" height="200" src="https://www.youtube.com/embed/${infoTecnica.youtubeId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius: 8px; border: 1px solid var(--border-color);"></iframe>
             </div>
         ` : `
             <div class="header-back-carta">
                 <h4 style="color: var(--text-muted); margin: 0; font-size: 14px; text-transform: uppercase;">Sin Información</h4>
                 <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
-            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado una imagen para este ejercicio en el código.</p>
+            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un enlace de YouTube para este ejercicio.</p>
         `;
 
         return `
@@ -288,7 +288,7 @@ listaUI.addEventListener('click', (e) => {
         document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
     }
     
-    // 3. Check Serie & Lanzar Isla Descanso (CORREGIDO EL PARPADEO)
+    // 3. Check Serie & Lanzar Isla Descanso
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -526,6 +526,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
