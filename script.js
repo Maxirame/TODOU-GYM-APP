@@ -39,16 +39,16 @@ let tiempoDescansoGlobal = 180; // 3 minutos por defecto en segundos
 let timerDescansoInterval;
 let descansoRestante = 0;
 
-// Diccionario de Técnicas (Videos e Imágenes)
+// Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
     "Press Banca": {
-        imgMusculo: "img/pressbanca.png"
+        youtubeId: "vthMCtgVtFw" // Solo pon la ID del video aquí
     },
-    "Press Banca Mancuernas": {
-        imgMusculo: "img/pressbancamancuernas.png"
+    "Sentadillas": {
+        youtubeId: "MvmTEjcXGk0" 
     },
-    "Press Inclinado": {
-        imgMusculo: "img/pressinclinado.png"
+    "Dominadas Supinas": {
+        youtubeId: "eGo4IYR2p3k"
     }
 };
 
@@ -526,6 +526,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
