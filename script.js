@@ -42,7 +42,7 @@ let descansoRestante = 0;
 // Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
     "Press Banca": {
-        youtubeId: "vthMCtgVtFw" // Solo pon la ID del video aquí
+        youtubeId: "0SJy6gPw_Ik" // Solo pon la ID del video aquí
     },
     "Sentadillas": {
         youtubeId: "MvmTEjcXGk0" 
@@ -526,6 +526,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
