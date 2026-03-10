@@ -47,11 +47,8 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-accion:hover { background: var(--accent-hover); transform: translateY(-2px); }
 .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px;}
 .btn-volver:hover { color: var(--text-main); border-color: var(--text-main); }
-
-/* --- ELIMINAR AHORA ES UNA CRUZ SUTIL --- */
 .btn-eliminar { background: transparent; color: var(--text-muted); border: none; padding: 6px; font-size: 14px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
 .btn-eliminar:hover { background: var(--danger); color: white; }
-
 .btn-reiniciar { background: transparent; color: var(--text-main); border: 2px dashed var(--border-color); padding: 15px; width: 100%; margin-top: 20px; flex-shrink: 0;}
 .btn-reiniciar:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
 .btn-borrar-historial { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; font-size: 14px; border-radius: 8px;}
@@ -94,7 +91,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
 
-/* ACÁ ESTÁ LA MAGIA PARA QUE ENTREN 3 EJERCICIOS (Ancho mínimo bajó a 280px) */
 #listaEjerciciosUI { 
     flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 5px; min-height: 0;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start;
@@ -103,11 +99,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* --- EJERCICIOS ULTRA ESTRECHOS --- */
 .ejercicio-item { background: var(--bg-card); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);}
 
-.ejercicio-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.ejercicio-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
 .titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900;}
 
-/* EL NUEVO TEXTO DE FALLO (Reemplaza los inputs) */
-.badge-pr { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block; font-weight: 600; transition: color 0.3s;}
+/* EL NUEVO TEXTO DE FALLO (Bajo el título) */
+.badge-pr { font-size: 12px; color: var(--text-muted); display: block; font-weight: 600; margin-bottom: 15px; transition: color 0.3s;}
 
 /* Series Apiladas Verticalmente */
 .contenedor-series { display: flex; flex-direction: column; gap: 8px; }
@@ -120,7 +116,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 }
 
 /* EFECTO CUANDO SE MARCA EL CHECK */
-.caja-serie.completada { background: var(--success-bg); border-color: var(--accent-neon); }
+.caja-serie.completada { background: rgba(217, 245, 34, 0.08); border-color: var(--accent-neon); }
 .caja-serie.completada .numero-serie { color: var(--accent-neon); }
 
 .numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
@@ -134,11 +130,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .input-datos:focus { outline: none; border-bottom: 1px solid var(--accent-neon); }
 .etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold; margin: 0 4px;}
 
-/* EL BOTÓN DEL CHECKBOX */
+/* EL BOTÓN DEL CHECKBOX AL LADO DE LA SERIE */
 .btn-check-serie {
     background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
     border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px;
+    cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px; flex-shrink: 0;
 }
 .btn-check-serie:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
 .caja-serie.completada .btn-check-serie { background: var(--accent-neon); color: #000; border-color: var(--accent-neon); }
@@ -170,7 +166,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .tarjeta-dia { min-height: 160px; padding: 15px 10px; }
     
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
-    .btn-guardar-historial { margin-left: 0; width: 100%; padding: 15px; }
+    .btn-guardar-historial, #btn-limpiar-checks { margin-left: 0; width: 100%; padding: 15px; }
     
     .cronometro-container { 
         position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); 
@@ -188,10 +184,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
     .ejercicio-item { padding: 15px; }
-    .ejercicio-header-top { margin-bottom: 12px; }
-    .titulo-ejercicio { font-size: 18px; }
+    .titulo-ejercicio { font-size: 16px; }
     
-    .caja-serie { padding: 8px 10px; }
+    .caja-serie { padding: 6px 8px; }
     .numero-serie { font-size: 13px; }
-    .input-datos { font-size: 16px; min-width: 45px; width: 45px; }
+    .input-datos { font-size: 16px; min-width: 40px; width: 40px; }
 }
