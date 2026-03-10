@@ -248,26 +248,29 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
+            // Agregamos el contenedor de Swipe y el tacho de basura
             htmlSeries += `
-                <div class="caja-serie ${isCompleted}">
-                    <span class="numero-serie">S${i + 1}</span>
-                    <div class="inputs-fila">
-                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
-                        <span class="etiqueta-x">x</span>
-                        <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
-                        <span class="etiqueta-kg">kg</span>
+                <div class="serie-swipe-wrapper">
+                    <div class="serie-delete-bg">
+                        <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie">🗑️</button>
                     </div>
-                    <button class="btn-check-serie" data-ej="${idx}" data-serie="${i}">✔</button>
+                    <div class="caja-serie ${isCompleted}">
+                        <span class="numero-serie">S${i + 1}</span>
+                        <div class="inputs-fila">
+                            <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
+                            <span class="etiqueta-x">x</span>
+                            <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
+                            <span class="etiqueta-kg">kg</span>
+                        </div>
+                        <button class="btn-check-serie" data-ej="${idx}" data-serie="${i}">✔</button>
+                    </div>
                 </div>`;
         }
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
-        
-        // Buscamos la info. Si no hay, devolvemos un objeto vacío
         const infoTecnica = infoEjercicios[ej.nombre] || {};
         
-        // Ahora preguntamos: ¿Tiene un ID de YouTube cargado?
         const htmlBack = infoTecnica.youtubeId ? `
             <div class="header-back-carta">
                 <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica Correcta</h4>
@@ -309,7 +312,7 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    // 1. Eliminar
+    // 1. Eliminar Ejercicio Completo
     if (e.target.classList.contains('btn-borrar-ejercicio')) {
         if(confirm('¿Borrar este ejercicio del día?')) {
             baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
@@ -341,16 +344,37 @@ listaUI.addEventListener('click', (e) => {
         const nuevoEstado = !estadoAnterior;
         baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = nuevoEstado;
         
-        // Guardamos en la nube silenciosamente
         guardarDatosEnNube(); 
         
-        // Efecto visual instantáneo sin recargar toda la interfaz
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
             iniciarRestTimer();
         } else {
             cajaSerie.classList.remove('completada');
+        }
+    }
+
+    // 4. Eliminar UNA Serie (Tacho de basura)
+    const btnEliminarSerie = e.target.closest('.btn-eliminar-serie');
+    if (btnEliminarSerie) {
+        const ejIdx = btnEliminarSerie.getAttribute('data-ej');
+        const serieIdx = parseInt(btnEliminarSerie.getAttribute('data-serie'));
+        
+        if (confirm('¿Seguro que quieres borrar esta serie?')) {
+            const ej = baseDeDatosLocal[diaActivo][ejIdx];
+            if (ej.series > 1) {
+                // Si hay más de una serie, restamos y borramos los datos de esa posición
+                ej.series--;
+                ej.repesRealizadas.splice(serieIdx, 1);
+                ej.pesosRealizados.splice(serieIdx, 1);
+                ej.seriesCompletadas.splice(serieIdx, 1);
+            } else {
+                // Si era la única serie, eliminamos la tarjeta del ejercicio completo
+                baseDeDatosLocal[diaActivo].splice(ejIdx, 1);
+            }
+            guardarDatosEnNube();
+            actualizarInterfazDia();
         }
     }
 });
@@ -395,6 +419,36 @@ listaUI.addEventListener('change', (e) => {
         guardarDatosEnNube();
     }
 });
+
+// LÓGICA DE GESTOS SWIPE (CELULAR Y PC)
+let swipeStartX = 0;
+let swipeActiveEl = null;
+
+const iniciarSwipe = (x, elemento) => {
+    if (elemento) {
+        swipeStartX = x;
+        swipeActiveEl = elemento;
+    } else {
+        document.querySelectorAll('.caja-serie.swiped').forEach(el => el.classList.remove('swiped'));
+    }
+};
+
+const finalizarSwipe = (x) => {
+    if (!swipeActiveEl) return;
+    const diffX = swipeStartX - x;
+    if (diffX > 40) { // Deslizó hacia la izquierda
+        document.querySelectorAll('.caja-serie.swiped').forEach(el => el.classList.remove('swiped'));
+        swipeActiveEl.classList.add('swiped');
+    } else if (diffX < -40) { // Deslizó hacia la derecha (cierra)
+        swipeActiveEl.classList.remove('swiped');
+    }
+    swipeActiveEl = null;
+};
+
+listaUI.addEventListener('touchstart', (e) => iniciarSwipe(e.touches[0].clientX, e.target.closest('.caja-serie')), {passive: true});
+listaUI.addEventListener('touchend', (e) => finalizarSwipe(e.changedTouches[0].clientX));
+listaUI.addEventListener('mousedown', (e) => iniciarSwipe(e.clientX, e.target.closest('.caja-serie')));
+listaUI.addEventListener('mouseup', (e) => finalizarSwipe(e.clientX));
 
 document.getElementById('btn-agregar-ejercicio').addEventListener('click', () => {
     const nombre = document.getElementById('inputEjercicio').value.trim();
@@ -565,6 +619,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
