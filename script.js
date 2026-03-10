@@ -3,7 +3,7 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA91qTTlkWMA5H9cEvI1yja5j3WmkzEbqY",
@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-setPersistence(auth, browserSessionPersistence); 
+setPersistence(auth, browserSessionPersistence);
 
 // ==========================================
 // SECCIÓN 2: ESTADO GLOBAL Y DICCIONARIOS
@@ -31,64 +31,32 @@ let totalEntrenamientos = 0;
 let fallosHistoricos = {}; 
 let pesosMaximos = {}; 
 let historialGlobal = []; 
+let misAmigos = []; // <-- NUEVO: Array para guardar tus amigos
 let diaActivo = null;
 let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 
-// Variables de la Isla de Descanso
-let tiempoDescansoGlobal = 180; // 3 minutos por defecto en segundos
+let tiempoDescansoGlobal = 180;
 let timerDescansoInterval;
 let descansoRestante = 0;
 
 // Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
-    "Press Banca": {
-        youtubeId: "TAH8RxOS0VI" // Solo pon la ID del video aquí
-    },
-    "Press Banca Mancuernas": {
-        youtubeId: "TAH8RxOS0VI"
-    },
-    "Press Inclinado": {
-        youtubeId: "-zbesyTNztQ"
-    },
-    "Press Inclinado Mancuernas": {
-        youtubeId: "-zbesyTNztQ"
-    },
-    "Apertura Mancuernas": {
-        youtubeId: "OtW0EYqBczI"
-    },
-    "Press Frances": {
-        youtubeId: "L3bEz-vcdGU"
-    },
-    "Extensiones Tricep": {
-        youtubeId: ""
-    },
-    "Dominadas": {
-        youtubeId: "BT3CSQKeEww"
-    },
-    "Dominadas Neutras": {
-        youtubeId: ""
-    },
-    "Dominadas Supino": {
-        youtubeId: ""
-    },
-    "Curl Predicador Mancuernas": {
-        youtubeId: ""
-    },
-    "Curl Predicador": {
-        youtubeId: ""
-    },
-    "Curl 21": {
-        youtubeId: ""
-    },
-    "Press Militar": {
-        youtubeId: "DdITN8U-kFI"
-    },
-    "Elevaciones Laterales": {
-        youtubeId: "UQkdNBpjFDo"
-    },
-    "Elevaciones Frontales": {
-        youtubeId: "HciAFZSN2Qo"
-    }
+    "Press Banca": { youtubeId: "TAH8RxOS0VI" },
+    "Press Banca Mancuernas": { youtubeId: "TAH8RxOS0VI" },
+    "Press Inclinado": { youtubeId: "-zbesyTNztQ" },
+    "Press Inclinado Mancuernas": { youtubeId: "-zbesyTNztQ" },
+    "Apertura Mancuernas": { youtubeId: "OtW0EYqBczI" },
+    "Press Frances": { youtubeId: "L3bEz-vcdGU" },
+    "Extensiones Tricep": { youtubeId: "" },
+    "Dominadas": { youtubeId: "BT3CSQKeEww" },
+    "Dominadas Neutras": { youtubeId: "" },
+    "Dominadas Supino": { youtubeId: "" },
+    "Curl Predicador Mancuernas": { youtubeId: "" },
+    "Curl Predicador": { youtubeId: "" },
+    "Curl 21": { youtubeId: "" },
+    "Press Militar": { youtubeId: "DdITN8U-kFI" },
+    "Elevaciones Laterales": { youtubeId: "UQkdNBpjFDo" },
+    "Elevaciones Frontales": { youtubeId: "HciAFZSN2Qo" }
 };
 
 // ==========================================
@@ -150,7 +118,7 @@ document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () =
 // ==========================================
 // SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
 // ==========================================
-let miTag = ""; // Variable para tu código de Discord
+let miTag = ""; 
 
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
@@ -159,7 +127,8 @@ async function guardarDatosEnNube() {
             baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
             tiempoDescansoGlobal,
             nombre: document.getElementById('nombre-usuario').innerText,
-            tag: miTag // Guardamos tu tag en Firebase
+            tag: miTag,
+            misAmigos // <-- Guardamos tu lista de amigos
         }, { merge: true });
     } catch (e) { console.warn("Modo local activo"); }
 }
@@ -173,8 +142,8 @@ async function cargarDatosDeNube(uid) {
             totalEntrenamientos = data.totalEntrenamientos || 0; fallosHistoricos = data.fallosHistoricos || {};
             pesosMaximos = data.pesosMaximos || {}; historialGlobal = data.historialGlobal || [];
             tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; 
+            misAmigos = data.misAmigos || []; // <-- Cargamos la lista
             
-            // Si el usuario ya tiene un tag lo carga, si es nuevo le genera uno aleatorio (ej: 4829)
             miTag = data.tag || Math.floor(1000 + Math.random() * 9000).toString();
             
             document.getElementById('nombre-usuario').innerText = data.nombre || "Atleta";
@@ -182,11 +151,10 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
             
-            // Si no tenía tag guardado, forzamos un guardado para que ya quede en su perfil
             if (!data.tag) guardarDatosEnNube();
 
         } else {
-            baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
+            baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = []; misAmigos = [];
             miTag = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
             document.getElementById('tag-usuario').innerText = `#${miTag}`;
@@ -194,9 +162,10 @@ async function cargarDatosDeNube(uid) {
         }
     } catch (error) {
         alert("⚠️ Base de datos inactiva. Modo Offline.");
-        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
+        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = []; misAmigos = [];
     }
     renderizarSemana();
+    if(typeof renderizarAmigos === 'function') renderizarAmigos(); // Pintamos los amigos al entrar
 }
 
 function editarNombre() {
@@ -720,6 +689,89 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
+// ==========================================
+// SECCIÓN 9: RED SOCIAL Y AMIGOS
+// ==========================================
+function renderizarAmigos() {
+    const contenedor = document.getElementById('lista-amigos');
+    if (!contenedor) return;
+    
+    if (misAmigos.length === 0) {
+        contenedor.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">Aún no has añadido amigos.</p>';
+        return;
+    }
+
+    // Por ahora los pintamos todos Offline hasta que hagamos la Fase 3 del Tiempo Real
+    contenedor.innerHTML = misAmigos.map(amigo => `
+        <div class="amigo-item offline"> 
+            <div class="amigo-avatar">${amigo.nombre.charAt(0).toUpperCase()}</div>
+            <div class="amigo-info">
+                <span class="amigo-nombre">${amigo.nombre} <span class="amigo-tag">#${amigo.tag}</span></span>
+                <span class="amigo-estado">Desconectado</span>
+            </div>
+            <button class="btn-llamar" title="Videollamada en desarrollo">📞</button>
+        </div>
+    `).join('');
+}
+
+document.getElementById('btn-add-amigo').addEventListener('click', async () => {
+    let input = prompt("Ingresa el nombre y tag de tu amigo exactamente (Ejemplo: Maxi #3423):");
+    if (!input || !input.includes('#')) {
+        if(input) alert("⚠️ Formato incorrecto. Recuerda incluir el # y el número.");
+        return;
+    }
+
+    let partes = input.split('#');
+    let nombreBuscado = partes[0].trim();
+    let tagBuscado = partes[1].trim();
+
+    if (nombreBuscado.toLowerCase() === document.getElementById('nombre-usuario').innerText.toLowerCase() && tagBuscado === miTag) {
+        return alert("⚠️ No puedes agregarte a ti mismo.");
+    }
+
+    try {
+        // Buscamos en toda la base de datos de Firebase
+        const usuariosRef = collection(db, "usuarios");
+        const q = query(usuariosRef, where("nombre", "==", nombreBuscado), where("tag", "==", tagBuscado));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            alert("❌ No se encontró a ningún atleta con ese nombre y tag. (Asegúrate de respetar mayúsculas y minúsculas)");
+        } else {
+            querySnapshot.forEach((docSnap) => {
+                const datosAmigo = docSnap.data();
+                const amigoId = docSnap.id;
+
+                if (misAmigos.some(a => a.uid === amigoId)) {
+                    alert("⚠️ Ya tienes a este atleta en tu lista.");
+                    return;
+                }
+
+                // Si lo encuentra y no lo tenías, lo guarda
+                misAmigos.push({
+                    uid: amigoId,
+                    nombre: datosAmigo.nombre,
+                    tag: datosAmigo.tag
+                });
+
+                guardarDatosEnNube();
+                renderizarAmigos();
+                alert(`✅ ¡${datosAmigo.nombre} añadido a tu lista de amigos!`);
+            });
+        }
+    } catch (error) {
+        console.error("Error buscando amigo:", error);
+        alert("⚠️ Hubo un error al buscar. Inténtalo de nuevo.");
+    }
+});
+
+// El botón de llamada lanza un aviso (Lo programaremos en la Fase 3)
+document.getElementById('lista-amigos').addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
+        alert('📞 ¡El Gym Virtual y las videollamadas llegarán en la Fase 3 de desarrollo!');
+    }
+});
 
 
 
