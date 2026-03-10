@@ -34,11 +34,14 @@ let historialGlobal = [];
 let diaActivo = null;
 let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 
+// Variables de la Isla de Descanso
+let tiempoDescansoGlobal = 180; // 3 minutos por defecto en segundos
+let timerDescansoInterval;
+let descansoRestante = 0;
+
 // ==========================================
 // DICCIONARIO DE TÉCNICAS (VIDEOS E IMÁGENES)
 // ==========================================
-// Aquí puedes agregar todos tus ejercicios. Asegúrate de crear
-// las carpetas "videos" e "img" y colocar los archivos allí.
 const infoEjercicios = {
     "Press Banca": {
         videoUrl: "videos/press_banca.mp4",
@@ -118,6 +121,7 @@ async function guardarDatosEnNube() {
     try {
         await setDoc(doc(db, "usuarios", auth.currentUser.uid), {
             baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
+            tiempoDescansoGlobal, // Guardamos la preferencia del temporizador
             nombre: document.getElementById('nombre-usuario').innerText
         }, { merge: true });
     } catch (e) { console.warn("Modo local activo"); }
@@ -131,6 +135,7 @@ async function cargarDatosDeNube(uid) {
             baseDeDatosLocal = data.baseDeDatosLocal || {}; estadoDias = data.estadoDias || {};
             totalEntrenamientos = data.totalEntrenamientos || 0; fallosHistoricos = data.fallosHistoricos || {};
             pesosMaximos = data.pesosMaximos || {}; historialGlobal = data.historialGlobal || [];
+            tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; // Cargamos preferencia o 3 min default
             document.getElementById('nombre-usuario').innerText = data.nombre || "Atleta";
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
@@ -222,11 +227,8 @@ function actualizarInterfazDia() {
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
-
-        // Buscamos info en el diccionario. Si no hay, devolvemos strings vacíos.
         const infoTecnica = infoEjercicios[ej.nombre] || { videoUrl: "", imgMusculo: "" };
         
-        // Estructura de la parte TRASERA de la carta
         const htmlBack = infoTecnica.videoUrl ? `
             <div class="header-back-carta">
                 <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica de Ejercicio</h4>
@@ -250,11 +252,9 @@ function actualizarInterfazDia() {
             <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un video para este ejercicio en el código.</p>
         `;
 
-        // Retornamos el contenedor 3D completo
         return `
             <div class="ejercicio-flip-container">
                 <div class="ejercicio-card-inner" id="card-inner-${idx}">
-                    
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -266,11 +266,9 @@ function actualizarInterfazDia() {
                         <div class="badge-pr" id="pr-${idx}">🏆 Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
                     </div>
-
                     <div class="ejercicio-card-back ejercicio-item">
                         ${htmlBack}
                     </div>
-
                 </div>
             </div>`;
     }).join('');
@@ -279,7 +277,7 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    // 1. Eliminar Ejercicio (solo si tiene la clase específica)
+    // 1. Eliminar
     if (e.target.classList.contains('btn-borrar-ejercicio')) {
         if(confirm('¿Borrar este ejercicio del día?')) {
             baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
@@ -287,19 +285,17 @@ listaUI.addEventListener('click', (e) => {
         }
     }
     
-    // 2. Giro de carta (Flip hacia atrás)
+    // 2. Flip
     if (e.target.classList.contains('btn-flip')) {
         const ejIdx = e.target.getAttribute('data-ej');
         document.getElementById(`card-inner-${ejIdx}`).classList.add('flipped');
     }
-    
-    // 3. Giro de carta (Flip hacia adelante)
     if (e.target.classList.contains('btn-flip-back')) {
         const ejIdx = e.target.getAttribute('data-ej');
         document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
     }
     
-    // 4. Check de Series Completadas
+    // 3. Check Serie & Lanzar Isla Descanso
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -309,10 +305,17 @@ listaUI.addEventListener('click', (e) => {
             baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas = new Array(baseDeDatosLocal[diaActivo][ejIdx].series).fill(false);
         }
         
-        baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = !baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx];
+        const estadoAnterior = baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx];
+        const nuevoEstado = !estadoAnterior;
+        baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = nuevoEstado;
         
         guardarDatosEnNube(); 
         actualizarInterfazDia(); 
+        
+        // Si acabamos de completar la serie (cambió a true), lanzamos el timer
+        if (nuevoEstado) {
+            iniciarRestTimer();
+        }
     }
 });
 
@@ -334,17 +337,12 @@ listaUI.addEventListener('change', (e) => {
         if (repsStr !== '' && pesoStr !== '' && repsStr !== undefined && pesoStr !== undefined) {
             const currentReps = parseFloat(repsStr);
             const currentPeso = parseFloat(pesoStr);
-            
             let maxPesoGuardado = parseFloat(pesosMaximos[nombreEj]) || 0;
             let maxRepsGuardadas = parseFloat(fallosHistoricos[nombreEj]) || 0;
-
             let isNewPR = false;
 
-            if (currentPeso > maxPesoGuardado) {
-                isNewPR = true;
-            } else if (currentPeso === maxPesoGuardado && currentReps > maxRepsGuardadas) {
-                isNewPR = true;
-            }
+            if (currentPeso > maxPesoGuardado) isNewPR = true;
+            else if (currentPeso === maxPesoGuardado && currentReps > maxRepsGuardadas) isNewPR = true;
 
             if (isNewPR) {
                 pesosMaximos[nombreEj] = currentPeso;
@@ -385,19 +383,24 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
     
     if(confirm('¿Seguro que quieres desmarcar todas las series de hoy? Tus pesos anotados no se borrarán.')) {
         rutina.forEach(ej => {
-            if(ej.seriesCompletadas) {
-                ej.seriesCompletadas = new Array(ej.series).fill(false);
-            }
+            if(ej.seriesCompletadas) ej.seriesCompletadas = new Array(ej.series).fill(false);
         });
         guardarDatosEnNube();
         actualizarInterfazDia();
     }
 });
 
-// --- CRONÓMETRO Y FLUJO DE VENTANAS ---
+// ==========================================
+// 6. FUNCIONES DE CRONÓMETRO E ISLA DESCANSO
+// ==========================================
 function formatTime(ms) {
     let secs = Math.floor(ms / 1000);
     return `${String(Math.floor(secs / 3600)).padStart(2,'0')}:${String(Math.floor((secs % 3600) / 60)).padStart(2,'0')}:${String(secs % 60).padStart(2,'0')}`;
+}
+function formatTimeDescanso(secs) {
+    let m = Math.floor(secs / 60);
+    let s = secs % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 function actualizarDisplayCrono() { document.getElementById('display-cronometro').innerText = formatTime(elapsedTime + (isRunning ? Date.now() - startTime : 0)); }
 
@@ -410,6 +413,77 @@ document.getElementById('btn-reset-crono').addEventListener('click', () => {
     if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) { clearInterval(timerInterval); isRunning = false; elapsedTime = 0; document.getElementById('btn-comenzar-pausa').innerHTML = '▶ COMENZAR'; document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); }
 });
 
+// Lógica de la Isla de Descanso
+function inicializarIslaDescanso() {
+    const cronoContainer = document.querySelector('.cronometro-container');
+    if (cronoContainer && !document.getElementById('isla-descanso')) {
+        const isla = document.createElement('div');
+        isla.id = 'isla-descanso';
+        isla.className = 'isla-descanso';
+        isla.innerHTML = `
+            <span id="tiempo-descanso-display">00:00</span>
+            <button id="btn-config-descanso" title="Configurar tiempo">⚙️</button>
+            <button id="btn-cerrar-descanso" title="Omitir descanso">✖</button>
+        `;
+        cronoContainer.appendChild(isla);
+
+        document.getElementById('btn-config-descanso').addEventListener('click', () => {
+            let input = prompt(`Configurar descanso en segundos (ej: 180 = 3 minutos) o formato MM:SS:\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, tiempoDescansoGlobal);
+            if (input) {
+                let nuevosSegundos;
+                if (input.includes(':')) {
+                    let partes = input.split(':');
+                    nuevosSegundos = parseInt(partes[0]) * 60 + parseInt(partes[1]);
+                } else {
+                    nuevosSegundos = parseInt(input);
+                }
+                if (!isNaN(nuevosSegundos) && nuevosSegundos > 0) {
+                    tiempoDescansoGlobal = nuevosSegundos;
+                    guardarDatosEnNube();
+                    if (document.getElementById('isla-descanso').classList.contains('visible')) {
+                        iniciarRestTimer(); 
+                    } else {
+                        alert(`⏱️ Tiempo de descanso actualizado a ${formatTimeDescanso(tiempoDescansoGlobal)}.`);
+                    }
+                }
+            }
+        });
+
+        document.getElementById('btn-cerrar-descanso').addEventListener('click', () => {
+            clearInterval(timerDescansoInterval);
+            document.getElementById('isla-descanso').classList.remove('visible');
+            document.getElementById('isla-descanso').classList.remove('fin-descanso');
+        });
+    }
+}
+
+function iniciarRestTimer() {
+    const isla = document.getElementById('isla-descanso');
+    if (!isla) return;
+    
+    clearInterval(timerDescansoInterval);
+    descansoRestante = tiempoDescansoGlobal;
+    document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
+    
+    isla.classList.remove('fin-descanso');
+    isla.classList.add('visible');
+    
+    timerDescansoInterval = setInterval(() => {
+        descansoRestante--;
+        document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
+        
+        if (descansoRestante <= 0) {
+            clearInterval(timerDescansoInterval);
+            isla.classList.add('fin-descanso'); 
+            // Ocultar automáticamente luego de 4 segundos finalizado el tiempo
+            setTimeout(() => {
+                isla.classList.remove('visible');
+                isla.classList.remove('fin-descanso');
+            }, 4000); 
+        }
+    }, 1000);
+}
+
 function abrirDia(dia) {
     diaActivo = dia;
     document.getElementById('titulo-dia').innerText = `${dia} de Guerra`;
@@ -417,9 +491,15 @@ function abrirDia(dia) {
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
     document.getElementById('contenedor-motivacion').innerHTML = `<img src="motivacion/${Math.floor(Math.random() * TOTAL_IMAGENES_MOTIVACION) + 1}.jpg" alt="Motivación Gym" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-neon);">`;
-    actualizarInterfazDia(); actualizarDisplayCrono();
+    
+    inicializarIslaDescanso(); // Creamos la isla si no existe
+    actualizarInterfazDia(); 
+    actualizarDisplayCrono();
 }
 
+// ==========================================
+// 7. FLUJO DE VENTANAS Y GUARDADO HISTÓRICO
+// ==========================================
 document.getElementById('btn-volver-semana').addEventListener('click', () => { diaActivo = null; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
 document.getElementById('btn-abrir-cuenta').addEventListener('click', () => { document.getElementById('vista-semana').style.display = 'none'; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'flex'; renderizarHistorial(); });
 document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () => { document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
