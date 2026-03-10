@@ -60,7 +60,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-wsp svg { width: 22px; height: 22px; fill: currentColor; }
 .btn-wsp:hover { background: var(--wsp-color); color: #000; transform: scale(1.15); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
 
-/* --- BOTONES ICONO SUPERIORES (Guardar / Limpiar) --- */
+/* --- BOTONES ICONO SUPERIORES --- */
 .btn-icono-accion {
     background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
     border-radius: 8px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
@@ -110,14 +110,78 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start;
 }
 
-/* --- EJERCICIOS ULTRA ESTRECHOS --- */
-.ejercicio-item { background: var(--bg-card); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);}
 
-/* ESPACIADO EQUITATIVO: 10px entre Título, Fallo y Series */
+/* =========================================
+   ESTRUCTURA DE CARTAS Y 3D FLIP
+   ========================================= */
+.ejercicio-flip-container {
+    perspective: 1000px;
+    width: 100%;
+}
+
+.ejercicio-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid; 
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.ejercicio-card-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.ejercicio-card-front, .ejercicio-card-back {
+    grid-area: 1 / 1; 
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.ejercicio-card-front {
+    transform: rotateY(0deg);
+}
+
+.ejercicio-card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+}
+
+.ejercicio-item { 
+    background: var(--bg-card); 
+    padding: 18px; 
+    border-radius: 12px; 
+    border: 1px solid var(--border-color);
+}
+
 .ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900;}
 .badge-pr { font-size: 12px; color: var(--text-muted); display: block; font-weight: 600; margin-bottom: 10px; transition: color 0.3s;}
 
+/* --- BOTONES DEL REVERSO --- */
+.btn-info-carta {
+    background: transparent; border: 1px solid var(--accent-neon); color: var(--accent-neon);
+    border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900; cursor: pointer; padding: 0; transition: all 0.2s ease; flex-shrink: 0;
+}
+.btn-info-carta:hover { background: var(--accent-neon); color: #000; transform: scale(1.1); }
+
+.header-back-carta {
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color);
+}
+
+.btn-cerrar-back {
+    background: transparent; color: var(--text-muted); border: none; padding: 6px; 
+    font-size: 14px; border-radius: 50%; width: 30px; height: 30px; 
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+}
+.btn-cerrar-back:hover { background: var(--bg-input); color: white; }
+
+/* --- CAJAS DE SERIES --- */
 .contenedor-series { display: flex; flex-direction: column; gap: 8px; }
 
 .caja-serie { 
@@ -131,8 +195,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .caja-serie.completada .numero-serie { color: var(--success-green); }
 
 .numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
-
-/* FIX HITBOX: Centramos los inputs y eliminamos el flex:1 para que no se estiren */
 .inputs-fila { display: flex; gap: 4px; align-items: center; flex: 1; justify-content: center;}
 
 .input-datos { 
@@ -162,37 +224,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .resumen-series { display: flex; gap: 5px; flex-wrap: wrap; }
 .mini-serie { background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid var(--border-color); color: var(--text-muted);}
 .mini-serie strong { color: var(--text-main); }
-
-/* --- EFECTO 3D CARTAS --- */
-.ejercicio-flip-container { perspective: 1000px; width: 100%; }
-.ejercicio-card-inner {
-    display: grid;
-    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-    transform-style: preserve-3d;
-}
-.ejercicio-card-inner.flipped { transform: rotateY(180deg); }
-.ejercicio-card-front, .ejercicio-card-back {
-    grid-area: 1 / 1; 
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden; 
-    border-radius: 12px;
-}
-.ejercicio-card-front { transform: rotateY(0deg); }
-.ejercicio-card-back {
-    background: var(--bg-card); border: 1px solid var(--border-color);
-    padding: 18px; transform: rotateY(180deg);
-    display: flex; flex-direction: column;
-}
-.btn-info-carta {
-    background: transparent; border: 1px solid var(--accent-neon); color: var(--accent-neon);
-    border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 900; cursor: pointer; padding: 0; transition: all 0.2s ease; flex-shrink: 0;
-}
-.btn-info-carta:hover { background: var(--accent-neon); color: #000; transform: scale(1.1); }
-.header-back-carta {
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color);
-}
 
 /* =========================================
    MEDIA QUERIES (MAGIA RESPONSIVE MOBILE)
@@ -233,4 +264,3 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
-
