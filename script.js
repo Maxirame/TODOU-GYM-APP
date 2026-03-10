@@ -364,13 +364,11 @@ listaUI.addEventListener('click', (e) => {
         if (confirm('¿Seguro que quieres borrar esta serie?')) {
             const ej = baseDeDatosLocal[diaActivo][ejIdx];
             if (ej.series > 1) {
-                // Si hay más de una serie, restamos y borramos los datos de esa posición
                 ej.series--;
                 ej.repesRealizadas.splice(serieIdx, 1);
                 ej.pesosRealizados.splice(serieIdx, 1);
                 ej.seriesCompletadas.splice(serieIdx, 1);
             } else {
-                // Si era la única serie, eliminamos la tarjeta del ejercicio completo
                 baseDeDatosLocal[diaActivo].splice(ejIdx, 1);
             }
             guardarDatosEnNube();
@@ -420,65 +418,93 @@ listaUI.addEventListener('change', (e) => {
     }
 });
 
-// LÓGICA DE GESTOS SWIPE (CELULAR Y PC)
+// LÓGICA DE GESTOS SWIPE FLUIDOS (CELULAR Y PC)
 let swipeStartX = 0;
+let swipeStartY = 0;
+let currentTranslate = 0;
 let swipeActiveEl = null;
+let isDragging = false;
 
-const iniciarSwipe = (x, elemento) => {
+const iniciarSwipe = (e, elemento) => {
+    if (e.type === 'mousedown' && e.button !== 0) return; // Ignorar clic derecho en PC
+    
+    // No interrumpir si hace clic directo en los inputs o botones
+    if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button') return;
+
     if (elemento) {
-        swipeStartX = x;
+        isDragging = true;
         swipeActiveEl = elemento;
+        swipeStartX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        swipeStartY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        
+        // Quitamos la transición para que el movimiento pegue 1:1 con el dedo
+        swipeActiveEl.style.transition = 'none';
+        currentTranslate = swipeActiveEl.classList.contains('swiped') ? -65 : 0;
     } else {
-        document.querySelectorAll('.caja-serie.swiped').forEach(el => el.classList.remove('swiped'));
+        document.querySelectorAll('.caja-serie.swiped').forEach(el => {
+            el.style.transform = '';
+            el.classList.remove('swiped');
+        });
     }
 };
 
-const finalizarSwipe = (x) => {
-    if (!swipeActiveEl) return;
-    const diffX = swipeStartX - x;
-    if (diffX > 40) { // Deslizó hacia la izquierda
-        document.querySelectorAll('.caja-serie.swiped').forEach(el => el.classList.remove('swiped'));
+const moverSwipe = (e) => {
+    if (!isDragging || !swipeActiveEl) return;
+    
+    const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    const diffX = currentX - swipeStartX;
+    const diffY = Math.abs(currentY - swipeStartY);
+    
+    // Si el usuario mueve el dedo más hacia abajo que hacia los lados (scroll), soltamos la carta
+    if (diffY > 10 && diffY > Math.abs(diffX)) {
+        isDragging = false;
+        swipeActiveEl.style.transform = '';
+        return; 
+    }
+
+    // Si está deslizando horizontalmente, bloqueamos acciones nativas del navegador
+    if (e.cancelable) e.preventDefault(); 
+    
+    let newTranslate = currentTranslate + diffX;
+    if (newTranslate > 0) newTranslate = 0; // No dejar que se vaya a la derecha
+    if (newTranslate < -80) newTranslate = -80; // Tope máximo a la izquierda
+
+    // Movemos la carta en tiempo real
+    swipeActiveEl.style.transform = `translateX(${newTranslate}px)`;
+};
+
+const finalizarSwipe = (e) => {
+    if (!isDragging || !swipeActiveEl) return;
+    isDragging = false;
+    
+    // Devolvemos la animación suave para el cierre o apertura final (el efecto "Snap")
+    swipeActiveEl.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    
+    const currentX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
+    const diffX = currentX - swipeStartX;
+    const finalPos = currentTranslate + diffX;
+
+    swipeActiveEl.style.transform = ''; // Limpiamos el estilo inline
+
+    if (finalPos < -35) { // Si pasó la mitad del camino, se queda abierto
         swipeActiveEl.classList.add('swiped');
-    } else if (diffX < -40) { // Deslizó hacia la derecha (cierra)
+    } else { // Si no, se devuelve a su lugar
         swipeActiveEl.classList.remove('swiped');
     }
     swipeActiveEl = null;
 };
 
-listaUI.addEventListener('touchstart', (e) => iniciarSwipe(e.touches[0].clientX, e.target.closest('.caja-serie')), {passive: true});
-listaUI.addEventListener('touchend', (e) => finalizarSwipe(e.changedTouches[0].clientX));
-listaUI.addEventListener('mousedown', (e) => iniciarSwipe(e.clientX, e.target.closest('.caja-serie')));
-listaUI.addEventListener('mouseup', (e) => finalizarSwipe(e.clientX));
+// Eventos táctiles para celular
+listaUI.addEventListener('touchstart', (e) => iniciarSwipe(e, e.target.closest('.caja-serie')), {passive: true});
+listaUI.addEventListener('touchmove', moverSwipe, {passive: false});
+listaUI.addEventListener('touchend', finalizarSwipe);
 
-document.getElementById('btn-agregar-ejercicio').addEventListener('click', () => {
-    const nombre = document.getElementById('inputEjercicio').value.trim();
-    const series = parseInt(document.getElementById('inputSeries').value);
-    if (!nombre || !series) return alert("¡Hey! Completá el nombre y las series.");
-    if (!baseDeDatosLocal[diaActivo]) baseDeDatosLocal[diaActivo] = [];
-    
-    baseDeDatosLocal[diaActivo].push({ 
-        nombre, series, 
-        repesRealizadas: new Array(series).fill(''), 
-        pesosRealizados: new Array(series).fill(''),
-        seriesCompletadas: new Array(series).fill(false)
-    });
-    
-    document.getElementById('inputEjercicio').value = ''; document.getElementById('inputSeries').value = '';
-    guardarDatosEnNube(); actualizarInterfazDia();
-});
-
-document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
-    const rutina = baseDeDatosLocal[diaActivo];
-    if (!diaActivo || !rutina || rutina.length === 0) return;
-    
-    if(confirm('¿Seguro que quieres desmarcar todas las series de hoy? Tus pesos anotados no se borrarán.')) {
-        rutina.forEach(ej => {
-            if(ej.seriesCompletadas) ej.seriesCompletadas = new Array(ej.series).fill(false);
-        });
-        guardarDatosEnNube();
-        actualizarInterfazDia();
-    }
-});
+// Eventos de mouse para PC
+listaUI.addEventListener('mousedown', (e) => iniciarSwipe(e, e.target.closest('.caja-serie')));
+listaUI.addEventListener('mousemove', moverSwipe);
+listaUI.addEventListener('mouseup', finalizarSwipe);
+listaUI.addEventListener('mouseleave', finalizarSwipe);
 
 // ==========================================
 // SECCIÓN 7: CRONÓMETRO E ISLA DE DESCANSO
@@ -619,6 +645,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
