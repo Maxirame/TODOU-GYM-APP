@@ -95,12 +95,70 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 
 /* --- INTERIOR DEL DÍA --- */
 .header-dia { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-shrink: 0;}
-.cronometro-container { margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); padding: 8px 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease;}
+
+/* CRONÓMETRO E ISLA DESCANSO */
+.cronometro-container { 
+    margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); 
+    padding: 8px 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease;
+    position: relative; /* Clave para anclar la Isla de Descanso aquí */
+}
 #display-cronometro { font-size: 28px; font-weight: 900; color: var(--text-main); font-variant-numeric: tabular-nums; letter-spacing: 1px;}
 .btn-crono { padding: 10px 15px; font-size: 14px; border: none; background: transparent; color: var(--accent-neon); border: 2px solid var(--accent-neon); }
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
+/* ESTILOS ISLA DESCANSO */
+.isla-descanso {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: rgba(24, 24, 27, 0.95);
+    border: 1px solid var(--accent-neon);
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 5px 15px rgba(217, 245, 34, 0.2);
+    transform: translateY(-15px) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: -1;
+}
+.isla-descanso.visible {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 100;
+}
+.isla-descanso.fin-descanso {
+    border-color: var(--success-green);
+    animation: pulse-green 1s infinite alternate;
+}
+@keyframes pulse-green {
+    from { box-shadow: 0 0 5px rgba(34, 197, 94, 0.3); }
+    to { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+}
+#tiempo-descanso-display {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--accent-neon);
+    font-variant-numeric: tabular-nums;
+    width: 50px;
+    text-align: center;
+}
+.isla-descanso.fin-descanso #tiempo-descanso-display { color: var(--success-green); }
+#btn-config-descanso, #btn-cerrar-descanso {
+    background: transparent; border: none; color: var(--text-muted);
+    font-size: 14px; padding: 2px; cursor: pointer; transition: color 0.2s;
+}
+#btn-config-descanso:hover { color: var(--text-main); transform: scale(1.1); }
+#btn-cerrar-descanso:hover { color: var(--danger); transform: scale(1.1); }
+
+
+/* LAYOUT DIA */
 .layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
@@ -249,6 +307,20 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     }
     #display-cronometro { font-size: 24px; margin-bottom: 0;}
     .btn-crono { width: auto; padding: 8px 12px; font-size: 12px;}
+
+    /* Isla Descanso para Celular (brota hacia arriba porque el timer está abajo) */
+    .isla-descanso {
+        top: auto;
+        bottom: 100%;
+        margin-top: 0;
+        margin-bottom: 10px;
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, 15px) scale(0.9);
+    }
+    .isla-descanso.visible {
+        transform: translate(-50%, 0) scale(1);
+    }
 
     .layout-dia { flex-direction: column; overflow: visible; gap: 20px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
