@@ -432,23 +432,25 @@ function inicializarIslaDescanso() {
         cronoContainer.appendChild(isla);
 
         document.getElementById('btn-config-descanso').addEventListener('click', () => {
-            let input = prompt(`Configurar descanso en segundos (ej: 180 = 3 minutos) o formato MM:SS:\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, tiempoDescansoGlobal);
-            if (input) {
-                let nuevosSegundos;
-                if (input.includes(':')) {
-                    let partes = input.split(':');
-                    nuevosSegundos = parseInt(partes[0]) * 60 + parseInt(partes[1]);
-                } else {
-                    nuevosSegundos = parseInt(input);
-                }
-                if (!isNaN(nuevosSegundos) && nuevosSegundos > 0) {
-                    tiempoDescansoGlobal = nuevosSegundos;
+            // Mostramos el valor actual convertido a minutos (ej: 180 segs se muestra como 3)
+            let minActuales = tiempoDescansoGlobal / 60;
+            let input = prompt(`Configurar descanso en MINUTOS (ej: 3 para tres minutos, 1.5 para un min y medio):\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, minActuales);
+            
+            if (input !== null && input.trim() !== "") {
+                // Reemplazamos coma por punto para evitar errores si escriben "1,5"
+                let nuevosMinutos = parseFloat(input.replace(',', '.'));
+                
+                if (!isNaN(nuevosMinutos) && nuevosMinutos > 0) {
+                    tiempoDescansoGlobal = Math.round(nuevosMinutos * 60); // Lo pasamos a segundos para el sistema
                     guardarDatosEnNube();
+                    
                     if (document.getElementById('isla-descanso').classList.contains('visible')) {
                         iniciarRestTimer(); 
                     } else {
                         alert(`⏱️ Tiempo de descanso actualizado a ${formatTimeDescanso(tiempoDescansoGlobal)}.`);
                     }
+                } else {
+                    alert("⚠️ Por favor, ingresa un número válido mayor a 0.");
                 }
             }
         });
@@ -531,4 +533,5 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
