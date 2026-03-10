@@ -177,7 +177,7 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO HTML ULTRA-COMPACTO
+// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON EL PR AUTOMATIZADO
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -189,47 +189,98 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             htmlSeries += `
                 <div class="caja-serie">
-                    <span class="numero-serie">S${i + 1}</span>
+                    <span class="numero-serie">S${i + 1}:</span>
                     <div class="inputs-fila">
-                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="R" value="${r}">
+                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
                         <span class="etiqueta-x">x</span>
-                        <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="Kg" value="${p}">
+                        <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
+                        <span class="etiqueta-kg">kg</span>
                     </div>
                 </div>`;
         }
+        
+        // Obtenemos el PR guardado si existe
+        const prReps = fallosHistoricos[ej.nombre] || '-';
+        const prPeso = pesosMaximos[ej.nombre] || '-';
+
         return `
             <div class="ejercicio-item">
                 <div class="ejercicio-header-top">
-                    <h4 class="titulo-ejercicio">${ej.nombre}</h4>
+                    <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                        <h4 class="titulo-ejercicio">${ej.nombre}</h4>
+                        <span class="badge-pr" id="pr-${idx}">🏆 PR: ${prReps} x ${prPeso}kg</span>
+                    </div>
                     <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
-                </div>
-                <div class="contenedor-records">
-                    <div class="caja-record"><label>Fallo</label><input type="number" class="input-fallo" data-nombre="${ej.nombre}" placeholder="--" value="${fallosHistoricos[ej.nombre] || ''}"></div>
-                    <div class="caja-record"><label>Max Kg</label><input type="number" class="input-maxpeso" data-nombre="${ej.nombre}" placeholder="--" value="${pesosMaximos[ej.nombre] || ''}"></div>
                 </div>
                 <div class="contenedor-series">${htmlSeries}</div>
             </div>`;
     }).join('');
 }
 
+// EL OÍDO CENTRAL QUE CALCULA LOS RÉCORDS AUTOMÁTICAMENTE
 const listaUI = document.getElementById('listaEjerciciosUI');
+
 listaUI.addEventListener('change', (e) => {
     const t = e.target;
     if (t.classList.contains('input-repes') || t.classList.contains('input-peso')) {
         const ejIdx = t.getAttribute('data-ej'); const serieIdx = t.getAttribute('data-serie');
         const tipo = t.classList.contains('input-repes') ? 'repesRealizadas' : 'pesosRealizados';
-        if (!baseDeDatosLocal[diaActivo][ejIdx][tipo]) baseDeDatosLocal[diaActivo][ejIdx][tipo] = new Array(baseDeDatosLocal[diaActivo][ejIdx].series).fill('');
+        
+        if (!baseDeDatosLocal[diaActivo][ejIdx][tipo]) {
+            baseDeDatosLocal[diaActivo][ejIdx][tipo] = new Array(baseDeDatosLocal[diaActivo][ejIdx].series).fill('');
+        }
         baseDeDatosLocal[diaActivo][ejIdx][tipo][serieIdx] = t.value;
+        
+        // --- LÓGICA DE AUTO-PR ---
+        const nombreEj = baseDeDatosLocal[diaActivo][ejIdx].nombre;
+        const repsStr = baseDeDatosLocal[diaActivo][ejIdx].repesRealizadas[serieIdx];
+        const pesoStr = baseDeDatosLocal[diaActivo][ejIdx].pesosRealizados[serieIdx];
+        
+        // Solo evalúa si completaste tanto repes como peso
+        if (repsStr !== '' && pesoStr !== '' && repsStr !== undefined && pesoStr !== undefined) {
+            const currentReps = parseFloat(repsStr);
+            const currentPeso = parseFloat(pesoStr);
+            
+            let maxPesoGuardado = parseFloat(pesosMaximos[nombreEj]) || 0;
+            let maxRepsGuardadas = parseFloat(fallosHistoricos[nombreEj]) || 0;
+
+            let isNewPR = false;
+
+            // Prioridad 1: Más peso
+            if (currentPeso > maxPesoGuardado) {
+                isNewPR = true;
+            } 
+            // Prioridad 2: Mismo peso, pero más repeticiones
+            else if (currentPeso === maxPesoGuardado && currentReps > maxRepsGuardadas) {
+                isNewPR = true;
+            }
+
+            // Si rompiste un récord, guardamos y actualizamos la etiqueta al instante
+            if (isNewPR) {
+                pesosMaximos[nombreEj] = currentPeso;
+                fallosHistoricos[nombreEj] = currentReps;
+                
+                const badge = document.getElementById(`pr-${ejIdx}`);
+                if(badge) {
+                    badge.innerText = `🏆 PR: ${currentReps} x ${currentPeso}kg`;
+                    // Efecto visual rápido de éxito
+                    badge.style.background = "var(--accent-neon)";
+                    badge.style.color = "#000";
+                    setTimeout(() => { badge.style.background = "rgba(217, 245, 34, 0.1)"; badge.style.color = "var(--accent-neon)"; }, 500);
+                }
+            }
+        }
+        
         guardarDatosEnNube();
     }
-    if (t.classList.contains('input-fallo')) { fallosHistoricos[t.getAttribute('data-nombre')] = t.value; guardarDatosEnNube(); }
-    if (t.classList.contains('input-maxpeso')) { pesosMaximos[t.getAttribute('data-nombre')] = t.value; guardarDatosEnNube(); }
 });
 
 listaUI.addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-eliminar')) {
-        baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
-        guardarDatosEnNube(); actualizarInterfazDia();
+        if(confirm('¿Borrar este ejercicio del día?')) {
+            baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
+            guardarDatosEnNube(); actualizarInterfazDia();
+        }
     }
 });
 
@@ -296,4 +347,3 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
-
