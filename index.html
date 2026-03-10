@@ -76,22 +76,13 @@
             <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
             <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
             
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; position: relative;">
+                <button class="btn-icono-accion" id="btn-toggle-add" title="Añadir Ejercicio">➕</button>
                 <button class="btn-icono-accion" id="btn-guardar-dia" title="Guardar Entrenamiento">💾</button>
                 <button class="btn-icono-accion" id="btn-limpiar-checks" title="Limpiar Checks">🧹</button>
-            </div>
 
-            <div class="cronometro-container">
-                <span id="display-cronometro">00:00:00</span>
-                <button id="btn-comenzar-pausa" class="btn-crono">▶ COMENZAR</button>
-                <button class="btn-crono btn-crono-reset" id="btn-reset-crono">⏹ RESET</button>
-            </div>
-        </div>
-
-        <div class="layout-dia">
-            <div class="columna-fija">
-                <div class="card">
-                    <h3 style="margin-bottom: 20px; text-transform: uppercase;">Añadir Ejercicio</h3>
+                <div id="burbuja-add-ejercicio" class="burbuja-panel">
+                    <h3 style="margin-top: 0; margin-bottom: 20px; text-transform: uppercase; color: var(--accent-neon);">Añadir Ejercicio</h3>
                     
                     <input type="text" id="inputEjercicio" list="listaEjercicios" placeholder="Ej: Press Banca" style="width: 100%; margin-bottom: 15px;">
                     <datalist id="listaEjercicios">
@@ -103,14 +94,25 @@
                         <option value="Extensiones de Tríceps"></option>
                     </datalist>
 
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-weight: 800; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Series a realizar:</span>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <span style="font-weight: 800; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Series:</span>
                         <input type="number" id="inputSeries" placeholder="Nº" min="1" style="flex: 1;">
                     </div>
                     
-                    <button class="btn-accion" id="btn-agregar-ejercicio">+ AÑADIR A LA RUTINA</button>
+                    <button class="btn-accion" id="btn-agregar-ejercicio" style="margin-top: 0;">+ AÑADIR A LA RUTINA</button>
+                    <button class="btn-volver" id="btn-cerrar-add" style="width: 100%; margin-top: 10px; border: none;">Cancelar</button>
                 </div>
+            </div>
 
+            <div class="cronometro-container">
+                <span id="display-cronometro">00:00:00</span>
+                <button id="btn-comenzar-pausa" class="btn-crono">▶ COMENZAR</button>
+                <button class="btn-crono btn-crono-reset" id="btn-reset-crono">⏹ RESET</button>
+            </div>
+        </div>
+
+        <div class="layout-dia">
+            <div class="columna-fija">
                 <div class="card" style="flex: 1; display: flex; flex-direction: column;">
                     <h3 style="text-align: center; font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px;">Modo Bestia</h3>
                     <div id="contenedor-motivacion" style="flex: 1; display: flex; align-items: center; justify-content: center;"></div>
@@ -140,4 +142,3 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
-
