@@ -248,6 +248,7 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
+            // Agregamos el contenedor de Swipe y el tacho de basura
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
                     <div class="serie-delete-bg">
@@ -265,6 +266,11 @@ function actualizarInterfazDia() {
                     </div>
                 </div>`;
         }
+        
+        // --- NUEVO: Botón para añadir una serie extra al final de la lista ---
+        htmlSeries += `
+            <button class="btn-add-serie" data-ej="${idx}">➕ Agregar Serie</button>
+        `;
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
@@ -373,6 +379,25 @@ listaUI.addEventListener('click', (e) => {
             guardarDatosEnNube();
             actualizarInterfazDia();
         }
+    }
+
+    // 5. Añadir UNA Serie Extra
+    if (e.target.classList.contains('btn-add-serie')) {
+        const ejIdx = e.target.getAttribute('data-ej');
+        const ej = baseDeDatosLocal[diaActivo][ejIdx];
+        
+        // Sumamos una serie y agregamos espacios vacíos a los arrays
+        ej.series++;
+        if (!ej.repesRealizadas) ej.repesRealizadas = [];
+        if (!ej.pesosRealizados) ej.pesosRealizados = [];
+        if (!ej.seriesCompletadas) ej.seriesCompletadas = [];
+        
+        ej.repesRealizadas.push('');
+        ej.pesosRealizados.push('');
+        ej.seriesCompletadas.push(false);
+        
+        guardarDatosEnNube();
+        actualizarInterfazDia();
     }
 });
 
@@ -679,6 +704,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
