@@ -150,13 +150,16 @@ document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () =
 // ==========================================
 // SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
 // ==========================================
+let miTag = ""; // Variable para tu código de Discord
+
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
     try {
         await setDoc(doc(db, "usuarios", auth.currentUser.uid), {
             baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
-            tiempoDescansoGlobal, // Guardamos la preferencia del temporizador
-            nombre: document.getElementById('nombre-usuario').innerText
+            tiempoDescansoGlobal,
+            nombre: document.getElementById('nombre-usuario').innerText,
+            tag: miTag // Guardamos tu tag en Firebase
         }, { merge: true });
     } catch (e) { console.warn("Modo local activo"); }
 }
@@ -169,13 +172,25 @@ async function cargarDatosDeNube(uid) {
             baseDeDatosLocal = data.baseDeDatosLocal || {}; estadoDias = data.estadoDias || {};
             totalEntrenamientos = data.totalEntrenamientos || 0; fallosHistoricos = data.fallosHistoricos || {};
             pesosMaximos = data.pesosMaximos || {}; historialGlobal = data.historialGlobal || [];
-            tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; // Cargamos preferencia o 3 min default
+            tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; 
+            
+            // Si el usuario ya tiene un tag lo carga, si es nuevo le genera uno aleatorio (ej: 4829)
+            miTag = data.tag || Math.floor(1000 + Math.random() * 9000).toString();
+            
             document.getElementById('nombre-usuario').innerText = data.nombre || "Atleta";
+            document.getElementById('tag-usuario').innerText = `#${miTag}`;
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
+            
+            // Si no tenía tag guardado, forzamos un guardado para que ya quede en su perfil
+            if (!data.tag) guardarDatosEnNube();
+
         } else {
             baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
+            miTag = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
+            document.getElementById('tag-usuario').innerText = `#${miTag}`;
+            guardarDatosEnNube();
         }
     } catch (error) {
         alert("⚠️ Base de datos inactiva. Modo Offline.");
@@ -670,9 +685,10 @@ function abrirDia(dia) {
     document.getElementById('vista-semana').style.display = 'none';
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
-    document.getElementById('contenedor-motivacion').innerHTML = `<img src="motivacion/${Math.floor(Math.random() * TOTAL_IMAGENES_MOTIVACION) + 1}.jpg" alt="Motivación Gym" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-neon);">`;
     
-    inicializarIslaDescanso(); // Creamos la isla si no existe
+    // NOTA: Eliminamos la carga de la imagen de motivación de aquí.
+    
+    inicializarIslaDescanso();
     actualizarInterfazDia(); 
     actualizarDisplayCrono();
 }
