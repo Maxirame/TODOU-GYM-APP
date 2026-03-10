@@ -176,7 +176,7 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON EL PR AUTOMATIZADO Y EL CHECK
+// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON EL PR AUTOMATIZADO Y EL CHECK VERDE
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -207,10 +207,12 @@ function actualizarInterfazDia() {
         return `
             <div class="ejercicio-item">
                 <div class="ejercicio-header-top">
-                    <h4 class="titulo-ejercicio">${ej.nombre}</h4>
+                    <div>
+                        <h4 class="titulo-ejercicio">${ej.nombre}</h4>
+                        <span class="badge-pr" id="pr-${idx}">Fallo: ${prPeso}kg x ${prReps} repes</span>
+                    </div>
                     <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
                 </div>
-                <div class="badge-pr" id="pr-${idx}">Fallo: ${prPeso}kg x ${prReps} repes</div>
                 <div class="contenedor-series">${htmlSeries}</div>
             </div>`;
     }).join('');
@@ -237,11 +239,10 @@ listaUI.addEventListener('click', (e) => {
             baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas = new Array(baseDeDatosLocal[diaActivo][ejIdx].series).fill(false);
         }
         
-        // Invertimos el estado (de falso a verdadero o viceversa)
         baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = !baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx];
         
         guardarDatosEnNube(); 
-        actualizarInterfazDia(); // Refresca para pintar de verde
+        actualizarInterfazDia(); 
     }
 });
 
@@ -270,12 +271,9 @@ listaUI.addEventListener('change', (e) => {
 
             let isNewPR = false;
 
-            // Prioridad 1: Más peso
             if (currentPeso > maxPesoGuardado) {
                 isNewPR = true;
-            } 
-            // Prioridad 2: Mismo peso, pero más repeticiones
-            else if (currentPeso === maxPesoGuardado && currentReps > maxRepsGuardadas) {
+            } else if (currentPeso === maxPesoGuardado && currentReps > maxRepsGuardadas) {
                 isNewPR = true;
             }
 
@@ -286,7 +284,7 @@ listaUI.addEventListener('change', (e) => {
                 const badge = document.getElementById(`pr-${ejIdx}`);
                 if(badge) {
                     badge.innerText = `Fallo: ${currentPeso}kg x ${currentReps} repes`;
-                    badge.style.color = "var(--accent-neon)";
+                    badge.style.color = "var(--success-green)";
                     setTimeout(() => { badge.style.color = "var(--text-muted)"; }, 1500);
                 }
             }
@@ -301,7 +299,6 @@ document.getElementById('btn-agregar-ejercicio').addEventListener('click', () =>
     if (!nombre || !series) return alert("¡Hey! Completá el nombre y las series.");
     if (!baseDeDatosLocal[diaActivo]) baseDeDatosLocal[diaActivo] = [];
     
-    // Al agregar, creamos el array de seriesCompletadas (todas en false)
     baseDeDatosLocal[diaActivo].push({ 
         nombre, series, 
         repesRealizadas: new Array(series).fill(''), 
@@ -313,13 +310,16 @@ document.getElementById('btn-agregar-ejercicio').addEventListener('click', () =>
     guardarDatosEnNube(); actualizarInterfazDia();
 });
 
-// NUEVO BOTÓN: LIMPIAR CHECKS DEL DÍA
+// NUEVO BOTÓN: LIMPIAR CHECKS DEL DÍA (Arreglado)
 document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
-    if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return;
-    if(confirm('¿Seguro que quieres desmarcar (limpiar) todas las series de hoy? Tus pesos anotados no se borrarán.')) {
-        baseDeDatosLocal[diaActivo].forEach(ej => {
+    const rutina = baseDeDatosLocal[diaActivo];
+    if (!diaActivo || !rutina || rutina.length === 0) return;
+    
+    if(confirm('¿Seguro que quieres desmarcar todas las series de hoy? Tus pesos anotados no se borrarán.')) {
+        rutina.forEach(ej => {
             if(ej.seriesCompletadas) {
-                ej.seriesCompletadas.fill(false);
+                // Forzamos la creación de un nuevo arreglo en "blanco"
+                ej.seriesCompletadas = new Array(ej.series).fill(false);
             }
         });
         guardarDatosEnNube();
