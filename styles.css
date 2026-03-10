@@ -3,8 +3,12 @@
     --bg-body: #0a0a0c; --bg-card: #18181b; --bg-input: #27272a;
     --border-color: #3f3f46; --text-main: #f4f4f5; --text-muted: #a1a1aa;
     --accent-neon: #d9f522; --accent-hover: #b8d11c;
-    --danger: #ef4444; --warning: #f59e0b; --success-bg: rgba(217, 245, 34, 0.1);
+    --danger: #ef4444; --warning: #f59e0b; 
+    --success-bg: rgba(217, 245, 34, 0.1);
     --wsp-color: #25D366; 
+    /* NUEVO COLOR VERDE PARA LOS CHECKS */
+    --success-green: #22c55e;
+    --success-green-bg: rgba(34, 197, 94, 0.1);
 }
 
 /* --- RESET Y SCROLLBAR --- */
@@ -47,8 +51,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-accion:hover { background: var(--accent-hover); transform: translateY(-2px); }
 .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px;}
 .btn-volver:hover { color: var(--text-main); border-color: var(--text-main); }
+
+/* --- ELIMINAR --- */
 .btn-eliminar { background: transparent; color: var(--text-muted); border: none; padding: 6px; font-size: 14px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
 .btn-eliminar:hover { background: var(--danger); color: white; }
+
 .btn-reiniciar { background: transparent; color: var(--text-main); border: 2px dashed var(--border-color); padding: 15px; width: 100%; margin-top: 20px; flex-shrink: 0;}
 .btn-reiniciar:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
 .btn-borrar-historial { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; font-size: 14px; border-radius: 8px;}
@@ -99,11 +106,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* --- EJERCICIOS ULTRA ESTRECHOS --- */
 .ejercicio-item { background: var(--bg-card); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);}
 
-.ejercicio-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.ejercicio-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900;}
 
-/* EL NUEVO TEXTO DE FALLO (Bajo el título) */
-.badge-pr { font-size: 12px; color: var(--text-muted); display: block; font-weight: 600; margin-bottom: 15px; transition: color 0.3s;}
+/* EL NUEVO TEXTO DE FALLO */
+.badge-pr { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block; font-weight: 600; transition: color 0.3s;}
 
 /* Series Apiladas Verticalmente */
 .contenedor-series { display: flex; flex-direction: column; gap: 8px; }
@@ -115,9 +122,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     transition: all 0.2s ease;
 }
 
-/* EFECTO CUANDO SE MARCA EL CHECK */
-.caja-serie.completada { background: rgba(217, 245, 34, 0.08); border-color: var(--accent-neon); }
-.caja-serie.completada .numero-serie { color: var(--accent-neon); }
+/* AQUÍ SE HACE LA MAGIA VERDE AL TOCAR CHECK */
+.caja-serie.completada { background: var(--success-green-bg); border-color: var(--success-green); }
+.caja-serie.completada .numero-serie { color: var(--success-green); }
 
 .numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
 .inputs-fila { display: flex; gap: 4px; align-items: center; flex: 1; justify-content: center;}
@@ -136,8 +143,8 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px; flex-shrink: 0;
 }
-.btn-check-serie:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
-.caja-serie.completada .btn-check-serie { background: var(--accent-neon); color: #000; border-color: var(--accent-neon); }
+.btn-check-serie:hover { border-color: var(--success-green); color: var(--success-green); }
+.caja-serie.completada .btn-check-serie { background: var(--success-green); color: #000; border-color: var(--success-green); }
 
 
 /* --- CUENTA --- */
@@ -184,6 +191,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
     .ejercicio-item { padding: 15px; }
+    .ejercicio-header-top { padding-bottom: 0; margin-bottom: 12px; }
     .titulo-ejercicio { font-size: 16px; }
     
     .caja-serie { padding: 6px 8px; }
