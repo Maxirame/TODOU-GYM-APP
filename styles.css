@@ -273,7 +273,12 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* Clase que se activa con JavaScript al soltar el swipe */
 .caja-serie.swiped { transform: translateX(-65px); }
 
-.caja-serie.completada { background: var(--success-green-bg); border-color: var(--success-green); }
+/* MAGIA DE COLORES SÓLIDOS: Para que no se vea el fondo rojo al dar click */
+.caja-serie.completada { 
+    /* Usamos un gradient falso para combinar el fondo sólido con la transparencia verde */
+    background: linear-gradient(var(--success-green-bg), var(--success-green-bg)), var(--bg-input); 
+    border-color: var(--success-green); 
+}
 .caja-serie.completada .numero-serie { color: var(--success-green); }
 
 .numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
@@ -286,6 +291,27 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-check-serie { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px; flex-shrink: 0; }
 .btn-check-serie:hover { border-color: var(--success-green); color: var(--success-green); }
 .caja-serie.completada .btn-check-serie { background: var(--success-green); color: #000; border-color: var(--success-green); }
+
+/* BOTÓN PARA AÑADIR SERIE EXTRA */
+.btn-add-serie {
+    background: transparent;
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    border-radius: 8px;
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.btn-add-serie:hover {
+    border-color: var(--success-green);
+    color: var(--success-green);
+    background: var(--success-green-bg);
+}
 
 /* ==========================================
    SECCIÓN 10: VISTA DE CUENTA E HISTORIAL
@@ -364,6 +390,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
+
 
 
 
