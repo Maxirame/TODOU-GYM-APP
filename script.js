@@ -176,7 +176,7 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON EL PR AUTOMATIZADO Y EL CHECK VERDE
+// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON LA COPA
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -207,12 +207,10 @@ function actualizarInterfazDia() {
         return `
             <div class="ejercicio-item">
                 <div class="ejercicio-header-top">
-                    <div>
-                        <h4 class="titulo-ejercicio">${ej.nombre}</h4>
-                        <span class="badge-pr" id="pr-${idx}">Fallo: ${prPeso}kg x ${prReps} repes</span>
-                    </div>
+                    <h4 class="titulo-ejercicio">${ej.nombre}</h4>
                     <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
                 </div>
+                <div class="badge-pr" id="pr-${idx}">🏆 Fallo: ${prPeso}kg x ${prReps} repes</div>
                 <div class="contenedor-series">${htmlSeries}</div>
             </div>`;
     }).join('');
@@ -221,7 +219,6 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    // BOTÓN ELIMINAR
     if (e.target.classList.contains('btn-eliminar')) {
         if(confirm('¿Borrar este ejercicio del día?')) {
             baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
@@ -229,7 +226,6 @@ listaUI.addEventListener('click', (e) => {
         }
     }
     
-    // BOTÓN CHECK VERDE
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -257,7 +253,6 @@ listaUI.addEventListener('change', (e) => {
         }
         baseDeDatosLocal[diaActivo][ejIdx][tipo][serieIdx] = t.value;
         
-        // --- LÓGICA DE AUTO-FALLO ---
         const nombreEj = baseDeDatosLocal[diaActivo][ejIdx].nombre;
         const repsStr = baseDeDatosLocal[diaActivo][ejIdx].repesRealizadas[serieIdx];
         const pesoStr = baseDeDatosLocal[diaActivo][ejIdx].pesosRealizados[serieIdx];
@@ -283,7 +278,7 @@ listaUI.addEventListener('change', (e) => {
                 
                 const badge = document.getElementById(`pr-${ejIdx}`);
                 if(badge) {
-                    badge.innerText = `Fallo: ${currentPeso}kg x ${currentReps} repes`;
+                    badge.innerText = `🏆 Fallo: ${currentPeso}kg x ${currentReps} repes`;
                     badge.style.color = "var(--success-green)";
                     setTimeout(() => { badge.style.color = "var(--text-muted)"; }, 1500);
                 }
@@ -310,7 +305,6 @@ document.getElementById('btn-agregar-ejercicio').addEventListener('click', () =>
     guardarDatosEnNube(); actualizarInterfazDia();
 });
 
-// NUEVO BOTÓN: LIMPIAR CHECKS DEL DÍA (Arreglado)
 document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
     const rutina = baseDeDatosLocal[diaActivo];
     if (!diaActivo || !rutina || rutina.length === 0) return;
@@ -318,7 +312,6 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
     if(confirm('¿Seguro que quieres desmarcar todas las series de hoy? Tus pesos anotados no se borrarán.')) {
         rutina.forEach(ej => {
             if(ej.seriesCompletadas) {
-                // Forzamos la creación de un nuevo arreglo en "blanco"
                 ej.seriesCompletadas = new Array(ej.series).fill(false);
             }
         });
