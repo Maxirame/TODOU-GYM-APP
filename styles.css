@@ -47,8 +47,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-accion:hover { background: var(--accent-hover); transform: translateY(-2px); }
 .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px;}
 .btn-volver:hover { color: var(--text-main); border-color: var(--text-main); }
+
+/* --- ELIMINAR AHORA ES UNA CRUZ SUTIL --- */
 .btn-eliminar { background: transparent; color: var(--text-muted); border: none; padding: 6px; font-size: 14px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
 .btn-eliminar:hover { background: var(--danger); color: white; }
+
 .btn-reiniciar { background: transparent; color: var(--text-main); border: 2px dashed var(--border-color); padding: 15px; width: 100%; margin-top: 20px; flex-shrink: 0;}
 .btn-reiniciar:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
 .btn-borrar-historial { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; font-size: 14px; border-radius: 8px;}
@@ -91,40 +94,55 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
 
+/* ACÁ ESTÁ LA MAGIA PARA QUE ENTREN 3 EJERCICIOS (Ancho mínimo bajó a 280px) */
 #listaEjerciciosUI { 
     flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 5px; min-height: 0;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 15px; align-content: start;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start;
 }
 
-/* --- EJERCICIOS ULTRA COMPACTOS (ESTILO FOTO) --- */
-.ejercicio-item { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);}
+/* --- EJERCICIOS ULTRA ESTRECHOS --- */
+.ejercicio-item { background: var(--bg-card); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);}
 
-.ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
-.badge-pr { background: rgba(217, 245, 34, 0.1); color: var(--accent-neon); font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(217, 245, 34, 0.3); margin-left: 10px; letter-spacing: 0.5px;}
+.ejercicio-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900;}
 
-/* Series en Píldoras */
-.contenedor-series { display: flex; flex-wrap: wrap; gap: 10px; }
+/* EL NUEVO TEXTO DE FALLO (Reemplaza los inputs) */
+.badge-pr { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block; font-weight: 600; transition: color 0.3s;}
+
+/* Series Apiladas Verticalmente */
+.contenedor-series { display: flex; flex-direction: column; gap: 8px; }
+
 .caja-serie { 
-    display: flex; flex-direction: row; align-items: center; 
-    background: var(--bg-input); padding: 8px 12px; 
+    display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+    background: var(--bg-input); padding: 6px 12px; 
     border-radius: 8px; border: 1px solid var(--border-color); 
-    transition: border 0.2s; width: auto;
+    transition: all 0.2s ease;
 }
-.caja-serie:focus-within { border-color: var(--text-muted); }
 
-.numero-serie { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-right: 6px; width: auto; }
-.inputs-fila { display: flex; gap: 2px; align-items: center;}
+/* EFECTO CUANDO SE MARCA EL CHECK */
+.caja-serie.completada { background: var(--success-bg); border-color: var(--accent-neon); }
+.caja-serie.completada .numero-serie { color: var(--accent-neon); }
 
-/* ANCHO SEGURO DE 4 DIGITOS (45px) */
+.numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
+.inputs-fila { display: flex; gap: 4px; align-items: center; flex: 1; justify-content: center;}
+
 .input-datos { 
     text-align: center; border: none; border-bottom: 1px solid transparent; border-radius: 0; 
-    padding: 0; font-size: 15px; background: transparent; color: var(--text-main); 
+    padding: 2px 0; font-size: 16px; background: transparent; color: var(--text-main); 
     font-weight: 800; min-width: 45px; width: 45px; font-family: 'Montserrat', sans-serif;
 }
 .input-datos:focus { outline: none; border-bottom: 1px solid var(--accent-neon); }
-.etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold; margin: 0 2px;}
-.etiqueta-kg { color: var(--text-muted); font-size: 12px; font-weight: bold; margin-left: 2px;}
+.etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold; margin: 0 4px;}
+
+/* EL BOTÓN DEL CHECKBOX */
+.btn-check-serie {
+    background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+    border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px;
+}
+.btn-check-serie:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
+.caja-serie.completada .btn-check-serie { background: var(--accent-neon); color: #000; border-color: var(--accent-neon); }
+
 
 /* --- CUENTA --- */
 .historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; }
@@ -170,11 +188,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
     .ejercicio-item { padding: 15px; }
-    .ejercicio-header-top { padding-bottom: 0; margin-bottom: 12px; }
-    .titulo-ejercicio { font-size: 16px; }
-    .badge-pr { margin-left: 8px; font-size: 9px; padding: 3px 6px;}
+    .ejercicio-header-top { margin-bottom: 12px; }
+    .titulo-ejercicio { font-size: 18px; }
     
-    .caja-serie { padding: 6px 8px; }
-    .numero-serie { font-size: 11px; }
-    .input-datos { font-size: 14px; min-width: 40px; width: 40px; }
+    .caja-serie { padding: 8px 10px; }
+    .numero-serie { font-size: 13px; }
+    .input-datos { font-size: 16px; min-width: 45px; width: 45px; }
 }
