@@ -1,5 +1,5 @@
 // ==========================================
-// 1. IMPORTACIONES DE FIREBASE
+// SECCIÓN 1: IMPORTACIONES DE FIREBASE
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -20,7 +20,7 @@ const db = getFirestore(app);
 setPersistence(auth, browserSessionPersistence); 
 
 // ==========================================
-// 2. ESTADO GLOBAL DE LA APP
+// SECCIÓN 2: ESTADO GLOBAL Y DICCIONARIOS
 // ==========================================
 const diasDeLaSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const TOTAL_IMAGENES_MOTIVACION = 8; 
@@ -39,9 +39,7 @@ let tiempoDescansoGlobal = 180; // 3 minutos por defecto en segundos
 let timerDescansoInterval;
 let descansoRestante = 0;
 
-// ==========================================
-// DICCIONARIO DE TÉCNICAS (VIDEOS E IMÁGENES)
-// ==========================================
+// Diccionario de Técnicas (Videos e Imágenes)
 const infoEjercicios = {
     "Press Banca": {
         videoUrl: "videos/press_banca.mp4",
@@ -58,7 +56,7 @@ const infoEjercicios = {
 };
 
 // ==========================================
-// 3. SISTEMA DE AUTENTICACIÓN
+// SECCIÓN 3: SISTEMA DE AUTENTICACIÓN
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -114,7 +112,7 @@ document.getElementById('btn-google').addEventListener('click', async () => {
 document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => signOut(auth));
 
 // ==========================================
-// 4. BASE DE DATOS Y SINCRONIZACIÓN
+// SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
 // ==========================================
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
@@ -163,9 +161,8 @@ function editarNombre() {
 document.getElementById('btn-editar-nombre').addEventListener('click', editarNombre);
 
 // ==========================================
-// 5. LÓGICA DE UI Y EVENTOS OPTIMIZADOS
+// SECCIÓN 5: RENDERIZADO Y EVENTOS VISTA SEMANAL
 // ==========================================
-
 function renderizarSemana() {
     const contenedor = document.getElementById('contenedor-tarjetas');
     contenedor.innerHTML = diasDeLaSemana.map(dia => {
@@ -201,6 +198,9 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
+// ==========================================
+// SECCIÓN 6: VISTA DEL DÍA Y LÓGICA DE EJERCICIOS
+// ==========================================
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -391,7 +391,7 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
 });
 
 // ==========================================
-// 6. FUNCIONES DE CRONÓMETRO E ISLA DESCANSO
+// SECCIÓN 7: CRONÓMETRO E ISLA DE DESCANSO
 // ==========================================
 function formatTime(ms) {
     let secs = Math.floor(ms / 1000);
@@ -484,6 +484,9 @@ function iniciarRestTimer() {
     }, 1000);
 }
 
+// ==========================================
+// SECCIÓN 8: FLUJO DE VENTANAS E HISTORIAL
+// ==========================================
 function abrirDia(dia) {
     diaActivo = dia;
     document.getElementById('titulo-dia').innerText = `${dia} de Guerra`;
@@ -497,9 +500,6 @@ function abrirDia(dia) {
     actualizarDisplayCrono();
 }
 
-// ==========================================
-// 7. FLUJO DE VENTANAS Y GUARDADO HISTÓRICO
-// ==========================================
 document.getElementById('btn-volver-semana').addEventListener('click', () => { diaActivo = null; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
 document.getElementById('btn-abrir-cuenta').addEventListener('click', () => { document.getElementById('vista-semana').style.display = 'none'; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'flex'; renderizarHistorial(); });
 document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () => { document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
