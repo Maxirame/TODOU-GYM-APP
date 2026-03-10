@@ -1,4 +1,6 @@
-/* --- VARIABLES DE COLOR --- */
+/* ==========================================
+   SECCIÓN 1: VARIABLES Y RESET GLOBALES
+   ========================================== */
 :root {
     --bg-body: #0a0a0c; --bg-card: #18181b; --bg-input: #27272a;
     --border-color: #3f3f46; --text-main: #f4f4f5; --text-muted: #a1a1aa;
@@ -10,7 +12,6 @@
     --success-green-bg: rgba(34, 197, 94, 0.1);
 }
 
-/* --- RESET Y SCROLLBAR --- */
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-body); border-radius: 4px; }
@@ -20,7 +21,9 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-/* --- ESTRUCTURA MAESTRA --- */
+/* ==========================================
+   SECCIÓN 2: ESTRUCTURA MAESTRA Y TIPOGRAFÍA
+   ========================================== */
 body { 
     font-family: 'Montserrat', sans-serif; background-color: var(--bg-body); color: var(--text-main); 
     padding: 20px 40px; max-width: 1600px; margin: auto; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
@@ -29,7 +32,6 @@ body {
 #vista-auth { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 #vista-semana, #vista-dia, #vista-cuenta { width: 100%; flex: 1; flex-direction: column; overflow: hidden; }
 
-/* --- TIPOGRAFÍA Y COMPONENTES --- */
 h1 { font-weight: 900; text-transform: uppercase; font-size: 32px; letter-spacing: -1px; margin-bottom: 5px; color: var(--text-main);}
 h2, h3, h4 { font-weight: 800; color: var(--text-main); margin-top: 0;}
 p { color: var(--text-muted); }
@@ -45,7 +47,9 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
 input:focus { outline: none; border-color: var(--accent-neon); box-shadow: 0 0 10px rgba(217, 245, 34, 0.2); }
 button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* --- BOTONES --- */
+/* ==========================================
+   SECCIÓN 3: BOTONES GLOBALES
+   ========================================== */
 .btn-accion { background: var(--accent-neon); color: #000; padding: 15px; width: 100%; margin-top: 15px; font-size: 16px; border: none; box-shadow: 0 4px 15px rgba(217, 245, 34, 0.3); }
 .btn-accion:hover { background: var(--accent-hover); transform: translateY(-2px); }
 .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px;}
@@ -60,7 +64,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-wsp svg { width: 22px; height: 22px; fill: currentColor; }
 .btn-wsp:hover { background: var(--wsp-color); color: #000; transform: scale(1.15); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
 
-/* --- BOTONES ICONO SUPERIORES --- */
 .btn-icono-accion {
     background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
     border-radius: 8px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
@@ -72,7 +75,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     background: rgba(217, 245, 34, 0.1); transform: translateY(-2px);
 }
 
-/* --- HEADER Y PERFIL --- */
+/* ==========================================
+   SECCIÓN 4: HEADER, PERFIL Y ESTADÍSTICAS
+   ========================================== */
 #banner-stats { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, var(--bg-card), #111113); padding: 25px 35px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 25px; flex-shrink: 0;}
 .btn-perfil { display: flex; align-items: center; gap: 15px; background: transparent; border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 50px; }
 .btn-perfil:hover { background: var(--bg-input); border-color: var(--accent-neon); }
@@ -82,7 +87,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 #contador-total { font-size: 60px; font-weight: 900; color: var(--accent-neon); text-shadow: 0 0 20px rgba(217, 245, 34, 0.4); line-height: 1; margin: 0;}
 .btn-reset-total { background: transparent; border: none; font-size: 24px; color: var(--text-muted); padding: 0;}
 
-/* --- GRILLA DE DÍAS --- */
+/* ==========================================
+   SECCIÓN 5: GRILLA SEMANAL Y TARJETAS DÍA
+   ========================================== */
 #contenedor-tarjetas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; flex: 1; overflow-y: auto;}
 .tarjeta-dia { display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 15px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-color); text-align: center; height: 100%; min-height: 220px; cursor: pointer;}
 .tarjeta-dia:hover { transform: translateY(-3px); border-color: var(--text-muted); }
@@ -93,10 +100,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .checkbox-dia:checked { background: var(--accent-neon); border-color: var(--accent-neon); }
 .checkbox-dia:checked::after { content: '✔'; position: absolute; color: #000; font-size: 22px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-/* --- INTERIOR DEL DÍA --- */
+/* ==========================================
+   SECCIÓN 6: INTERIOR DEL DÍA Y CRONÓMETRO
+   ========================================== */
 .header-dia { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-shrink: 0;}
 
-/* CRONÓMETRO E ISLA DESCANSO */
 .cronometro-container { 
     margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); 
     padding: 8px 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease;
@@ -108,9 +116,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
-/* =========================================
-   ESTILOS ISLA DESCANSO (PC: CAE HACIA ABAJO)
-   ========================================= */
+/* ==========================================
+   SECCIÓN 7: ISLA DE DESCANSO
+   ========================================== */
 .isla-descanso {
     position: absolute;
     top: 100%; /* Cae justo por debajo del cronómetro */
@@ -129,7 +137,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     /* ESTADO OCULTO */
     transform: translate(-50%, -20px) scale(0.8);
     opacity: 0;
-    visibility: hidden; /* Esto arregla que no se vea el "fantasma" */
+    visibility: hidden; /* Arregla que no se vea el "fantasma" en PC */
     pointer-events: none;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: -1;
@@ -168,8 +176,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 #btn-config-descanso:hover { color: var(--text-main); transform: scale(1.1); }
 #btn-cerrar-descanso:hover { color: var(--danger); transform: scale(1.1); }
 
-
-/* LAYOUT DIA */
+/* ==========================================
+   SECCIÓN 8: LAYOUT Y CARTAS 3D (FLIP)
+   ========================================== */
 .layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
@@ -179,111 +188,47 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start;
 }
 
+.ejercicio-flip-container { perspective: 1000px; width: 100%; }
+.ejercicio-card-inner { position: relative; width: 100%; height: 100%; display: grid; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
+.ejercicio-card-inner.flipped { transform: rotateY(180deg); }
+.ejercicio-card-front, .ejercicio-card-back { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; height: 100%; }
+.ejercicio-card-front { transform: rotateY(0deg); }
+.ejercicio-card-back { transform: rotateY(180deg); display: flex; flex-direction: column; }
 
-/* =========================================
-   ESTRUCTURA DE CARTAS Y 3D FLIP
-   ========================================= */
-.ejercicio-flip-container {
-    perspective: 1000px;
-    width: 100%;
-}
-
-.ejercicio-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: grid; 
-    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-    transform-style: preserve-3d;
-}
-
-.ejercicio-card-inner.flipped {
-    transform: rotateY(180deg);
-}
-
-.ejercicio-card-front, .ejercicio-card-back {
-    grid-area: 1 / 1; 
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    width: 100%;
-    height: 100%;
-}
-
-.ejercicio-card-front {
-    transform: rotateY(0deg);
-}
-
-.ejercicio-card-back {
-    transform: rotateY(180deg);
-    display: flex;
-    flex-direction: column;
-}
-
-.ejercicio-item { 
-    background: var(--bg-card); 
-    padding: 18px; 
-    border-radius: 12px; 
-    border: 1px solid var(--border-color);
-}
-
+.ejercicio-item { background: var(--bg-card); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color); }
 .ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900;}
 .badge-pr { font-size: 12px; color: var(--text-muted); display: block; font-weight: 600; margin-bottom: 10px; transition: color 0.3s;}
 
-/* --- BOTONES DEL REVERSO --- */
-.btn-info-carta {
-    background: transparent; border: 1px solid var(--accent-neon); color: var(--accent-neon);
-    border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 900; cursor: pointer; padding: 0; transition: all 0.2s ease; flex-shrink: 0;
-}
+.btn-info-carta { background: transparent; border: 1px solid var(--accent-neon); color: var(--accent-neon); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; cursor: pointer; padding: 0; transition: all 0.2s ease; flex-shrink: 0; }
 .btn-info-carta:hover { background: var(--accent-neon); color: #000; transform: scale(1.1); }
-
-.header-back-carta {
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color);
-}
-
-.btn-cerrar-back {
-    background: transparent; color: var(--text-muted); border: none; padding: 6px; 
-    font-size: 14px; border-radius: 50%; width: 30px; height: 30px; 
-    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
-}
+.header-back-carta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+.btn-cerrar-back { background: transparent; color: var(--text-muted); border: none; padding: 6px; font-size: 14px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
 .btn-cerrar-back:hover { background: var(--bg-input); color: white; }
 
-/* --- CAJAS DE SERIES --- */
+/* ==========================================
+   SECCIÓN 9: CAJAS DE SERIES E INPUTS
+   ========================================== */
 .contenedor-series { display: flex; flex-direction: column; gap: 8px; }
 
-.caja-serie { 
-    display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-    background: var(--bg-input); padding: 6px 12px; 
-    border-radius: 8px; border: 1px solid var(--border-color); 
-    transition: all 0.2s ease;
-}
-
+.caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-input); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); transition: all 0.2s ease; }
 .caja-serie.completada { background: var(--success-green-bg); border-color: var(--success-green); }
 .caja-serie.completada .numero-serie { color: var(--success-green); }
 
 .numero-serie { font-size: 13px; font-weight: 900; color: var(--text-muted); width: 25px; transition: color 0.2s; }
 .inputs-fila { display: flex; gap: 4px; align-items: center; flex: 1; justify-content: center;}
 
-.input-datos { 
-    text-align: center; border: none; border-bottom: 1px solid transparent; border-radius: 0; 
-    padding: 2px 0; font-size: 16px; background: transparent; color: var(--text-main); 
-    font-weight: 800; width: 45px; font-family: 'Montserrat', sans-serif;
-}
+.input-datos { text-align: center; border: none; border-bottom: 1px solid transparent; border-radius: 0; padding: 2px 0; font-size: 16px; background: transparent; color: var(--text-main); font-weight: 800; width: 45px; font-family: 'Montserrat', sans-serif; }
 .input-datos:focus { outline: none; border-bottom: 1px solid var(--accent-neon); }
 .etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold; margin: 0 4px;}
 
-.btn-check-serie {
-    background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
-    border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px; flex-shrink: 0;
-}
+.btn-check-serie { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 14px; margin-left: 5px; flex-shrink: 0; }
 .btn-check-serie:hover { border-color: var(--success-green); color: var(--success-green); }
 .caja-serie.completada .btn-check-serie { background: var(--success-green); color: #000; border-color: var(--success-green); }
 
-
-/* --- CUENTA --- */
+/* ==========================================
+   SECCIÓN 10: VISTA DE CUENTA E HISTORIAL
+   ========================================== */
 .historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; }
 .tarjeta-historial { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
 .fecha-historial { color: var(--accent-neon); font-weight: 900; font-size: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
@@ -294,9 +239,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .mini-serie { background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid var(--border-color); color: var(--text-muted);}
 .mini-serie strong { color: var(--text-main); }
 
-/* =========================================
-   MEDIA QUERIES (MAGIA RESPONSIVE MOBILE)
-   ========================================= */
+/* ==========================================
+   SECCIÓN 11: MEDIA QUERIES (VERSIÓN MOBILE)
+   ========================================== */
 @media (max-width: 768px) {
     body { padding: 12px; padding-bottom: 90px; height: auto; overflow: auto; display: block; }
     
