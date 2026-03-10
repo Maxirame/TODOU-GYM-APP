@@ -87,13 +87,19 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
+/* MEJORA PC: Achicamos la columna izquierda para dar más espacio a la derecha */
 .layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
-.columna-fija { width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
+.columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; min-height: 0;}
-#listaEjerciciosUI { flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 10px; min-height: 0;}
+
+/* MEJORA PC: Convertimos la lista de ejercicios en una Grilla para usar el ancho de la pantalla */
+#listaEjerciciosUI { 
+    flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 10px; min-height: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 15px; align-content: start;
+}
 
 /* --- EJERCICIOS ULTRA COMPACTOS --- */
-.ejercicio-item { background: var(--bg-body); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border-color);}
+.ejercicio-item { background: var(--bg-body); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);}
 
 .ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
 .titulo-ejercicio { font-size: 18px; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
@@ -103,12 +109,12 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .caja-record label { background: var(--border-color); padding: 6px 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-main);}
 .caja-record input { border: none; border-radius: 0; width: 55px; background: transparent; padding: 6px; text-align: center; color: var(--accent-neon); font-size: 14px;}
 
-/* Series en una sola línea horizontal (S1 | 10 x 80) */
-.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+/* MEJORA INPUTS: Cajitas un poco más anchas (160px) y sin padding lateral para que entren los decimales */
+.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 .caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); transition: border 0.2s;}
-.numero-serie { font-size: 14px; font-weight: 900; color: var(--accent-neon); margin: 0; width: 30px; }
+.numero-serie { font-size: 14px; font-weight: 900; color: var(--accent-neon); margin: 0; width: 25px; }
 .inputs-fila { display: flex; gap: 5px; align-items: center; width: auto; flex: 1;}
-.input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 2px; font-size: 16px; background: transparent; color: var(--text-main); width: 100%; min-width: 30px;}
+.input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 2px 0; font-size: 16px; background: transparent; color: var(--text-main); flex: 1; min-width: 40px;}
 .etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold;}
 
 /* --- CUENTA --- */
@@ -126,7 +132,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
    MEDIA QUERIES (MAGIA RESPONSIVE MOBILE)
    ========================================= */
 @media (max-width: 768px) {
-    /* Padding inferior gigante para que el cronómetro flotante no tape los últimos ejercicios */
     body { padding: 12px; padding-bottom: 90px; height: auto; overflow: auto; display: block; }
     
     #banner-stats { flex-direction: column; text-align: center; gap: 15px; padding: 20px 15px;}
@@ -140,7 +145,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
     .btn-guardar-historial { margin-left: 0; width: 100%; padding: 15px; }
     
-    /* CRONÓMETRO FLOTANTE EN CELULAR (Siempre visible) */
+    /* CRONÓMETRO FLOTANTE EN CELULAR */
     .cronometro-container { 
         position: fixed; 
         bottom: 15px; 
@@ -163,10 +168,12 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .layout-dia { flex-direction: column; overflow: visible; gap: 20px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
     .columna-scroll { overflow: visible; padding: 10px;}
-    #listaEjerciciosUI { overflow-y: visible; padding-right: 0;}
+    
+    /* En celular volvemos a mostrar la lista en una sola columna vertical */
+    #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
     /* EJERCICIO EN MOBILE COMPACTO */
-    .ejercicio-item { padding: 12px; margin-bottom: 10px; }
+    .ejercicio-item { padding: 12px; }
     .ejercicio-header-top { padding-bottom: 6px; margin-bottom: 8px; }
     .titulo-ejercicio { font-size: 16px; }
     .btn-eliminar { padding: 4px 8px; font-size: 10px; }
@@ -175,8 +182,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .caja-record label { padding: 4px 6px; font-size: 9px;}
     .caja-record input { width: 50px; padding: 4px; font-size: 13px;}
     
-    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 8px;}
-    .caja-serie { padding: 6px 10px; }
-    .numero-serie { font-size: 12px; width: 25px; }
-    .input-datos { font-size: 15px; }
+    /* Aseguramos que los números no se corten en celular tampoco */
+    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px;}
+    .caja-serie { padding: 6px 8px; }
+    .numero-serie { font-size: 12px; width: 22px; }
+    .input-datos { font-size: 15px; min-width: 35px; }
 }
