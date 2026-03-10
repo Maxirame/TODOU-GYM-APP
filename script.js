@@ -178,9 +178,11 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
+// AQUI ESTÁ EL DISEÑO ULTRA-COMPACTO APLICADO
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
+    
     document.getElementById('listaEjerciciosUI').innerHTML = rutinaHoy.map((ej, idx) => {
         let htmlSeries = '';
         for (let i = 0; i < ej.series; i++) {
@@ -189,10 +191,11 @@ function actualizarInterfazDia() {
             htmlSeries += `
                 <div class="caja-serie">
                     <span class="numero-serie">SET ${i + 1}</span>
-                    <span class="etiqueta-input">Repes</span>
-                    <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
-                    <span class="etiqueta-input">Kg</span>
-                    <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
+                    <div class="inputs-fila">
+                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="Reps" value="${r}">
+                        <span class="etiqueta-x">x</span>
+                        <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="Kg" value="${p}">
+                    </div>
                 </div>`;
         }
         return `
@@ -202,7 +205,7 @@ function actualizarInterfazDia() {
                     <div class="contenedor-records">
                         <div class="caja-record"><label>Fallo</label><input type="number" class="input-fallo" data-nombre="${ej.nombre}" placeholder="--" value="${fallosHistoricos[ej.nombre] || ''}"></div>
                         <div class="caja-record"><label>Max Kg</label><input type="number" class="input-maxpeso" data-nombre="${ej.nombre}" placeholder="--" value="${pesosMaximos[ej.nombre] || ''}"></div>
-                        <button class="btn-eliminar" data-ej="${idx}">✖ Eliminar</button>
+                        <button class="btn-eliminar" data-ej="${idx}">✖</button>
                     </div>
                 </div>
                 <div class="contenedor-series">${htmlSeries}</div>
@@ -296,3 +299,4 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
