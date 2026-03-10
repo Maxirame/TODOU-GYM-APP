@@ -37,7 +37,7 @@
 
     <div id="vista-semana" style="display: none;">
         <div id="banner-stats">
-            <div style="display: flex; gap: 30px; align-items: center;">
+            <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
                 <button class="btn-perfil" id="btn-abrir-cuenta">
                     <div class="icono-perfil" id="letra-avatar">M</div>
                     <div style="text-align: left;">
@@ -47,7 +47,10 @@
                         </span>
                     </div>
                 </button>
-                <button id="btn-editar-nombre" class="icono-editar" title="Editar Nombre" style="background: transparent;">✎ EDITAR</button>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <button id="btn-editar-nombre" class="icono-editar" style="background: transparent;">✎ EDITAR</button>
+                    <button id="btn-cerrar-sesion-main" class="icono-editar" style="background: transparent; color: var(--danger); border-color: var(--danger);">SALIR</button>
+                </div>
                 
                 <div style="margin-left: 20px;">
                     <h1 style="color: var(--text-main); margin: 0;">Panel de Control</h1>
@@ -124,10 +127,7 @@
                 <button class="btn-volver" id="btn-volver-desde-cuenta" style="margin: 0;">❮ VOLVER AL PANEL</button>
                 <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Atleta</span></h1>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn-borrar-historial" id="btn-borrar-todo">🗑 BORRAR HISTORIAL</button>
-                <button class="btn-borrar-historial" id="btn-cerrar-sesion" style="border-color: var(--warning); color: var(--warning);">CERRAR SESIÓN</button>
-            </div>
+            <button class="btn-borrar-historial" id="btn-borrar-todo">🗑 BORRAR HISTORIAL COMPLETO</button>
         </div>
 
         <h3 style="color: var(--accent-neon); text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Tu Historial de Batallas</h3>
@@ -137,4 +137,3 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
-
