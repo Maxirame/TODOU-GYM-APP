@@ -37,6 +37,8 @@ let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 // ==========================================
 // DICCIONARIO DE TÉCNICAS (VIDEOS E IMÁGENES)
 // ==========================================
+// Aquí puedes agregar todos tus ejercicios. Asegúrate de crear
+// las carpetas "videos" e "img" y colocar los archivos allí.
 const infoEjercicios = {
     "Press Banca": {
         videoUrl: "videos/press_banca.mp4",
@@ -45,6 +47,10 @@ const infoEjercicios = {
     "Sentadillas": {
         videoUrl: "videos/sentadillas.mp4",
         imgMusculo: "img/cuadriceps.png"
+    },
+    "Dominadas Supinas": {
+        videoUrl: "videos/dominadas.mp4",
+        imgMusculo: "img/espalda.png"
     }
 };
 
@@ -190,7 +196,6 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON LA COPA
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -215,15 +220,17 @@ function actualizarInterfazDia() {
                 </div>`;
         }
         
-      const prReps = fallosHistoricos[ej.nombre] || '--';
+        const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
 
+        // Buscamos info en el diccionario. Si no hay, devolvemos strings vacíos.
         const infoTecnica = infoEjercicios[ej.nombre] || { videoUrl: "", imgMusculo: "" };
         
+        // Estructura de la parte TRASERA de la carta
         const htmlBack = infoTecnica.videoUrl ? `
             <div class="header-back-carta">
                 <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica de Ejercicio</h4>
-                <button class="btn-eliminar btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
+                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
             <div class="video-container" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                 <video width="100%" controls style="border-radius: 8px; border: 1px solid var(--border-color);">
@@ -238,28 +245,32 @@ function actualizarInterfazDia() {
         ` : `
             <div class="header-back-carta">
                 <h4 style="color: var(--text-muted); margin: 0; font-size: 14px; text-transform: uppercase;">Sin Información</h4>
-                <button class="btn-eliminar btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
+                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
-            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un video para este ejercicio.</p>
+            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un video para este ejercicio en el código.</p>
         `;
 
+        // Retornamos el contenedor 3D completo
         return `
             <div class="ejercicio-flip-container">
                 <div class="ejercicio-card-inner" id="card-inner-${idx}">
+                    
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica">!</button>
                                 <h4 class="titulo-ejercicio">${ej.nombre}</h4>
                             </div>
-                            <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
+                            <button class="btn-eliminar btn-borrar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
                         </div>
                         <div class="badge-pr" id="pr-${idx}">🏆 Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
                     </div>
-                    <div class="ejercicio-card-back">
+
+                    <div class="ejercicio-card-back ejercicio-item">
                         ${htmlBack}
                     </div>
+
                 </div>
             </div>`;
     }).join('');
@@ -268,13 +279,27 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-eliminar')) {
+    // 1. Eliminar Ejercicio (solo si tiene la clase específica)
+    if (e.target.classList.contains('btn-borrar-ejercicio')) {
         if(confirm('¿Borrar este ejercicio del día?')) {
             baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
             guardarDatosEnNube(); actualizarInterfazDia();
         }
     }
     
+    // 2. Giro de carta (Flip hacia atrás)
+    if (e.target.classList.contains('btn-flip')) {
+        const ejIdx = e.target.getAttribute('data-ej');
+        document.getElementById(`card-inner-${ejIdx}`).classList.add('flipped');
+    }
+    
+    // 3. Giro de carta (Flip hacia adelante)
+    if (e.target.classList.contains('btn-flip-back')) {
+        const ejIdx = e.target.getAttribute('data-ej');
+        document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
+    }
+    
+    // 4. Check de Series Completadas
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -288,14 +313,6 @@ listaUI.addEventListener('click', (e) => {
         
         guardarDatosEnNube(); 
         actualizarInterfazDia(); 
-    }
-  if (e.target.classList.contains('btn-flip')) {
-        const ejIdx = e.target.getAttribute('data-ej');
-        document.getElementById(`card-inner-${ejIdx}`).classList.add('flipped');
-    }
-    if (e.target.classList.contains('btn-flip-back')) {
-        const ejIdx = e.target.getAttribute('data-ej');
-        document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
     }
 });
 
@@ -430,4 +447,3 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
-
