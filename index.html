@@ -76,7 +76,10 @@
             <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
             <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
             
-            <button class="btn-guardar-historial" id="btn-guardar-dia">💾 GUARDAR ENTRENAMIENTO</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-guardar-historial" id="btn-guardar-dia">💾 GUARDAR</button>
+                <button class="btn-volver" id="btn-limpiar-checks" style="border-color: var(--warning); color: var(--warning);">🧹 LIMPIAR CHECKS</button>
+            </div>
 
             <div class="cronometro-container">
                 <span id="display-cronometro">00:00:00</span>
