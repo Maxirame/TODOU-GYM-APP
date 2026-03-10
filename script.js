@@ -2,7 +2,7 @@
 // 1. IMPORTACIONES DE FIREBASE
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -17,6 +17,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Forzamos a que la sesión se cierre al cerrar la pestaña o el navegador
+setPersistence(auth, browserSessionPersistence);
 
 // ==========================================
 // 2. VARIABLES DE MEMORIA DE LA APP
@@ -50,7 +53,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// LOGIN NORMAL
 document.getElementById('btn-login').addEventListener('click', async () => {
     const email = document.getElementById('auth-email').value;
     const pass = document.getElementById('auth-pass').value;
@@ -65,7 +67,6 @@ document.getElementById('btn-login').addEventListener('click', async () => {
     }
 });
 
-// CREAR CUENTA + ENVIAR EMAIL DE VERIFICACIÓN
 document.getElementById('btn-register').addEventListener('click', async () => {
     const email = document.getElementById('auth-email').value;
     const pass = document.getElementById('auth-pass').value;
@@ -75,11 +76,8 @@ document.getElementById('btn-register').addEventListener('click', async () => {
     try {
         errorMsg.innerText = "Creando cuenta...";
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        
-        // Manda el mail oficial de bienvenida y verificación de Google
         await sendEmailVerification(userCredential.user);
         alert("¡Cuenta creada exitosamente! Te hemos enviado un correo para verificar tu identidad.");
-        
         setTimeout(() => editarNombre(), 1000); 
     } catch (error) {
         if (error.code === 'auth/weak-password') errorMsg.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
@@ -88,14 +86,12 @@ document.getElementById('btn-register').addEventListener('click', async () => {
     }
 });
 
-// LOGIN CON GOOGLE
 document.getElementById('btn-google').addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
     const errorMsg = document.getElementById('auth-error');
     try {
         errorMsg.innerText = "Abriendo ventana de Google...";
         await signInWithPopup(auth, provider);
-        // Si no tenía nombre configurado, le pedimos uno
         if (auth.currentUser.displayName) {
              document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName.split(" ")[0];
         }
@@ -104,10 +100,9 @@ document.getElementById('btn-google').addEventListener('click', async () => {
     }
 });
 
-// CERRAR SESIÓN
-document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
-    signOut(auth);
-});
+// NUEVO BOTÓN DE CERRAR SESIÓN PRINCIPAL
+document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => { signOut(auth); });
+
 
 // ==========================================
 // 4. SINCRONIZACIÓN CON FIREBASE (NUBE) - ESCUDO ANTI-CRASH
@@ -122,7 +117,7 @@ async function guardarDatosEnNube() {
             nombre: document.getElementById('nombre-usuario').innerText
         }, { merge: true });
     } catch (e) {
-        console.warn("No se pudo guardar en la nube (Modo local activo)");
+        console.warn("Error guardando en la nube:", e);
     }
 }
 
@@ -148,18 +143,16 @@ async function cargarDatosDeNube(uid) {
                 document.getElementById('nombre-usuario').innerText = "Atleta";
             }
         } else {
-            // Usuario nuevo
             baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; 
             fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
             document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
         }
     } catch (error) {
-        console.error("Firebase no está habilitado correctamente:", error);
-        alert("⚠️ Iniciaste sesión, pero la base de datos no está activa. Modo Local.");
+        console.error("Firebase bloqueado por permisos:", error);
+        alert("⚠️ Iniciaste sesión, pero la base de datos no está activa. Revisa las reglas de Firestore.");
         baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
     }
     
-    // Esto GARANTIZA que los días de la semana siempre se dibujen
     renderizarSemana();
 }
 
