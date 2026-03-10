@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-setPersistence(auth, browserSessionPersistence); // Cierra sesión al salir
+setPersistence(auth, browserSessionPersistence); 
 
 // ==========================================
 // 2. ESTADO GLOBAL DE LA APP
@@ -161,10 +161,9 @@ function renderizarSemana() {
     document.getElementById('contador-total').innerText = totalEntrenamientos;
 }
 
-// OPTIMIZACIÓN: DELEGACIÓN DE EVENTOS EN EL PANEL PRINCIPAL
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
     if (e.target.closest('.btn-wsp')) return window.open("https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw", '_blank');
-    if (e.target.classList.contains('checkbox-dia')) return; // Lo maneja el evento 'change'
+    if (e.target.classList.contains('checkbox-dia')) return; 
     const tarjeta = e.target.closest('.tarjeta-dia');
     if (tarjeta) abrirDia(tarjeta.getAttribute('data-dia'));
 });
@@ -178,7 +177,7 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO ULTRA-COMPACTO APLICADO
+// AQUI ESTÁ EL DISEÑO HTML ULTRA-COMPACTO
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -190,9 +189,9 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             htmlSeries += `
                 <div class="caja-serie">
-                    <span class="numero-serie">SET ${i + 1}</span>
+                    <span class="numero-serie">S${i + 1}</span>
                     <div class="inputs-fila">
-                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="Reps" value="${r}">
+                        <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="R" value="${r}">
                         <span class="etiqueta-x">x</span>
                         <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="Kg" value="${p}">
                     </div>
@@ -200,22 +199,20 @@ function actualizarInterfazDia() {
         }
         return `
             <div class="ejercicio-item">
-                <div class="ejercicio-cabecera">
+                <div class="ejercicio-header-top">
                     <h4 class="titulo-ejercicio">${ej.nombre}</h4>
-                    <div class="contenedor-records">
-                        <div class="caja-record"><label>Fallo</label><input type="number" class="input-fallo" data-nombre="${ej.nombre}" placeholder="--" value="${fallosHistoricos[ej.nombre] || ''}"></div>
-                        <div class="caja-record"><label>Max Kg</label><input type="number" class="input-maxpeso" data-nombre="${ej.nombre}" placeholder="--" value="${pesosMaximos[ej.nombre] || ''}"></div>
-                        <button class="btn-eliminar" data-ej="${idx}">✖</button>
-                    </div>
+                    <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
+                </div>
+                <div class="contenedor-records">
+                    <div class="caja-record"><label>Fallo</label><input type="number" class="input-fallo" data-nombre="${ej.nombre}" placeholder="--" value="${fallosHistoricos[ej.nombre] || ''}"></div>
+                    <div class="caja-record"><label>Max Kg</label><input type="number" class="input-maxpeso" data-nombre="${ej.nombre}" placeholder="--" value="${pesosMaximos[ej.nombre] || ''}"></div>
                 </div>
                 <div class="contenedor-series">${htmlSeries}</div>
             </div>`;
     }).join('');
 }
 
-// OPTIMIZACIÓN: EL "OÍDO CENTRAL" PARA TODOS LOS EJERCICIOS
 const listaUI = document.getElementById('listaEjerciciosUI');
-
 listaUI.addEventListener('change', (e) => {
     const t = e.target;
     if (t.classList.contains('input-repes') || t.classList.contains('input-peso')) {
