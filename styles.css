@@ -47,7 +47,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-accion:hover { background: var(--accent-hover); transform: translateY(-2px); }
 .btn-volver { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px;}
 .btn-volver:hover { color: var(--text-main); border-color: var(--text-main); }
-.btn-eliminar { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; font-size: 12px;}
+.btn-eliminar { background: transparent; color: var(--text-muted); border: none; padding: 6px; font-size: 14px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;}
 .btn-eliminar:hover { background: var(--danger); color: white; }
 .btn-reiniciar { background: transparent; color: var(--text-main); border: 2px dashed var(--border-color); padding: 15px; width: 100%; margin-top: 20px; flex-shrink: 0;}
 .btn-reiniciar:hover { border-color: var(--accent-neon); color: var(--accent-neon); }
@@ -89,37 +89,42 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 
 .layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
-.columna-scroll { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; min-height: 0;}
+.columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
 
 #listaEjerciciosUI { 
-    flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 10px; min-height: 0;
+    flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 5px; min-height: 0;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 15px; align-content: start;
 }
 
-/* --- EJERCICIOS ULTRA COMPACTOS --- */
-.ejercicio-item { background: var(--bg-body); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);}
+/* --- EJERCICIOS ULTRA COMPACTOS (ESTILO FOTO) --- */
+.ejercicio-item { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);}
 
-.ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 10px; }
-.titulo-ejercicio { font-size: 18px; color: var(--accent-neon); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
+.ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;}
+.badge-pr { background: rgba(217, 245, 34, 0.1); color: var(--accent-neon); font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(217, 245, 34, 0.3); margin-left: 10px; letter-spacing: 0.5px;}
 
-.contenedor-records { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; justify-content: flex-start;}
-.caja-record { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;}
-.caja-record label { background: var(--border-color); padding: 6px 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-main);}
-/* FIX RECORDS: Bajamos fuente y padding horizontal a 0 */
-.caja-record input { border: none; border-radius: 0; width: 50px; background: transparent; padding: 2px 0; text-align: center; color: var(--accent-neon); font-size: 13px;}
-
-.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); transition: border 0.2s;}
-.numero-serie { font-size: 13px; font-weight: 900; color: var(--accent-neon); margin: 0; width: 22px; }
-.inputs-fila { display: flex; gap: 4px; align-items: center; width: auto; flex: 1;}
-
-/* FIX REPES/KG: Fuente chica (14px), ancho minimo forzado, padding a cero, y números "más apretados" (-0.5px) */
-.input-datos { 
-    text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; 
-    padding: 2px 0; font-size: 14px; background: transparent; color: var(--text-main); 
-    flex: 1; min-width: 45px; letter-spacing: -0.5px; font-family: 'Montserrat', sans-serif;
+/* Series en Píldoras */
+.contenedor-series { display: flex; flex-wrap: wrap; gap: 10px; }
+.caja-serie { 
+    display: flex; flex-direction: row; align-items: center; 
+    background: var(--bg-input); padding: 8px 12px; 
+    border-radius: 8px; border: 1px solid var(--border-color); 
+    transition: border 0.2s; width: auto;
 }
-.etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold;}
+.caja-serie:focus-within { border-color: var(--text-muted); }
+
+.numero-serie { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-right: 6px; width: auto; }
+.inputs-fila { display: flex; gap: 2px; align-items: center;}
+
+/* ANCHO SEGURO DE 4 DIGITOS (45px) */
+.input-datos { 
+    text-align: center; border: none; border-bottom: 1px solid transparent; border-radius: 0; 
+    padding: 0; font-size: 15px; background: transparent; color: var(--text-main); 
+    font-weight: 800; min-width: 45px; width: 45px; font-family: 'Montserrat', sans-serif;
+}
+.input-datos:focus { outline: none; border-bottom: 1px solid var(--accent-neon); }
+.etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold; margin: 0 2px;}
+.etiqueta-kg { color: var(--text-muted); font-size: 12px; font-weight: bold; margin-left: 2px;}
 
 /* --- CUENTA --- */
 .historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; }
@@ -160,22 +165,16 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 
     .layout-dia { flex-direction: column; overflow: visible; gap: 20px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
-    .columna-scroll { overflow: visible; padding: 10px;}
+    .columna-scroll { overflow: visible; padding: 0;}
     
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
-    .ejercicio-item { padding: 12px; }
-    .ejercicio-header-top { padding-bottom: 6px; margin-bottom: 8px; }
+    .ejercicio-item { padding: 15px; }
+    .ejercicio-header-top { padding-bottom: 0; margin-bottom: 12px; }
     .titulo-ejercicio { font-size: 16px; }
-    .btn-eliminar { padding: 4px 8px; font-size: 10px; }
+    .badge-pr { margin-left: 8px; font-size: 9px; padding: 3px 6px;}
     
-    .contenedor-records { gap: 6px; justify-content: center;}
-    .caja-record label { padding: 4px; font-size: 9px;}
-    .caja-record input { width: 45px; padding: 2px 0; font-size: 12px;}
-    
-    /* CELULAR: Cajita un poco más angosta para que el número baje a 13px y no haya colisión */
-    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 8px;}
     .caja-serie { padding: 6px 8px; }
-    .numero-serie { font-size: 12px; width: 20px; }
-    .input-datos { font-size: 13px; min-width: 40px; padding: 2px 0; letter-spacing: -0.5px;}
+    .numero-serie { font-size: 11px; }
+    .input-datos { font-size: 14px; min-width: 40px; width: 40px; }
 }
