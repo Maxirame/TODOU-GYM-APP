@@ -218,6 +218,8 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     border-radius: 8px; 
     overflow: hidden; 
     background: var(--bg-input); 
+    user-select: none; /* ¡ESTA ES LA MAGIA QUE EVITA EL AZUL EN PC! */
+    -webkit-user-select: none; /* Magia para iOS/Mac */
 }
 
 /* El fondo rojo con el tacho, esperando por detrás */
@@ -238,11 +240,12 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .caja-serie { 
     display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
     background: var(--bg-input); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); 
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, border-color 0.2s; 
     position: relative; z-index: 2; width: 100%; touch-action: pan-y; 
+    /* La transición de translateX ahora la maneja el JavaScript en tiempo real */
+    transition: background 0.2s, border-color 0.2s; 
 }
 
-/* Clase que se activa con JavaScript al deslizar */
+/* Clase que se activa con JavaScript al soltar el swipe */
 .caja-serie.swiped { transform: translateX(-65px); }
 
 .caja-serie.completada { background: var(--success-green-bg); border-color: var(--success-green); }
@@ -328,4 +331,5 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
+
 
