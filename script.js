@@ -248,7 +248,6 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
-            // Agregamos el contenedor de Swipe y el tacho de basura
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
                     <div class="serie-delete-bg">
@@ -426,9 +425,7 @@ let swipeActiveEl = null;
 let isDragging = false;
 
 const iniciarSwipe = (e, elemento) => {
-    if (e.type === 'mousedown' && e.button !== 0) return; // Ignorar clic derecho en PC
-    
-    // No interrumpir si hace clic directo en los inputs o botones
+    if (e.type === 'mousedown' && e.button !== 0) return; 
     if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button') return;
 
     if (elemento) {
@@ -437,7 +434,6 @@ const iniciarSwipe = (e, elemento) => {
         swipeStartX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
         swipeStartY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
         
-        // Quitamos la transición para que el movimiento pegue 1:1 con el dedo
         swipeActiveEl.style.transition = 'none';
         currentTranslate = swipeActiveEl.classList.contains('swiped') ? -65 : 0;
     } else {
@@ -456,21 +452,18 @@ const moverSwipe = (e) => {
     const diffX = currentX - swipeStartX;
     const diffY = Math.abs(currentY - swipeStartY);
     
-    // Si el usuario mueve el dedo más hacia abajo que hacia los lados (scroll), soltamos la carta
     if (diffY > 10 && diffY > Math.abs(diffX)) {
         isDragging = false;
         swipeActiveEl.style.transform = '';
         return; 
     }
 
-    // Si está deslizando horizontalmente, bloqueamos acciones nativas del navegador
     if (e.cancelable) e.preventDefault(); 
     
     let newTranslate = currentTranslate + diffX;
-    if (newTranslate > 0) newTranslate = 0; // No dejar que se vaya a la derecha
-    if (newTranslate < -80) newTranslate = -80; // Tope máximo a la izquierda
+    if (newTranslate > 0) newTranslate = 0; 
+    if (newTranslate < -80) newTranslate = -80; 
 
-    // Movemos la carta en tiempo real
     swipeActiveEl.style.transform = `translateX(${newTranslate}px)`;
 };
 
@@ -478,18 +471,17 @@ const finalizarSwipe = (e) => {
     if (!isDragging || !swipeActiveEl) return;
     isDragging = false;
     
-    // Devolvemos la animación suave para el cierre o apertura final (el efecto "Snap")
     swipeActiveEl.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     
     const currentX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
     const diffX = currentX - swipeStartX;
     const finalPos = currentTranslate + diffX;
 
-    swipeActiveEl.style.transform = ''; // Limpiamos el estilo inline
+    swipeActiveEl.style.transform = ''; 
 
-    if (finalPos < -35) { // Si pasó la mitad del camino, se queda abierto
+    if (finalPos < -35) { 
         swipeActiveEl.classList.add('swiped');
-    } else { // Si no, se devuelve a su lugar
+    } else { 
         swipeActiveEl.classList.remove('swiped');
     }
     swipeActiveEl = null;
@@ -505,6 +497,48 @@ listaUI.addEventListener('mousedown', (e) => iniciarSwipe(e, e.target.closest('.
 listaUI.addEventListener('mousemove', moverSwipe);
 listaUI.addEventListener('mouseup', finalizarSwipe);
 listaUI.addEventListener('mouseleave', finalizarSwipe);
+
+// --- NUEVA LÓGICA: BURBUJA DE AÑADIR EJERCICIO ---
+document.getElementById('btn-toggle-add').addEventListener('click', () => {
+    document.getElementById('burbuja-add-ejercicio').classList.toggle('visible');
+});
+
+document.getElementById('btn-cerrar-add').addEventListener('click', () => {
+    document.getElementById('burbuja-add-ejercicio').classList.remove('visible');
+});
+
+document.getElementById('btn-agregar-ejercicio').addEventListener('click', () => {
+    const nombre = document.getElementById('inputEjercicio').value.trim();
+    const series = parseInt(document.getElementById('inputSeries').value);
+    if (!nombre || !series) return alert("¡Hey! Completá el nombre y las series.");
+    if (!baseDeDatosLocal[diaActivo]) baseDeDatosLocal[diaActivo] = [];
+    
+    baseDeDatosLocal[diaActivo].push({ 
+        nombre, series, 
+        repesRealizadas: new Array(series).fill(''), 
+        pesosRealizados: new Array(series).fill(''),
+        seriesCompletadas: new Array(series).fill(false)
+    });
+    
+    document.getElementById('inputEjercicio').value = ''; document.getElementById('inputSeries').value = '';
+    guardarDatosEnNube(); actualizarInterfazDia();
+    
+    // Ocultamos la burbuja automáticamente después de añadir
+    document.getElementById('burbuja-add-ejercicio').classList.remove('visible');
+});
+
+document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
+    const rutina = baseDeDatosLocal[diaActivo];
+    if (!diaActivo || !rutina || rutina.length === 0) return;
+    
+    if(confirm('¿Seguro que quieres desmarcar todas las series de hoy? Tus pesos anotados no se borrarán.')) {
+        rutina.forEach(ej => {
+            if(ej.seriesCompletadas) ej.seriesCompletadas = new Array(ej.series).fill(false);
+        });
+        guardarDatosEnNube();
+        actualizarInterfazDia();
+    }
+});
 
 // ==========================================
 // SECCIÓN 7: CRONÓMETRO E ISLA DE DESCANSO
@@ -645,6 +679,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
