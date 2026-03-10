@@ -1,22 +1,17 @@
 /* --- VARIABLES DE COLOR --- */
 :root {
-    --bg-body: #0a0a0c;
-    --bg-card: #18181b;
-    --bg-input: #27272a;
-    --border-color: #3f3f46;
-    --text-main: #f4f4f5;
-    --text-muted: #a1a1aa;
-    --accent-neon: #d9f522; 
-    --accent-hover: #b8d11c;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --success-bg: rgba(217, 245, 34, 0.1);
+    --bg-body: #0a0a0c; --bg-card: #18181b; --bg-input: #27272a;
+    --border-color: #3f3f46; --text-main: #f4f4f5; --text-muted: #a1a1aa;
+    --accent-neon: #d9f522; --accent-hover: #b8d11c;
+    --danger: #ef4444; --warning: #f59e0b; --success-bg: rgba(217, 245, 34, 0.1);
     --wsp-color: #25D366; 
 }
 
 /* --- ESTILOS LOGIN --- */
-#vista-auth { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100%; }
-.auth-card { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 15px;}
+#vista-auth { width: 100%; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+#vista-semana, #vista-dia, #vista-cuenta { width: 100%; flex: 1; flex-direction: column; }
+
+.auth-card { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px;}
 .auth-card h1 { text-align: center; color: var(--accent-neon); margin-bottom: 5px; }
 .auth-card p { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 0; margin-bottom: 20px;}
 .error-msg { color: var(--danger); font-size: 12px; text-align: center; margin-top: 10px; min-height: 15px;}
@@ -63,7 +58,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-wsp svg { width: 22px; height: 22px; fill: currentColor; }
 .btn-wsp:hover { background: var(--wsp-color); color: #000; transform: scale(1.15); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
 
-#banner-stats { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, var(--bg-card), #111113); padding: 30px 40px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 30px; }
+#banner-stats { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, var(--bg-card), #111113); padding: 30px 40px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 30px; width: 100%; box-sizing: border-box;}
 
 .btn-perfil { display: flex; align-items: center; gap: 15px; background: transparent; border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
 .btn-perfil:hover { background: var(--bg-input); border-color: var(--accent-neon); }
@@ -74,7 +69,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 #contador-total { font-size: 70px; font-weight: 900; color: var(--accent-neon); text-shadow: 0 0 20px rgba(217, 245, 34, 0.4); line-height: 1; margin: 0;}
 .btn-reset-total { background: transparent; border: none; font-size: 24px; color: var(--text-muted); padding: 0;}
 
-#contenedor-tarjetas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; flex: 1; overflow-y: auto;}
+#contenedor-tarjetas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; flex: 1; overflow-y: auto; width: 100%;}
 .tarjeta-dia { display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 15px; border-radius: 12px; transition: all 0.3s ease; background: var(--bg-card); border: 1px solid var(--border-color); text-align: center; height: 100%; min-height: 250px; }
 .tarjeta-dia:hover { transform: translateY(-5px); border-color: var(--text-muted); cursor: pointer;}
 .dia-verde { border-color: var(--accent-neon); background: var(--success-bg); box-shadow: 0 0 15px rgba(217, 245, 34, 0.1);}
@@ -93,7 +88,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
-.layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; }
+.layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%;}
 .columna-fija { flex: 1; max-width: 450px; display: flex; flex-direction: column; gap: 25px; overflow-y: auto; padding-right: 5px;}
 .columna-scroll { flex: 2; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden;}
 #listaEjerciciosUI { flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 15px;}
@@ -113,7 +108,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 5px; font-size: 20px; background: transparent; margin-bottom: 5px; color: var(--text-main);}
 .etiqueta-input { font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-bottom: 2px;}
 
-.historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start;}
+.historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; width: 100%;}
 .tarjeta-historial { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
 .fecha-historial { color: var(--accent-neon); font-weight: 900; font-size: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
 .badge-dia { background: var(--bg-input); color: var(--text-muted); font-size: 12px; padding: 5px 10px; border-radius: 50px; }
@@ -174,3 +169,4 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .fecha-historial { flex-direction: column; align-items: flex-start; font-size: 18px;}
     .badge-dia { width: 100%; text-align: center; margin-top: 10px;}
 }
+
