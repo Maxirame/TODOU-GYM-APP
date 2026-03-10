@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutina | Social Gym</title>
+    <title>Community GYM</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,7 +11,7 @@
 
     <div id="vista-auth">
         <div class="card auth-card">
-            <h1>GYM SOCIAL</h1>
+            <h1>Community GYM</h1>
             <p>Inicia sesión para sincronizar tus entrenamientos</p>
             
             <input type="email" id="auth-email" placeholder="Correo electrónico">
@@ -43,13 +43,13 @@
                     <div style="text-align: left;">
                         <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">CUENTA</span>
                         <span style="font-size: 16px; font-weight: 800; color: var(--text-main);">
-                            <span id="nombre-usuario">Atleta</span>
+                            <span id="nombre-usuario">Nombre</span>
                         </span>
                     </div>
                 </button>
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <button id="btn-editar-nombre" class="icono-editar" style="background: transparent;">✎ EDITAR</button>
-                    <button id="btn-cerrar-sesion-main" class="icono-editar" style="background: transparent; color: var(--danger); border-color: var(--danger);">SALIR</button>
+                    <button id="btn-cerrar-sesion-main" class="icono-editar" style="background: transparent; color: var(--danger); border-color: var(--danger);">Cerrar Sesion</button>
                 </div>
                 
                 <div style="margin-left: 20px;">
@@ -59,7 +59,7 @@
             </div>
             <div class="stats-info">
                 <div style="text-align: right;">
-                    <h3 style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Días de Gloria</h3>
+                    <h3 style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Días de Entreno</h3>
                     <p style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin: 0;">Histórico global</p>
                 </div>
                 <p id="contador-total">0</p>
@@ -68,7 +68,7 @@
         </div>
 
         <div id="contenedor-tarjetas"></div>
-        <button class="btn-reiniciar" id="btn-reiniciar-semana">🔄 RESETEAR SEMANA</button>
+        <button class="btn-reiniciar" id="btn-reiniciar-semana">🔄 REINICIAR CHECK SEMANAL</button>
     </div>
 
     <div id="vista-dia" style="display: none;">
@@ -140,3 +140,4 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
