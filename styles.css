@@ -207,11 +207,44 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-cerrar-back:hover { background: var(--bg-input); color: white; }
 
 /* ==========================================
-   SECCIÓN 9: CAJAS DE SERIES E INPUTS
+   SECCIÓN 9: CAJAS DE SERIES, INPUTS Y SWIPE
    ========================================== */
-.contenedor-series { display: flex; flex-direction: column; gap: 8px; }
+.contenedor-series { display: flex; flex-direction: column; gap: 8px; overflow-x: hidden; padding-bottom: 2px; }
 
-.caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-input); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); transition: all 0.2s ease; }
+/* Contenedor que abraza a la serie y al fondo rojo */
+.serie-swipe-wrapper { 
+    position: relative; 
+    width: 100%; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    background: var(--bg-input); 
+}
+
+/* El fondo rojo con el tacho, esperando por detrás */
+.serie-delete-bg { 
+    position: absolute; top: 0; right: 0; width: 100%; height: 100%; 
+    background-color: var(--danger); 
+    display: flex; align-items: center; justify-content: flex-end; 
+    padding-right: 18px; border-radius: 8px; z-index: 1; 
+}
+
+.btn-eliminar-serie { 
+    background: transparent; border: none; color: white; font-size: 20px; 
+    cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+}
+.btn-eliminar-serie:hover { transform: scale(1.1); }
+
+/* La caja principal ahora flota por encima (z-index 2) y puede deslizarse */
+.caja-serie { 
+    display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
+    background: var(--bg-input); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, border-color 0.2s; 
+    position: relative; z-index: 2; width: 100%; touch-action: pan-y; 
+}
+
+/* Clase que se activa con JavaScript al deslizar */
+.caja-serie.swiped { transform: translateX(-65px); }
+
 .caja-serie.completada { background: var(--success-green-bg); border-color: var(--success-green); }
 .caja-serie.completada .numero-serie { color: var(--success-green); }
 
@@ -295,3 +328,4 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
+
