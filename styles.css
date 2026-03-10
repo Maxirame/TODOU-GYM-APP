@@ -87,12 +87,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
-/* MEJORA PC: Achicamos la columna izquierda para dar más espacio a la derecha */
 .layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
 .columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
 .columna-scroll { flex: 1; display: flex; flex-direction: column; background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; min-height: 0;}
 
-/* MEJORA PC: Convertimos la lista de ejercicios en una Grilla para usar el ancho de la pantalla */
 #listaEjerciciosUI { 
     flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 10px; min-height: 0;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 15px; align-content: start;
@@ -107,14 +105,20 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .contenedor-records { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; justify-content: flex-start;}
 .caja-record { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;}
 .caja-record label { background: var(--border-color); padding: 6px 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-main);}
-.caja-record input { border: none; border-radius: 0; width: 55px; background: transparent; padding: 6px; text-align: center; color: var(--accent-neon); font-size: 14px;}
+/* FIX RECORDS: Bajamos fuente y padding horizontal a 0 */
+.caja-record input { border: none; border-radius: 0; width: 50px; background: transparent; padding: 2px 0; text-align: center; color: var(--accent-neon); font-size: 13px;}
 
-/* MEJORA INPUTS: Cajitas un poco más anchas (160px) y sin padding lateral para que entren los decimales */
-.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-.caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); transition: border 0.2s;}
-.numero-serie { font-size: 14px; font-weight: 900; color: var(--accent-neon); margin: 0; width: 25px; }
-.inputs-fila { display: flex; gap: 5px; align-items: center; width: auto; flex: 1;}
-.input-datos { text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; padding: 2px 0; font-size: 16px; background: transparent; color: var(--text-main); flex: 1; min-width: 40px;}
+.contenedor-series { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.caja-serie { display: flex; flex-direction: row; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color); transition: border 0.2s;}
+.numero-serie { font-size: 13px; font-weight: 900; color: var(--accent-neon); margin: 0; width: 22px; }
+.inputs-fila { display: flex; gap: 4px; align-items: center; width: auto; flex: 1;}
+
+/* FIX REPES/KG: Fuente chica (14px), ancho minimo forzado, padding a cero, y números "más apretados" (-0.5px) */
+.input-datos { 
+    text-align: center; border: none; border-bottom: 2px solid var(--border-color); border-radius: 0; 
+    padding: 2px 0; font-size: 14px; background: transparent; color: var(--text-main); 
+    flex: 1; min-width: 45px; letter-spacing: -0.5px; font-family: 'Montserrat', sans-serif;
+}
 .etiqueta-x { color: var(--text-muted); font-size: 12px; font-weight: bold;}
 
 /* --- CUENTA --- */
@@ -145,22 +149,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
     .btn-guardar-historial { margin-left: 0; width: 100%; padding: 15px; }
     
-    /* CRONÓMETRO FLOTANTE EN CELULAR */
     .cronometro-container { 
-        position: fixed; 
-        bottom: 15px; 
-        left: 50%; 
-        transform: translateX(-50%); 
-        width: 92%; 
-        z-index: 1000; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.9); 
-        background: rgba(24, 24, 27, 0.95); 
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--border-color);
-        justify-content: center;
-        flex-direction: row; 
-        gap: 10px;
-        padding: 12px 15px;
+        position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); 
+        width: 92%; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.9); 
+        background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--border-color);
+        justify-content: center; flex-direction: row; gap: 10px; padding: 12px 15px;
     }
     #display-cronometro { font-size: 24px; margin-bottom: 0;}
     .btn-crono { width: auto; padding: 8px 12px; font-size: 12px;}
@@ -169,22 +162,20 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
     .columna-scroll { overflow: visible; padding: 10px;}
     
-    /* En celular volvemos a mostrar la lista en una sola columna vertical */
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 12px;} 
     
-    /* EJERCICIO EN MOBILE COMPACTO */
     .ejercicio-item { padding: 12px; }
     .ejercicio-header-top { padding-bottom: 6px; margin-bottom: 8px; }
     .titulo-ejercicio { font-size: 16px; }
     .btn-eliminar { padding: 4px 8px; font-size: 10px; }
     
-    .contenedor-records { gap: 8px; justify-content: center;}
-    .caja-record label { padding: 4px 6px; font-size: 9px;}
-    .caja-record input { width: 50px; padding: 4px; font-size: 13px;}
+    .contenedor-records { gap: 6px; justify-content: center;}
+    .caja-record label { padding: 4px; font-size: 9px;}
+    .caja-record input { width: 45px; padding: 2px 0; font-size: 12px;}
     
-    /* Aseguramos que los números no se corten en celular tampoco */
-    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px;}
+    /* CELULAR: Cajita un poco más angosta para que el número baje a 13px y no haya colisión */
+    .contenedor-series { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 8px;}
     .caja-serie { padding: 6px 8px; }
-    .numero-serie { font-size: 12px; width: 22px; }
-    .input-datos { font-size: 15px; min-width: 35px; }
+    .numero-serie { font-size: 12px; width: 20px; }
+    .input-datos { font-size: 13px; min-width: 40px; padding: 2px 0; letter-spacing: -0.5px;}
 }
