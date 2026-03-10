@@ -42,16 +42,13 @@ let descansoRestante = 0;
 // Diccionario de Técnicas (Videos e Imágenes)
 const infoEjercicios = {
     "Press Banca": {
-        videoUrl: "videos/press_banca.mp4",
-        imgMusculo: "img/pecho.png"
+        imgMusculo: "img/pressbanca.png"
     },
-    "Sentadillas": {
-        videoUrl: "videos/sentadillas.mp4",
-        imgMusculo: "img/cuadriceps.png"
+    "Press Banca Mancuernas": {
+        imgMusculo: "img/pressbancamancuernas.png"
     },
-    "Dominadas Supinas": {
-        videoUrl: "videos/dominadas.mp4",
-        imgMusculo: "img/espalda.png"
+    "Press Inclinado": {
+        imgMusculo: "img/pressinclinado.png"
     }
 };
 
@@ -533,5 +530,6 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
