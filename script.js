@@ -295,7 +295,7 @@ listaUI.addEventListener('click', (e) => {
         document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
     }
     
-    // 3. Check Serie & Lanzar Isla Descanso
+    // 3. Check Serie & Lanzar Isla Descanso (CORREGIDO EL PARPADEO)
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -309,12 +309,16 @@ listaUI.addEventListener('click', (e) => {
         const nuevoEstado = !estadoAnterior;
         baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = nuevoEstado;
         
+        // Guardamos en la nube silenciosamente
         guardarDatosEnNube(); 
-        actualizarInterfazDia(); 
         
-        // Si acabamos de completar la serie (cambió a true), lanzamos el timer
+        // Efecto visual instantáneo sin recargar toda la interfaz
+        const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
+            cajaSerie.classList.add('completada');
             iniciarRestTimer();
+        } else {
+            cajaSerie.classList.remove('completada');
         }
     }
 });
@@ -527,3 +531,4 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
