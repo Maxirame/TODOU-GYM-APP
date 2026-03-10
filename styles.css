@@ -327,6 +327,43 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .mini-serie strong { color: var(--text-main); }
 
 /* ==========================================
+   SECCIÓN 10.5: ESTILOS DE LA RED SOCIAL
+   ========================================== */
+.amigo-item { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; transition: all 0.3s ease;}
+.amigo-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--border-color); display: flex; justify-content: center; align-items: center; font-weight: 800; color: white; position: relative; flex-shrink: 0;}
+
+/* El puntito de conexión */
+.amigo-avatar::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; border: 3px solid var(--bg-input); transition: all 0.3s ease;}
+
+.amigo-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.amigo-nombre { font-size: 14px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.amigo-tag { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+.amigo-estado { font-size: 11px; font-weight: 600; transition: color 0.3s ease; margin-top: 2px;}
+
+/* ESTADO: ONLINE (Azul) */
+.amigo-item.online .amigo-avatar::after { background: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);}
+.amigo-item.online .amigo-estado { color: #3b82f6; }
+
+/* ESTADO: ENTRENANDO (Verde y parpadeante) */
+.amigo-item.entrenando { border-color: var(--success-green); background: var(--success-green-bg); }
+.amigo-item.entrenando .amigo-avatar::after { background: var(--success-green); box-shadow: 0 0 10px var(--success-green);}
+.amigo-item.entrenando .amigo-estado { color: var(--success-green); animation: pulse-text 1.5s infinite alternate; }
+
+/* ESTADO: OFFLINE (Gris apagado) */
+.amigo-item.offline .amigo-avatar { opacity: 0.5; }
+.amigo-item.offline .amigo-avatar::after { background: var(--text-muted); }
+.amigo-item.offline .amigo-estado { color: var(--text-muted); font-weight: 400; }
+
+.btn-llamar { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
+.btn-llamar:hover { background: #3b82f6; border-color: #3b82f6; transform: scale(1.1); }
+.amigo-item.entrenando .btn-llamar:hover { background: var(--success-green); border-color: var(--success-green); color: #000; }
+
+@keyframes pulse-text { 
+    from { opacity: 0.6; } 
+    to { opacity: 1; text-shadow: 0 0 5px var(--success-green); } 
+}
+
+/* ==========================================
    SECCIÓN 11: MEDIA QUERIES (VERSIÓN MOBILE)
    ========================================== */
 @media (max-width: 768px) {
@@ -390,6 +427,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
+
 
 
 
