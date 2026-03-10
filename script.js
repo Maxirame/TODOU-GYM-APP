@@ -224,29 +224,25 @@ function actualizarInterfazDia() {
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
         const prPeso = pesosMaximos[ej.nombre] || '--';
-        const infoTecnica = infoEjercicios[ej.nombre] || { videoUrl: "", imgMusculo: "" };
         
-        const htmlBack = infoTecnica.videoUrl ? `
+        // Buscamos la info. Si no hay, devolvemos un objeto con imgMusculo vacío
+        const infoTecnica = infoEjercicios[ej.nombre] || { imgMusculo: "" };
+        
+        // Ahora preguntamos: ¿Tiene imagen?
+        const htmlBack = infoTecnica.imgMusculo ? `
             <div class="header-back-carta">
-                <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica de Ejercicio</h4>
+                <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Músculo Principal</h4>
                 <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
-            <div class="video-container" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                <video width="100%" controls style="border-radius: 8px; border: 1px solid var(--border-color);">
-                    <source src="${infoTecnica.videoUrl}" type="video/mp4">
-                    Tu navegador no soporta videos.
-                </video>
-                <div style="margin-top: 15px; text-align: center;">
-                    <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Músculo Principal</span><br>
-                    <img src="${infoTecnica.imgMusculo}" alt="Músculo" style="height: 40px; margin-top: 5px; opacity: 0.8;" onerror="this.style.display='none'">
-                </div>
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-top: 10px;">
+                <img src="${infoTecnica.imgMusculo}" alt="Músculo trabajado" style="max-width: 100%; max-height: 180px; object-fit: contain; opacity: 0.9; filter: drop-shadow(0 0 10px rgba(217, 245, 34, 0.2));" onerror="this.style.display='none'">
             </div>
         ` : `
             <div class="header-back-carta">
                 <h4 style="color: var(--text-muted); margin: 0; font-size: 14px; text-transform: uppercase;">Sin Información</h4>
                 <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
             </div>
-            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un video para este ejercicio en el código.</p>
+            <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado una imagen para este ejercicio en el código.</p>
         `;
 
         return `
@@ -530,6 +526,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
