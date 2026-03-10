@@ -32,7 +32,6 @@ let fallosHistoricos = {};
 let pesosMaximos = {}; 
 let historialGlobal = []; 
 let diaActivo = null;
-let domElementCrono = null;
 let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 
 // ==========================================
@@ -177,7 +176,7 @@ document.getElementById('contenedor-tarjetas').addEventListener('change', (e) =>
     }
 });
 
-// AQUI ESTÁ EL DISEÑO HTML DE PÍLDORAS CON EL PR AUTOMATIZADO
+// AQUI ESTÁ EL DISEÑO HTML ESTRECHO Y BOTÓN CHECK
 function actualizarInterfazDia() {
     if (!diaActivo) return;
     const rutinaHoy = baseDeDatosLocal[diaActivo] || [];
@@ -187,28 +186,30 @@ function actualizarInterfazDia() {
         for (let i = 0; i < ej.series; i++) {
             const r = (ej.repesRealizadas && ej.repesRealizadas[i]) || ''; 
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
+            const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
+
             htmlSeries += `
-                <div class="caja-serie">
-                    <span class="numero-serie">S${i + 1}:</span>
+                <div class="caja-serie ${isCompleted}">
+                    <span class="numero-serie">S${i + 1}</span>
                     <div class="inputs-fila">
                         <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
                         <span class="etiqueta-x">x</span>
                         <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
-                        <span class="etiqueta-kg">kg</span>
                     </div>
+                    <button class="btn-check-serie" data-ej="${idx}" data-serie="${i}">✔</button>
                 </div>`;
         }
         
-        // Obtenemos el PR guardado si existe
-        const prReps = fallosHistoricos[ej.nombre] || '-';
-        const prPeso = pesosMaximos[ej.nombre] || '-';
+        // Obtenemos el PR para mostrarlo en el nuevo formato unificado
+        const prReps = fallosHistoricos[ej.nombre] || '--';
+        const prPeso = pesosMaximos[ej.nombre] || '--';
 
         return `
             <div class="ejercicio-item">
                 <div class="ejercicio-header-top">
-                    <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                    <div>
                         <h4 class="titulo-ejercicio">${ej.nombre}</h4>
-                        <span class="badge-pr" id="pr-${idx}">🏆 PR: ${prReps} x ${prPeso}kg</span>
+                        <span class="badge-pr" id="pr-${idx}">Fallo: ${prPeso}kg x ${prReps} repes</span>
                     </div>
                     <button class="btn-eliminar" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
                 </div>
@@ -217,8 +218,35 @@ function actualizarInterfazDia() {
     }).join('');
 }
 
-// EL OÍDO CENTRAL QUE CALCULA LOS RÉCORDS AUTOMÁTICAMENTE
+// EL OÍDO CENTRAL QUE CALCULA LOS RÉCORDS AUTOMÁTICAMENTE Y MANEJA LOS CHECKS
 const listaUI = document.getElementById('listaEjerciciosUI');
+
+listaUI.addEventListener('click', (e) => {
+    // BOTÓN ELIMINAR
+    if (e.target.classList.contains('btn-eliminar')) {
+        if(confirm('¿Borrar este ejercicio del día?')) {
+            baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
+            guardarDatosEnNube(); actualizarInterfazDia();
+        }
+    }
+    
+    // BOTÓN CHECK VERDE
+    const btnCheck = e.target.closest('.btn-check-serie');
+    if (btnCheck) {
+        const ejIdx = btnCheck.getAttribute('data-ej');
+        const serieIdx = btnCheck.getAttribute('data-serie');
+        
+        if (!baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas) {
+            baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas = new Array(baseDeDatosLocal[diaActivo][ejIdx].series).fill(false);
+        }
+        
+        // Invertimos el estado (de falso a verdadero o viceversa)
+        baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx] = !baseDeDatosLocal[diaActivo][ejIdx].seriesCompletadas[serieIdx];
+        
+        guardarDatosEnNube(); 
+        actualizarInterfazDia(); // Refresca para pintar de verde
+    }
+});
 
 listaUI.addEventListener('change', (e) => {
     const t = e.target;
@@ -231,12 +259,11 @@ listaUI.addEventListener('change', (e) => {
         }
         baseDeDatosLocal[diaActivo][ejIdx][tipo][serieIdx] = t.value;
         
-        // --- LÓGICA DE AUTO-PR ---
+        // --- LÓGICA DE AUTO-FALLO ---
         const nombreEj = baseDeDatosLocal[diaActivo][ejIdx].nombre;
         const repsStr = baseDeDatosLocal[diaActivo][ejIdx].repesRealizadas[serieIdx];
         const pesoStr = baseDeDatosLocal[diaActivo][ejIdx].pesosRealizados[serieIdx];
         
-        // Solo evalúa si completaste tanto repes como peso
         if (repsStr !== '' && pesoStr !== '' && repsStr !== undefined && pesoStr !== undefined) {
             const currentReps = parseFloat(repsStr);
             const currentPeso = parseFloat(pesoStr);
@@ -255,32 +282,19 @@ listaUI.addEventListener('change', (e) => {
                 isNewPR = true;
             }
 
-            // Si rompiste un récord, guardamos y actualizamos la etiqueta al instante
             if (isNewPR) {
                 pesosMaximos[nombreEj] = currentPeso;
                 fallosHistoricos[nombreEj] = currentReps;
                 
                 const badge = document.getElementById(`pr-${ejIdx}`);
                 if(badge) {
-                    badge.innerText = `🏆 PR: ${currentReps} x ${currentPeso}kg`;
-                    // Efecto visual rápido de éxito
-                    badge.style.background = "var(--accent-neon)";
-                    badge.style.color = "#000";
-                    setTimeout(() => { badge.style.background = "rgba(217, 245, 34, 0.1)"; badge.style.color = "var(--accent-neon)"; }, 500);
+                    badge.innerText = `Fallo: ${currentPeso}kg x ${currentReps} repes`;
+                    badge.style.color = "var(--accent-neon)";
+                    setTimeout(() => { badge.style.color = "var(--text-muted)"; }, 1500);
                 }
             }
         }
-        
         guardarDatosEnNube();
-    }
-});
-
-listaUI.addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-eliminar')) {
-        if(confirm('¿Borrar este ejercicio del día?')) {
-            baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
-            guardarDatosEnNube(); actualizarInterfazDia();
-        }
     }
 });
 
@@ -289,7 +303,15 @@ document.getElementById('btn-agregar-ejercicio').addEventListener('click', () =>
     const series = parseInt(document.getElementById('inputSeries').value);
     if (!nombre || !series) return alert("¡Hey! Completá el nombre y las series.");
     if (!baseDeDatosLocal[diaActivo]) baseDeDatosLocal[diaActivo] = [];
-    baseDeDatosLocal[diaActivo].push({ nombre, series, repesRealizadas: new Array(series).fill(''), pesosRealizados: new Array(series).fill('') });
+    
+    // Al agregar, creamos el array de seriesCompletadas (todas en false)
+    baseDeDatosLocal[diaActivo].push({ 
+        nombre, series, 
+        repesRealizadas: new Array(series).fill(''), 
+        pesosRealizados: new Array(series).fill(''),
+        seriesCompletadas: new Array(series).fill(false)
+    });
+    
     document.getElementById('inputEjercicio').value = ''; document.getElementById('inputSeries').value = '';
     guardarDatosEnNube(); actualizarInterfazDia();
 });
@@ -347,3 +369,4 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
