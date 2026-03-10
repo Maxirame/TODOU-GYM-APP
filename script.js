@@ -42,28 +42,52 @@ let descansoRestante = 0;
 // Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
     "Press Banca": {
-        youtubeId: "TAH8RxOS0VI&t=22s" // Solo pon la ID del video aquí
+        youtubeId: "TAH8RxOS0VI" // Solo pon la ID del video aquí
     },
     "Press Banca Mancuernas": {
-        youtubeId: "IZYddBcNmws"
-    },
-    "Press Inclinado Mancuernas": {
-        youtubeId: "-zbesyTNztQ" 
+        youtubeId: "TAH8RxOS0VI"
     },
     "Press Inclinado": {
-        youtubeId: "-zbesyTNztQ" 
+        youtubeId: "-zbesyTNztQ"
     },
-    "": {
-        youtubeId: "-zbesyTNztQ" 
+    "Press Inclinado Mancuernas": {
+        youtubeId: "-zbesyTNztQ"
     },
-    "": {
-        youtubeId: "-zbesyTNztQ" 
+    "Apertura Mancuernas": {
+        youtubeId: "OtW0EYqBczI"
     },
-    "": {
-        youtubeId: "-zbesyTNztQ" 
+    "Press Frances": {
+        youtubeId: "L3bEz-vcdGU"
+    },
+    "Extensiones Tricep": {
+        youtubeId: ""
     },
     "Dominadas": {
         youtubeId: "BT3CSQKeEww"
+    },
+    "Dominadas Neutras": {
+        youtubeId: ""
+    },
+    "Dominadas Supino": {
+        youtubeId: ""
+    },
+    "Curl Predicador Mancuernas": {
+        youtubeId: ""
+    },
+    "Curl Predicador": {
+        youtubeId: ""
+    },
+    "Curl 21": {
+        youtubeId: ""
+    },
+    "Press Militar": {
+        youtubeId: "DdITN8U-kFI"
+    },
+    "Elevaciones Laterales": {
+        youtubeId: "UQkdNBpjFDo"
+    },
+    "Elevaciones Frontales": {
+        youtubeId: "HciAFZSN2Qo"
     }
 };
 
@@ -541,6 +565,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
