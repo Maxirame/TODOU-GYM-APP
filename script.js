@@ -2,10 +2,9 @@
 // 1. IMPORTACIONES DE FIREBASE
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Tu Llave Maestra (Verificada)
 const firebaseConfig = {
   apiKey: "AIzaSyA91qTTlkWMA5H9cEvI1yja5j3WmkzEbqY",
   authDomain: "gym-app-social.firebaseapp.com",
@@ -15,7 +14,6 @@ const firebaseConfig = {
   appId: "1:788607838572:web:85ea3b15fdf467671aab49"
 };
 
-// Inicializamos la app en la nube
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -39,7 +37,6 @@ let domElementCrono = null;
 // 3. SISTEMA DE AUTENTICACIÓN (LOGIN)
 // ==========================================
 
-// El "Vigilante": Revisa si ya estabas logueado al entrar a la página
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('vista-auth').style.display = 'none';
@@ -53,7 +50,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// BOTÓN: INICIAR SESIÓN
+// LOGIN NORMAL
 document.getElementById('btn-login').addEventListener('click', async () => {
     const email = document.getElementById('auth-email').value;
     const pass = document.getElementById('auth-pass').value;
@@ -64,17 +61,11 @@ document.getElementById('btn-login').addEventListener('click', async () => {
         errorMsg.innerText = "Cargando...";
         await signInWithEmailAndPassword(auth, email, pass);
     } catch (error) {
-        console.error("Error de Firebase:", error.code);
-        // Mostrar el error real en pantalla para saber qué pasa
-        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-            errorMsg.innerText = "⚠️ Correo o contraseña incorrectos.";
-        } else {
-            errorMsg.innerText = "⚠️ Error: " + error.code;
-        }
+        errorMsg.innerText = "⚠️ Error: Verifica tu correo o contraseña.";
     }
 });
 
-// BOTÓN: CREAR CUENTA
+// CREAR CUENTA + ENVIAR EMAIL DE VERIFICACIÓN
 document.getElementById('btn-register').addEventListener('click', async () => {
     const email = document.getElementById('auth-email').value;
     const pass = document.getElementById('auth-pass').value;
@@ -83,70 +74,92 @@ document.getElementById('btn-register').addEventListener('click', async () => {
     
     try {
         errorMsg.innerText = "Creando cuenta...";
-        await createUserWithEmailAndPassword(auth, email, pass);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        
+        // Manda el mail oficial de bienvenida y verificación de Google
+        await sendEmailVerification(userCredential.user);
+        alert("¡Cuenta creada exitosamente! Te hemos enviado un correo para verificar tu identidad.");
+        
         setTimeout(() => editarNombre(), 1000); 
     } catch (error) {
-        console.error("Error de Firebase:", error.code);
-        if (error.code === 'auth/weak-password') {
-            errorMsg.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
-        } else if (error.code === 'auth/email-already-in-use') {
-            errorMsg.innerText = "⚠️ Ese correo ya está registrado.";
-        } else {
-            errorMsg.innerText = "⚠️ Error: " + error.code;
-        }
+        if (error.code === 'auth/weak-password') errorMsg.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
+        else if (error.code === 'auth/email-already-in-use') errorMsg.innerText = "⚠️ Ese correo ya está registrado.";
+        else errorMsg.innerText = "⚠️ Error: " + error.code;
     }
 });
 
-// BOTÓN: CERRAR SESIÓN
+// LOGIN CON GOOGLE
+document.getElementById('btn-google').addEventListener('click', async () => {
+    const provider = new GoogleAuthProvider();
+    const errorMsg = document.getElementById('auth-error');
+    try {
+        errorMsg.innerText = "Abriendo ventana de Google...";
+        await signInWithPopup(auth, provider);
+        // Si no tenía nombre configurado, le pedimos uno
+        if (auth.currentUser.displayName) {
+             document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName.split(" ")[0];
+        }
+    } catch (error) {
+        errorMsg.innerText = "⚠️ Error al conectar con Google.";
+    }
+});
+
+// CERRAR SESIÓN
 document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
     signOut(auth);
 });
 
-
 // ==========================================
-// 4. SINCRONIZACIÓN CON FIREBASE (NUBE)
+// 4. SINCRONIZACIÓN CON FIREBASE (NUBE) - ESCUDO ANTI-CRASH
 // ==========================================
 
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
-    const userRef = doc(db, "usuarios", auth.currentUser.uid);
-    
-    await setDoc(userRef, {
-        baseDeDatosLocal,
-        estadoDias,
-        totalEntrenamientos,
-        fallosHistoricos,
-        pesosMaximos,
-        historialGlobal,
-        nombre: document.getElementById('nombre-usuario').innerText
-    }, { merge: true });
+    try {
+        const userRef = doc(db, "usuarios", auth.currentUser.uid);
+        await setDoc(userRef, {
+            baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
+            nombre: document.getElementById('nombre-usuario').innerText
+        }, { merge: true });
+    } catch (e) {
+        console.warn("No se pudo guardar en la nube (Modo local activo)");
+    }
 }
 
 async function cargarDatosDeNube(uid) {
-    const userRef = doc(db, "usuarios", uid);
-    const docSnap = await getDoc(userRef);
-    
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        baseDeDatosLocal = data.baseDeDatosLocal || {};
-        estadoDias = data.estadoDias || {};
-        totalEntrenamientos = data.totalEntrenamientos || 0;
-        fallosHistoricos = data.fallosHistoricos || {};
-        pesosMaximos = data.pesosMaximos || {};
-        historialGlobal = data.historialGlobal || [];
+    try {
+        const userRef = doc(db, "usuarios", uid);
+        const docSnap = await getDoc(userRef);
         
-        if(data.nombre) {
-            document.getElementById('nombre-usuario').innerText = data.nombre;
-            document.getElementById('titulo-perfil-nombre').innerText = data.nombre;
-            document.getElementById('letra-avatar').innerText = data.nombre.charAt(0).toUpperCase();
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            baseDeDatosLocal = data.baseDeDatosLocal || {};
+            estadoDias = data.estadoDias || {};
+            totalEntrenamientos = data.totalEntrenamientos || 0;
+            fallosHistoricos = data.fallosHistoricos || {};
+            pesosMaximos = data.pesosMaximos || {};
+            historialGlobal = data.historialGlobal || [];
+            
+            if(data.nombre) {
+                document.getElementById('nombre-usuario').innerText = data.nombre;
+                document.getElementById('titulo-perfil-nombre').innerText = data.nombre;
+                document.getElementById('letra-avatar').innerText = data.nombre.charAt(0).toUpperCase();
+            } else {
+                document.getElementById('nombre-usuario').innerText = "Atleta";
+            }
         } else {
-            document.getElementById('nombre-usuario').innerText = "Atleta";
+            // Usuario nuevo
+            baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; 
+            fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
+            document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
         }
-    } else {
-        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; 
-        fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
-        document.getElementById('nombre-usuario').innerText = "Atleta";
+    } catch (error) {
+        console.error("Firebase no está habilitado correctamente:", error);
+        alert("⚠️ Iniciaste sesión, pero la base de datos no está activa. Modo Local.");
+        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = [];
     }
+    
+    // Esto GARANTIZA que los días de la semana siempre se dibujen
     renderizarSemana();
 }
 
@@ -162,7 +175,6 @@ function editarNombre() {
         guardarDatosEnNube();
     }
 }
-// Conectar botón editar nombre
 document.getElementById('btn-editar-nombre').addEventListener('click', editarNombre);
 
 
@@ -191,10 +203,8 @@ function renderizarSemana() {
     contenedorTarjetas.innerHTML = acumuladorHTML;
     document.getElementById('contador-total').innerText = totalEntrenamientos;
 
-    // Conectar eventos dinámicos a las tarjetas
     document.querySelectorAll('.tarjeta-dia').forEach(tarjeta => {
         tarjeta.addEventListener('click', (e) => {
-            // Evitar abrir el día si hizo clic en WSP o Checkbox
             if(e.target.closest('.btn-wsp') || e.target.classList.contains('checkbox-dia')) return;
             abrirDia(tarjeta.getAttribute('data-dia'));
         });
@@ -208,9 +218,7 @@ function renderizarSemana() {
     });
 
     document.querySelectorAll('.btn-wsp').forEach(btn => {
-        btn.addEventListener('click', () => {
-            window.open("https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw", '_blank');
-        });
+        btn.addEventListener('click', () => { window.open("https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw", '_blank'); });
     });
 }
 
@@ -223,17 +231,13 @@ function marcarCompletado(dia, estaMarcado) {
 
 document.getElementById('btn-reiniciar-semana').addEventListener('click', () => {
     if(confirm('¿Listo para destruir una nueva semana? Tus marcas se conservan.')) {
-        estadoDias = {}; 
-        guardarDatosEnNube();
-        renderizarSemana();
+        estadoDias = {}; guardarDatosEnNube(); renderizarSemana();
     }
 });
 
 document.getElementById('btn-reiniciar-historico').addEventListener('click', () => {
     if(confirm('⚠️ ¿Seguro que querés reiniciar tus días de gloria a cero?')) {
-        totalEntrenamientos = 0; 
-        guardarDatosEnNube();
-        renderizarSemana();
+        totalEntrenamientos = 0; guardarDatosEnNube(); renderizarSemana();
     }
 });
 
@@ -315,10 +319,7 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
 
 document.getElementById('btn-borrar-todo').addEventListener('click', () => {
     if(confirm('⚠️ ¿Estás completamente seguro de borrar TODO tu historial guardado? Esta acción no se puede deshacer.')) {
-        historialGlobal = [];
-        guardarDatosEnNube();
-        renderizarHistorial();
-        alert('Historial borrado con éxito.');
+        historialGlobal = []; guardarDatosEnNube(); renderizarHistorial(); alert('Historial borrado con éxito.');
     }
 });
 
@@ -396,7 +397,6 @@ function actualizarInterfazDia() {
     });
     contenedor.innerHTML = acumuladorHTML;
 
-    // Conectar eventos dinámicos a los inputs generados
     document.querySelectorAll('.input-repes').forEach(input => {
         input.addEventListener('change', (e) => {
             const indexEj = e.target.getAttribute('data-ej');
