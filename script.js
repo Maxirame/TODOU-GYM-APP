@@ -42,13 +42,28 @@ let descansoRestante = 0;
 // Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
     "Press Banca": {
-        youtubeId: "0SJy6gPw_Ik" // Solo pon la ID del video aquí
+        youtubeId: "TAH8RxOS0VI&t=22s" // Solo pon la ID del video aquí
     },
-    "Sentadillas": {
-        youtubeId: "MvmTEjcXGk0" 
+    "Press Banca Mancuernas": {
+        youtubeId: "IZYddBcNmws"
     },
-    "Dominadas Supinas": {
-        youtubeId: "eGo4IYR2p3k"
+    "Press Inclinado Mancuernas": {
+        youtubeId: "-zbesyTNztQ" 
+    },
+    "Press Inclinado": {
+        youtubeId: "-zbesyTNztQ" 
+    },
+    "": {
+        youtubeId: "-zbesyTNztQ" 
+    },
+    "": {
+        youtubeId: "-zbesyTNztQ" 
+    },
+    "": {
+        youtubeId: "-zbesyTNztQ" 
+    },
+    "Dominadas": {
+        youtubeId: "BT3CSQKeEww"
     }
 };
 
@@ -526,6 +541,7 @@ function renderizarHistorial() {
             `).join('')}
         </div>`).join('');
 }
+
 
 
 
