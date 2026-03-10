@@ -101,19 +101,23 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     margin-left: auto; display: flex; align-items: center; gap: 15px; background: var(--bg-card); 
     padding: 8px 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease;
     position: relative; /* Clave para anclar la Isla de Descanso aquí */
+    z-index: 50; /* Para asegurar que pase por encima de las cartas */
 }
 #display-cronometro { font-size: 28px; font-weight: 900; color: var(--text-main); font-variant-numeric: tabular-nums; letter-spacing: 1px;}
 .btn-crono { padding: 10px 15px; font-size: 14px; border: none; background: transparent; color: var(--accent-neon); border: 2px solid var(--accent-neon); }
 .btn-crono-pausa { color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { color: var(--text-muted); border-color: var(--border-color); }
 
-/* ESTILOS ISLA DESCANSO */
+/* =========================================
+   ESTILOS ISLA DESCANSO (PC: CAE HACIA ABAJO)
+   ========================================= */
 .isla-descanso {
     position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-    background: rgba(24, 24, 27, 0.95);
+    top: 100%; /* Cae justo por debajo del cronómetro */
+    left: 50%; /* Lo centra perfecto al medio */
+    margin-top: 12px;
+    background: rgba(24, 24, 27, 0.85); /* Un poco más transparente */
+    backdrop-filter: blur(10px); /* Efecto cristal */
     border: 1px solid var(--accent-neon);
     border-radius: 20px;
     padding: 8px 15px;
@@ -121,18 +125,25 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     align-items: center;
     gap: 12px;
     box-shadow: 0 5px 15px rgba(217, 245, 34, 0.2);
-    transform: translateY(-15px) scale(0.9);
+    
+    /* ESTADO OCULTO */
+    transform: translate(-50%, -20px) scale(0.8);
     opacity: 0;
+    visibility: hidden; /* Esto arregla que no se vea el "fantasma" */
     pointer-events: none;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: -1;
 }
+
 .isla-descanso.visible {
-    transform: translateY(0) scale(1);
+    /* ESTADO VISIBLE */
+    transform: translate(-50%, 0) scale(1);
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
     z-index: 100;
 }
+
 .isla-descanso.fin-descanso {
     border-color: var(--success-green);
     animation: pulse-green 1s infinite alternate;
@@ -313,12 +324,15 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
         top: auto;
         bottom: 100%;
         margin-top: 0;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         left: 50%;
         right: auto;
-        transform: translate(-50%, 15px) scale(0.9);
+        
+        /* ESTADO OCULTO */
+        transform: translate(-50%, 20px) scale(0.8);
     }
     .isla-descanso.visible {
+        /* ESTADO VISIBLE */
         transform: translate(-50%, 0) scale(1);
     }
 
