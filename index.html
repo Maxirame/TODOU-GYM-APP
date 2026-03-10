@@ -88,10 +88,7 @@
                     <datalist id="listaEjercicios">
                         <option value="Press Banca"></option>
                         <option value="Dominadas Supinas"></option>
-                        <option value="Curl de Bíceps"></option>
                         <option value="Sentadillas"></option>
-                        <option value="Press Militar"></option>
-                        <option value="Extensiones de Tríceps"></option>
                     </datalist>
 
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
@@ -113,9 +110,39 @@
 
         <div class="layout-dia">
             <div class="columna-fija">
-                <div class="card" style="flex: 1; display: flex; flex-direction: column;">
-                    <h3 style="text-align: center; font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px;">Modo Bestia</h3>
-                    <div id="contenedor-motivacion" style="flex: 1; display: flex; align-items: center; justify-content: center;"></div>
+                <div class="card" style="flex: 1; display: flex; flex-direction: column; padding: 15px;">
+                    <h3 style="font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        Comunidad
+                        <button id="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); cursor: pointer;" title="Añadir amigo">➕</button>
+                    </h3>
+                    
+                    <div id="lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+                        <div class="amigo-item online">
+                            <div class="amigo-avatar">M</div>
+                            <div class="amigo-info">
+                                <span class="amigo-nombre">Maxi <span class="amigo-tag">#3423</span></span>
+                                <span class="amigo-estado">Online</span>
+                            </div>
+                            <button class="btn-llamar" title="Llamar a entrenar">📞</button>
+                        </div>
+
+                        <div class="amigo-item entrenando">
+                            <div class="amigo-avatar">L</div>
+                            <div class="amigo-info">
+                                <span class="amigo-nombre">Lucas <span class="amigo-tag">#8192</span></span>
+                                <span class="amigo-estado">Entrenando...</span>
+                            </div>
+                            <button class="btn-llamar" title="Unirse al entreno">📞</button>
+                        </div>
+
+                        <div class="amigo-item offline">
+                            <div class="amigo-avatar">S</div>
+                            <div class="amigo-info">
+                                <span class="amigo-nombre">Seba <span class="amigo-tag">#1102</span></span>
+                                <span class="amigo-estado">últ. vez hace 2h</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -142,4 +169,5 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
