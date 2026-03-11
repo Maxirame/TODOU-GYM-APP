@@ -237,8 +237,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .header-back-carta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .btn-cerrar-back { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2); font-size: 16px; border-radius: 50%; width: 32px; height: 32px; transition: 0.3s; padding:0; display:flex; align-items:center; justify-content:center;}
 .btn-cerrar-back:hover { background: rgba(255,255,255,0.2); color: #fff; transform: scale(1.1); }
-.btn-eliminar-ejercicio { background: transparent; border: none; color: var(--text-muted); font-size: 20px; transition: 0.2s; padding: 0; display: flex; justify-content: center; align-items: center;}
-.btn-eliminar-ejercicio:hover { color: var(--danger); transform: scale(1.1); }
+
+/* CORRECCIÓN: Se arregla el nombre de la clase para la X */
+.btn-borrar-ejercicio { background: transparent; border: none; color: var(--text-muted); font-size: 20px; transition: 0.2s; padding: 0; display: flex; justify-content: center; align-items: center; cursor: pointer;}
+.btn-borrar-ejercicio:hover { color: var(--danger); transform: scale(1.1); }
 
 /* ==========================================
    SECCIÓN 9: CAJAS DE SERIES, INPUTS Y SWIPE
@@ -310,7 +312,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .mini-serie strong { color: var(--text-main); }
 
 /* ==========================================
-   SECCIÓN 10.5: COMUNIDAD LIQUID GLASS
+   SECCIÓN 10.5: COMUNIDAD LIQUID Glass
    ========================================== */
 .amigo-item { 
     display: flex; align-items: center; gap: 12px; 
@@ -322,10 +324,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     background: var(--border-color); 
 }
 
-/* SOLUCIÓN: Círculos de estado forzados a ser un relleno sólido y opaco */
+/* Círculos de estado más pequeños y minimalistas (10px en vez de 14px) */
 .amigo-avatar::after { 
-    content: ''; position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; 
-    border-radius: 50%; border: 3px solid var(--bg-card); transition: 0.3s; 
+    content: ''; position: absolute; bottom: 0px; right: 0px; width: 10px; height: 10px; 
+    border-radius: 50%; border: 2px solid var(--bg-card); transition: 0.3s; 
     background-color: var(--text-muted); /* Gris mate sólido por defecto */
     opacity: 1; z-index: 5;
 }
@@ -333,7 +335,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* ONLINE (Azul) */
 .amigo-item.online .amigo-avatar::after { 
     background-color: #3b82f6 !important; 
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
 }
 .amigo-item.online .amigo-estado { color: #3b82f6; }
 
@@ -342,7 +344,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .amigo-item.entrenando .amigo-avatar { background: rgba(50, 215, 75, 0.2); color: var(--success-green); } 
 .amigo-item.entrenando .amigo-avatar::after { 
     background-color: var(--success-green) !important; 
-    box-shadow: 0 0 12px var(--success-green);
+    box-shadow: 0 0 10px var(--success-green);
 }
 .amigo-item.entrenando .amigo-estado { color: var(--success-green); animation: pulse-text 1.5s infinite alternate; }
 
@@ -405,4 +407,5 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 15px;} 
     .sala-video { bottom: 110px; right: 20px; width: 130px; height: 195px; }
 }
+
 
