@@ -47,7 +47,6 @@ h1 { font-weight: 900; text-transform: uppercase; font-size: 32px; letter-spacin
 h2, h3, h4 { font-weight: 800; color: var(--text-main); margin-top: 0;}
 p { color: var(--text-muted); }
 
-/* Tarjetas Base con ligero Glassmorphism */
 .card { 
     background: linear-gradient(145deg, #1e1e22 0%, #151518 100%);
     padding: 25px; border-radius: 24px; 
@@ -60,7 +59,6 @@ p { color: var(--text-muted); }
 .auth-card p { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 0; margin-bottom: 20px;}
 .error-msg { color: var(--danger); font-size: 12px; text-align: center; margin-top: 10px; min-height: 15px;}
 
-/* Inputs esculpidos */
 input[type="text"], input[type="number"], input[type="email"], input[type="password"] { 
     font-family: 'Montserrat', sans-serif; 
     border-radius: 16px; 
@@ -87,9 +85,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 
 .btn-volver { background: var(--glass-bg); color: var(--text-muted); border: var(--glass-border); padding: 12px 20px; font-size: 14px; border-radius: 16px; backdrop-filter: blur(10px); box-shadow: var(--glass-shadow); }
 .btn-volver:hover { color: var(--text-main); border-color: rgba(255,255,255,0.4); transform: translateY(-2px); }
-
-.btn-eliminar { background: transparent; border: none; color: var(--text-muted); font-size: 18px; transition: 0.2s; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 8px;}
-.btn-eliminar:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
 .btn-reiniciar { background: transparent; color: var(--text-main); border: 2px dashed rgba(255,255,255,0.2); padding: 15px; width: 100%; margin-top: 20px; flex-shrink: 0; border-radius: 16px; }
 .btn-reiniciar:hover { border-color: var(--accent-neon); color: var(--accent-neon); background: rgba(217, 245, 34, 0.05);}
@@ -141,7 +136,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 15px; text-align: center; height: 100%; min-height: 220px; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     background: var(--glass-bg); backdrop-filter: blur(10px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--glass-shadow);
 }
-/* CORRECCIÓN: Se quitó el scale() para evitar el scroll horizontal involuntario */
 .tarjeta-dia:hover { transform: translateY(-4px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3); }
 .dia-verde { 
     border-color: var(--accent-neon); 
@@ -243,13 +237,15 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .header-back-carta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .btn-cerrar-back { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2); font-size: 16px; border-radius: 50%; width: 32px; height: 32px; transition: 0.3s; padding:0; display:flex; align-items:center; justify-content:center;}
 .btn-cerrar-back:hover { background: rgba(255,255,255,0.2); color: #fff; transform: scale(1.1); }
+.btn-eliminar-ejercicio { background: transparent; border: none; color: var(--text-muted); font-size: 20px; transition: 0.2s; padding: 0; display: flex; justify-content: center; align-items: center;}
+.btn-eliminar-ejercicio:hover { color: var(--danger); transform: scale(1.1); }
 
 /* ==========================================
    SECCIÓN 9: CAJAS DE SERIES, INPUTS Y SWIPE
    ========================================== */
 .contenedor-series { display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; padding-bottom: 2px; }
 
-.serie-swipe-wrapper { position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: transparent; user-select: none; -webkit-user-select: none; }
+.serie-swipe-wrapper { position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: transparent; user-select: none; -webkit-user-select: none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
 
 .serie-delete-bg { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; border-radius: 12px; z-index: 1; }
 .btn-eliminar-serie { background: transparent; border: none; color: white; font-size: 22px; transition: 0.2s; padding:0; display:flex; align-items:center; justify-content:center;}
@@ -263,8 +259,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
 }
 .caja-serie.swiped { transform: translateX(-70px); }
+
+/* SOLUCIÓN: Agregamos la capa var(--bg-input) detrás del gradiente verde transparente para que tape el rojo */
 .caja-serie.completada { 
-    background: var(--success-green-bg); 
+    background: linear-gradient(145deg, rgba(50, 215, 75, 0.2) 0%, rgba(50, 215, 75, 0.05) 100%), var(--bg-input); 
     border-color: var(--success-green); 
     box-shadow: 0 5px 15px rgba(50, 215, 75, 0.2), inset 0 1px 2px rgba(255,255,255,0.2);
 }
@@ -301,7 +299,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* ==========================================
    SECCIÓN 10: VISTA DE CUENTA E HISTORIAL
    ========================================== */
-/* CORRECCIÓN: Historial compacto y con menor ocupación en pantalla */
 .historial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; padding-right: 15px; flex: 1; align-content: start; }
 .tarjeta-historial { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 .fecha-historial { color: var(--accent-neon); font-weight: 900; font-size: 16px; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
@@ -319,29 +316,35 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     display: flex; align-items: center; gap: 12px; 
     background: var(--glass-bg); backdrop-filter: blur(10px); padding: 12px 15px; border-radius: 16px; border: var(--glass-border); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
-/* CORRECCIÓN: Fondo mate y sólido para el avatar, y conexión sin transparencia */
+
 .amigo-avatar { 
     width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 18px; color: #fff; position: relative; flex-shrink: 0;
-    background: var(--border-color); /* Fondo sólido mate en vez de gradiente retro */
+    background: var(--border-color); 
 }
-.amigo-avatar::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--bg-card); transition: 0.3s; background-color: var(--text-muted);}
+
+/* SOLUCIÓN: Círculos de estado forzados a ser un relleno sólido y opaco */
+.amigo-avatar::after { 
+    content: ''; position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; 
+    border-radius: 50%; border: 3px solid var(--bg-card); transition: 0.3s; 
+    background-color: var(--text-muted); /* Gris mate sólido por defecto */
+    opacity: 1; z-index: 5;
+}
+.amigo-item.online .amigo-avatar::after { background-color: var(--ios-blue) !important; box-shadow: 0 0 10px rgba(10, 132, 255, 0.8);}
+.amigo-item.online .amigo-estado { color: var(--ios-blue); }
+
+.amigo-item.entrenando { border-color: var(--success-green); background: linear-gradient(145deg, rgba(50, 215, 75, 0.15) 0%, rgba(50, 215, 75, 0.05) 100%); }
+.amigo-item.entrenando .amigo-avatar { background: var(--success-green-bg); color: var(--success-green); } 
+.amigo-item.entrenando .amigo-avatar::after { background-color: var(--success-green) !important; box-shadow: 0 0 12px var(--success-green);}
+.amigo-item.entrenando .amigo-estado { color: var(--success-green); animation: pulse-text 1.5s infinite alternate; }
+
+.amigo-item.offline .amigo-avatar { opacity: 0.7; }
+.amigo-item.offline .amigo-avatar::after { background-color: var(--text-muted) !important; }
+.amigo-item.offline .amigo-estado { color: var(--text-muted); font-weight: 600; }
 
 .amigo-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .amigo-nombre { font-size: 15px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
 .amigo-tag { font-size: 12px; color: var(--text-muted); font-weight: 600; }
 .amigo-estado { font-size: 12px; font-weight: 700; margin-top: 2px;}
-
-.amigo-item.online .amigo-avatar::after { background-color: var(--ios-blue); box-shadow: 0 0 10px rgba(10, 132, 255, 0.8);}
-.amigo-item.online .amigo-estado { color: var(--ios-blue); }
-
-.amigo-item.entrenando { border-color: var(--success-green); background: linear-gradient(145deg, rgba(50, 215, 75, 0.15) 0%, rgba(50, 215, 75, 0.05) 100%); }
-.amigo-item.entrenando .amigo-avatar { background: var(--success-green-bg); color: var(--success-green); } 
-.amigo-item.entrenando .amigo-avatar::after { background-color: var(--success-green); box-shadow: 0 0 12px var(--success-green);}
-.amigo-item.entrenando .amigo-estado { color: var(--success-green); animation: pulse-text 1.5s infinite alternate; }
-
-.amigo-item.offline .amigo-avatar { opacity: 0.7; }
-.amigo-item.offline .amigo-avatar::after { background-color: var(--text-muted); }
-.amigo-item.offline .amigo-estado { color: var(--text-muted); font-weight: 600; }
 
 .btn-llamar, .btn-eliminar-amigo { 
     background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); 
