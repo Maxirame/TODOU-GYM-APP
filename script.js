@@ -3,7 +3,7 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA91qTTlkWMA5H9cEvI1yja5j3WmkzEbqY",
@@ -122,7 +122,7 @@ document.getElementById('btn-google').addEventListener('click', async () => {
 document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => signOut(auth));
 
 // ==========================================
-// SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN (ON-SNAPSHOT)
+// SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
 // ==========================================
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
@@ -140,7 +140,6 @@ async function guardarDatosEnNube() {
 async function cargarDatosDeNube(uid) {
     const docRef = doc(db, "usuarios", uid);
     
-    // Si no tiene cuenta aún, la inicializamos
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
         miTag = Math.floor(1000 + Math.random() * 9000).toString();
@@ -149,7 +148,6 @@ async function cargarDatosDeNube(uid) {
         await guardarDatosEnNube();
     }
 
-    // ESCUCHAMOS NUESTRO PERFIL EN TIEMPO REAL (Para recibir notificaciones al instante)
     if(unsubscribeMisDatos) unsubscribeMisDatos();
     unsubscribeMisDatos = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -174,11 +172,12 @@ async function cargarDatosDeNube(uid) {
         }
     });
 
-    // Al entrar a la app, avisamos a Firebase que estamos ONLINE
     updateDoc(docRef, { estadoSocial: 'online', ultimaConexion: Date.now() }).catch(e=>console.log(e));
+    
+    // NUEVO: Conectamos el "Teléfono" al iniciar sesión
+    if(typeof activarEscuchaDeLlamadas === 'function') activarEscuchaDeLlamadas();
 }
 
-// Al cerrar la pestaña de la app, avisamos que estamos OFFLINE
 window.addEventListener('beforeunload', () => {
     if(auth.currentUser) {
         updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'offline', ultimaConexion: Date.now() });
@@ -861,21 +860,22 @@ function renderizarAmigos() {
 
 // 5. EVENTOS DE LA LISTA DE AMIGOS (Llamar y Eliminar)
 document.getElementById('lista-amigos').addEventListener('click', async (e) => {
-    // BOTÓN LLAMAR
+    // NUEVA LÓGICA DEL BOTÓN LLAMAR
     if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
-        alert('📞 ¡El Gym Virtual (Videollamada WebRTC) es el próximo paso de la Fase 3!');
+        const item = e.target.closest('.amigo-item');
+        const amigoUid = item.querySelector('.btn-eliminar-amigo').getAttribute('data-uid');
+        // Extraemos el nombre limpio (sin el tag)
+        const amigoNombre = item.querySelector('.amigo-nombre').childNodes[0].nodeValue.trim(); 
+        
+        if(typeof iniciarLlamada === 'function') iniciarLlamada(amigoUid, amigoNombre);
     }
 
-    // BOTÓN ELIMINAR AMIGO
+    // BOTÓN ELIMINAR AMIGO (QUEDA IGUAL)
     if (e.target.classList.contains('btn-eliminar-amigo')) {
         const amigoUid = e.target.getAttribute('data-uid');
-        
         if (confirm('¿Seguro que quieres eliminar a este compañero de tu lista?')) {
-            // 1. Lo borramos de NUESTRA lista
             misAmigos = misAmigos.filter(a => a.uid !== amigoUid);
             await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { misAmigos });
-
-            // 2. Nos borramos de SU lista
             try {
                 const amigoRef = doc(db, "usuarios", amigoUid);
                 const amigoSnap = await getDoc(amigoRef);
@@ -884,16 +884,208 @@ document.getElementById('lista-amigos').addEventListener('click', async (e) => {
                     amigosDeMiAmigo = amigosDeMiAmigo.filter(a => a.uid !== auth.currentUser.uid);
                     await updateDoc(amigoRef, { misAmigos: amigosDeMiAmigo });
                 }
-            } catch (error) { console.error("Error limpiando la base de datos mutua", error); }
+            } catch (error) { console.error(error); }
 
-            // 3. Dejamos de "escuchar" su estado en tiempo real para ahorrar datos
             if (listenersAmigos[amigoUid]) {
                 listenersAmigos[amigoUid](); 
                 delete listenersAmigos[amigoUid];
                 delete datosAmigosEnVivo[amigoUid];
             }
-
             renderizarAmigos();
         }
     }
 });
+
+// ==========================================
+// SECCIÓN 10: MOTOR DE VIDEOLLAMADAS (WEBRTC)
+// ==========================================
+const servidoresG = {
+    iceServers: [
+        { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+    ]
+};
+
+let pc = null;
+let localStream = null;
+let remoteStream = null;
+let currentCallDocId = null;
+let unsubscribeLlamadasEntrantes = null;
+let unsubscribeCall = null;
+
+const videoLocal = document.getElementById('video-local');
+const videoRemoto = document.getElementById('video-remoto');
+const modalEntrante = document.getElementById('modal-llamada-entrante');
+const salaVideo = document.getElementById('sala-video');
+
+async function configurarCamara() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        remoteStream = new MediaStream();
+        videoLocal.srcObject = localStream;
+        videoRemoto.srcObject = remoteStream;
+    } catch (err) {
+        alert("⚠️ Necesitas dar permisos de cámara y micrófono a tu navegador para entrenar juntos.");
+        throw err;
+    }
+}
+
+function crearConexion() {
+    pc = new RTCPeerConnection(servidoresG);
+    
+    // Inyectamos nuestros videos al canal
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+    // Recibimos los videos del amigo
+    pc.ontrack = event => {
+        event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+        });
+    };
+}
+
+async function iniciarLlamada(amigoUid, amigoNombre) {
+    alert(`Llamando a ${amigoNombre}... Enciende tu cámara.`);
+    await configurarCamara();
+    salaVideo.classList.remove('oculto');
+    crearConexion();
+
+    const callDocRef = doc(collection(db, "llamadas"));
+    const offerCandidatesRef = collection(callDocRef, "offerCandidates");
+    const answerCandidatesRef = collection(callDocRef, "answerCandidates");
+
+    currentCallDocId = callDocRef.id;
+
+    pc.onicecandidate = event => {
+        if(event.candidate) addDoc(offerCandidatesRef, event.candidate.toJSON());
+    };
+
+    const offerDescription = await pc.createOffer();
+    await pc.setLocalDescription(offerDescription);
+
+    const callData = {
+        callerId: auth.currentUser.uid,
+        callerName: document.getElementById('nombre-usuario').innerText,
+        calleeId: amigoUid,
+        offer: { type: offerDescription.type, sdp: offerDescription.sdp }
+    };
+
+    await setDoc(callDocRef, callData);
+
+    // Escuchamos si contesta o rechaza
+    unsubscribeCall = onSnapshot(callDocRef, (docSnap) => {
+        const data = docSnap.data();
+        if (!pc.currentRemoteDescription && data?.answer) {
+            const answerDescription = new RTCSessionDescription(data.answer);
+            pc.setRemoteDescription(answerDescription);
+        }
+        if (!docSnap.exists()) colgarLlamada(); // Si borró el doc, colgó
+    });
+
+    onSnapshot(answerCandidatesRef, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const candidate = new RTCIceCandidate(change.doc.data());
+                pc.addIceCandidate(candidate);
+            }
+        });
+    });
+}
+
+function activarEscuchaDeLlamadas() {
+    if(unsubscribeLlamadasEntrantes) unsubscribeLlamadasEntrantes();
+    
+    // Buscamos si hay alguna llamada donde nosotros seamos el "callee" (el que recibe)
+    const q = query(collection(db, "llamadas"), where("calleeId", "==", auth.currentUser.uid));
+    
+    unsubscribeLlamadasEntrantes = onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const callData = change.doc.data();
+                currentCallDocId = change.doc.id;
+                document.getElementById('texto-llamante').innerText = `${callData.callerName} te está llamando para entrenar...`;
+                modalEntrante.classList.remove('oculto');
+            }
+            if (change.type === "removed") {
+                // El que nos llamó colgó antes de que contestáramos
+                modalEntrante.classList.add('oculto');
+                if (currentCallDocId === change.doc.id) colgarLlamada(false); 
+            }
+        });
+    });
+}
+
+document.getElementById('btn-aceptar-llamada').addEventListener('click', async () => {
+    modalEntrante.classList.add('oculto');
+    await configurarCamara();
+    salaVideo.classList.remove('oculto');
+    crearConexion();
+
+    const callDocRef = doc(db, "llamadas", currentCallDocId);
+    const answerCandidatesRef = collection(callDocRef, "answerCandidates");
+    const offerCandidatesRef = collection(callDocRef, "offerCandidates");
+
+    pc.onicecandidate = event => {
+        if(event.candidate) addDoc(answerCandidatesRef, event.candidate.toJSON());
+    };
+
+    const callDocSnap = await getDoc(callDocRef);
+    const callData = callDocSnap.data();
+
+    const offerDescription = callData.offer;
+    await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+    const answerDescription = await pc.createAnswer();
+    await pc.setLocalDescription(answerDescription);
+
+    await updateDoc(callDocRef, {
+        answer: { type: answerDescription.type, sdp: answerDescription.sdp }
+    });
+
+    onSnapshot(offerCandidatesRef, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                const candidate = new RTCIceCandidate(change.doc.data());
+                pc.addIceCandidate(candidate);
+            }
+        });
+    });
+
+    unsubscribeCall = onSnapshot(callDocRef, (docSnap) => {
+        if (!docSnap.exists()) colgarLlamada();
+    });
+});
+
+document.getElementById('btn-rechazar-llamada').addEventListener('click', () => {
+    modalEntrante.classList.add('oculto');
+    if(currentCallDocId) deleteDoc(doc(db, "llamadas", currentCallDocId));
+    currentCallDocId = null;
+});
+
+document.getElementById('btn-colgar').addEventListener('click', () => colgarLlamada(true));
+
+async function colgarLlamada(borrarDoc = true) {
+    salaVideo.classList.add('oculto');
+    modalEntrante.classList.add('oculto');
+    
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+    if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        remoteStream = null;
+    }
+    if (pc) {
+        pc.close();
+        pc = null;
+    }
+    if (unsubscribeCall) {
+        unsubscribeCall();
+        unsubscribeCall = null;
+    }
+    if (borrarDoc && currentCallDocId) {
+        await deleteDoc(doc(db, "llamadas", currentCallDocId));
+    }
+    currentCallDocId = null;
+}
+
