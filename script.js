@@ -167,7 +167,7 @@ async function guardarDatosEnNube() {
     try {
         await setDoc(doc(db, "usuarios", auth.currentUser.uid), {
             baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
-            tiempoDescansoGlobal,
+            tiempoDescansoGlobal, ultimoResetSemanal, logrosDesbloqueados,
             nombre: document.getElementById('nombre-usuario').innerText,
             tag: miTag,
             misAmigos
@@ -194,6 +194,8 @@ async function cargarDatosDeNube(uid) {
             totalEntrenamientos = data.totalEntrenamientos || 0; fallosHistoricos = data.fallosHistoricos || {};
             pesosMaximos = data.pesosMaximos || {}; historialGlobal = data.historialGlobal || [];
             tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; 
+            ultimoResetSemanal = data.ultimoResetSemanal || 0;
+            logrosDesbloqueados = data.logrosDesbloqueados || [];
             
             misAmigos = data.misAmigos || [];
             solicitudesPendientes = data.solicitudesPendientes || [];
@@ -204,6 +206,7 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
 
+            verificarResetSemanal(); // Chequea si es lunes a las 00:00 y borra checks
             renderizarSemana();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
@@ -211,7 +214,6 @@ async function cargarDatosDeNube(uid) {
     });
 
     updateDoc(docRef, { estadoSocial: 'online', ultimaConexion: Date.now() }).catch(e=>console.log(e));
-    
     if(typeof activarEscuchaDeLlamadas === 'function') activarEscuchaDeLlamadas();
 }
 
@@ -243,16 +245,15 @@ function renderizarSemana() {
         const claseColor = estadoDias[dia] ? 'dia-verde' : '';
         return `
             <div class="tarjeta-dia ${claseColor}" data-dia="${dia}">
-                <span class="nombre-dia">${dia}</span>
-                <span class="subtexto" style="margin-bottom: 10px;">Entrenar ➔</span>
-                <button class="btn-wsp" title="Avisarle a mi bro">
+                <span class="nombre-dia">${dia.substring(0,3).toUpperCase()}</span>
+                <button class="btn-wsp" title="Avisarle a mi bro" style="z-index: 10;">
                     <svg viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.122.553 4.161 1.6 5.967L.25 23.582l5.736-1.503c1.745.966 3.711 1.474 5.762 1.474 6.645 0 12.03-5.385 12.03-12.03S18.676 0 12.031 0zm-.016 21.603c-1.782 0-3.52-.478-5.045-1.383l-.36-.214-3.75.982.998-3.655-.235-.373c-1-1.583-1.528-3.414-1.528-5.312 0-5.568 4.531-10.1 10.1-10.1 5.568 0 10.1 4.531 10.1 10.1s-4.531 10.1-10.1 10.1zm5.55-7.584c-.304-.152-1.802-.888-2.081-.992-.278-.103-.482-.152-.686.152-.204.304-.787.992-.966 1.196-.179.204-.358.228-.662.076-.304-.152-1.285-.473-2.45-1.517-.905-.812-1.516-1.815-1.695-2.119-.179-.304-.019-.469.133-.621.137-.137.304-.358.456-.538.152-.18.204-.304.304-.508.103-.204.051-.383-.025-.535-.076-.152-.686-1.65-.94-2.258-.247-.591-.497-.512-.686-.521-.179-.009-.384-.009-.588-.009-.204 0-.538.076-.821.383-.284.307-1.09 1.063-1.09 2.593 0 1.53 1.116 3.012 1.272 3.22.156.208 2.193 3.35 5.313 4.694.743.32 1.323.511 1.774.654.747.237 1.428.203 1.965.123.6-.088 1.802-.736 2.056-1.446.254-.71.254-1.319.179-1.446-.076-.127-.28-.203-.584-.355z"/></svg>
                 </button>
                 <input type="checkbox" class="checkbox-dia" data-checkdia="${dia}" ${checkStatus}>
             </div>
         `;
     }).join('');
-    document.getElementById('contador-total').innerText = totalEntrenamientos;
+    actualizarRango();
 }
 
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
@@ -705,8 +706,6 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     guardarDatosEnNube(); alert(`¡Día guardado con éxito!\nTiempo: ${document.getElementById('display-cronometro').innerText}`);
 });
 
-document.getElementById('btn-reiniciar-semana').addEventListener('click', () => { if(confirm('¿Destruir la semana? Tus récords y el historial se conservan.')) { estadoDias = {}; guardarDatosEnNube(); renderizarSemana(); } });
-document.getElementById('btn-reiniciar-historico').addEventListener('click', () => { if(confirm('⚠️ ¿Reiniciar tus días totales de gloria a cero?')) { totalEntrenamientos = 0; guardarDatosEnNube(); renderizarSemana(); } });
 document.getElementById('btn-borrar-todo').addEventListener('click', () => { if(confirm('⚠️ ¿Estás seguro de borrar TODO tu historial guardado? Esta acción no se puede deshacer.')) { historialGlobal = []; guardarDatosEnNube(); renderizarHistorial(); alert('Historial borrado con éxito.'); } });
 
 function renderizarHistorial() {
@@ -726,72 +725,53 @@ function renderizarHistorial() {
 // ==========================================
 // SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
 // ==========================================
-document.getElementById('btn-add-amigo').addEventListener('click', async () => {
-    let input = prompt("Añade a tu compañero de entreno\n\nIngresa su nombre y tag exactos (Ejemplo: Maxi #3423):");
-    if (!input || !input.includes('#')) return;
+document.addEventListener('click', async (e) => {
+    // BOTÓN AÑADIR AMIGO
+    if (e.target.closest('.btn-add-amigo')) {
+        let input = prompt("Añade a tu compañero de entreno\n\nIngresa su nombre y tag exactos (Ejemplo: Maxi #3423):");
+        if (!input || !input.includes('#')) return;
 
-    let partes = input.split('#');
-    let nombreBuscado = partes[0].trim();
-    let tagBuscado = partes[1].trim();
+        let partes = input.split('#');
+        let nombreBuscado = partes[0].trim();
+        let tagBuscado = partes[1].trim();
 
-    if (nombreBuscado.toLowerCase() === document.getElementById('nombre-usuario').innerText.toLowerCase() && tagBuscado === miTag) {
-        return alert("⚠️ Eres un lobo solitario, pero no puedes agregarte a ti mismo.");
-    }
-
-    try {
-        const usuariosRef = collection(db, "usuarios");
-        const q = query(usuariosRef, where("nombre", "==", nombreBuscado), where("tag", "==", tagBuscado));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            alert("❌ No se encontró al atleta. Revisa mayúsculas y minúsculas.");
-        } else {
-            querySnapshot.forEach(async (docSnap) => {
-                const amigoId = docSnap.id;
-
-                if (misAmigos.some(a => a.uid === amigoId)) return alert("⚠️ Ya son amigos.");
-
-                const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
-                await updateDoc(doc(db, "usuarios", amigoId), {
-                    solicitudesPendientes: arrayUnion(yo)
-                });
-
-                alert(`✅ Solicitud enviada a ${escapeHTML(nombreBuscado)}. Esperando a que acepte...`);
-            });
+        if (nombreBuscado.toLowerCase() === document.getElementById('nombre-usuario').innerText.toLowerCase() && tagBuscado === miTag) {
+            return alert("⚠️ Eres un lobo solitario, pero no puedes agregarte a ti mismo.");
         }
-    } catch (error) { console.error(error); }
-});
 
-document.getElementById('btn-ver-solicitudes').addEventListener('click', () => {
-    const panel = document.getElementById('panel-solicitudes');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-});
+        try {
+            const usuariosRef = collection(db, "usuarios");
+            const q = query(usuariosRef, where("nombre", "==", nombreBuscado), where("tag", "==", tagBuscado));
+            const querySnapshot = await getDocs(q);
 
-function renderizarSolicitudes() {
-    const lista = document.getElementById('lista-solicitudes');
-    const badge = document.getElementById('badge-notif');
-    
-    if (solicitudesPendientes.length > 0) {
-        badge.style.display = 'block';
-        lista.innerHTML = solicitudesPendientes.map((sol, idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:5px;">
-                <span style="font-size:12px; font-weight:700;">${escapeHTML(sol.nombre)} <span style="color:var(--text-muted); font-weight:400;">#${escapeHTML(sol.tag)}</span></span>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-aceptar-sol" data-idx="${idx}" style="background:var(--success-green); color:#000; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-check" style="pointer-events:none;"></i></button>
-                    <button class="btn-rechazar-sol" data-idx="${idx}" style="background:var(--danger); color:#fff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-x" style="pointer-events:none;"></i></button>
-                </div>
-            </div>
-        `).join('');
-    } else {
-        badge.style.display = 'none';
-        document.getElementById('panel-solicitudes').style.display = 'none'; 
-        lista.innerHTML = '';
+            if (querySnapshot.empty) {
+                alert("❌ No se encontró al atleta. Revisa mayúsculas y minúsculas.");
+            } else {
+                querySnapshot.forEach(async (docSnap) => {
+                    const amigoId = docSnap.id;
+
+                    if (misAmigos.some(a => a.uid === amigoId)) return alert("⚠️ Ya son amigos.");
+
+                    const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
+                    await updateDoc(doc(db, "usuarios", amigoId), { solicitudesPendientes: arrayUnion(yo) });
+
+                    alert(`✅ Solicitud enviada a ${escapeHTML(nombreBuscado)}.`);
+                });
+            }
+        } catch (error) { console.error(error); }
     }
-}
 
-document.getElementById('panel-solicitudes').addEventListener('click', async (e) => {
-    if (e.target.classList.contains('btn-aceptar-sol')) {
-        const idx = e.target.getAttribute('data-idx');
+    // BOTÓN VER SOLICITUDES
+    if (e.target.closest('.btn-ver-solicitudes')) {
+        document.querySelectorAll('.panel-solicitudes').forEach(panel => {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    // ACEPTAR O RECHAZAR SOLICITUD
+    if (e.target.closest('.btn-aceptar-sol')) {
+        const btn = e.target.closest('.btn-aceptar-sol');
+        const idx = btn.getAttribute('data-idx');
         const amigoData = solicitudesPendientes[idx];
         
         solicitudesPendientes.splice(idx, 1);
@@ -801,15 +781,74 @@ document.getElementById('panel-solicitudes').addEventListener('click', async (e)
         const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
         await updateDoc(doc(db, "usuarios", amigoData.uid), { misAmigos: arrayUnion(yo) });
         
-        alert(`🤝 ¡Tú y ${escapeHTML(amigoData.nombre)} ahora son compañeros de entreno!`);
+        alert(`🤝 ¡Tú y ${escapeHTML(amigoData.nombre)} ahora son compañeros!`);
+        renderizarSolicitudes();
     }
 
-    if (e.target.classList.contains('btn-rechazar-sol')) {
-        const idx = e.target.getAttribute('data-idx');
+    if (e.target.closest('.btn-rechazar-sol')) {
+        const btn = e.target.closest('.btn-rechazar-sol');
+        const idx = btn.getAttribute('data-idx');
         solicitudesPendientes.splice(idx, 1);
         await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { solicitudesPendientes });
+        renderizarSolicitudes();
+    }
+
+    // LLAMAR O ELIMINAR AMIGO (DESDE LA LISTA)
+    if (e.target.closest('.btn-llamar')) {
+        const item = e.target.closest('.amigo-item');
+        const amigoUid = item.querySelector('.btn-eliminar-amigo').getAttribute('data-uid');
+        const amigoNombre = item.querySelector('.amigo-nombre').childNodes[0].nodeValue.trim(); 
+        if(typeof iniciarLlamada === 'function') iniciarLlamada(amigoUid, amigoNombre);
+    }
+
+    if (e.target.closest('.btn-eliminar-amigo')) {
+        const btn = e.target.closest('.btn-eliminar-amigo');
+        const amigoUid = btn.getAttribute('data-uid');
+        if (confirm('¿Seguro que quieres eliminar a este compañero?')) {
+            misAmigos = misAmigos.filter(a => a.uid !== amigoUid);
+            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { misAmigos });
+            try {
+                const amigoRef = doc(db, "usuarios", amigoUid);
+                const amigoSnap = await getDoc(amigoRef);
+                if (amigoSnap.exists()) {
+                    let amigosDeMiAmigo = amigoSnap.data().misAmigos || [];
+                    amigosDeMiAmigo = amigosDeMiAmigo.filter(a => a.uid !== auth.currentUser.uid);
+                    await updateDoc(amigoRef, { misAmigos: amigosDeMiAmigo });
+                }
+            } catch (error) {}
+
+            if (listenersAmigos[amigoUid]) {
+                listenersAmigos[amigoUid](); 
+                delete listenersAmigos[amigoUid];
+                delete datosAmigosEnVivo[amigoUid];
+            }
+            renderizarAmigos();
+        }
     }
 });
+
+function renderizarSolicitudes() {
+    const listas = document.querySelectorAll('.lista-solicitudes');
+    const badges = document.querySelectorAll('.badge-notif');
+    
+    if (solicitudesPendientes.length > 0) {
+        badges.forEach(b => b.style.display = 'block');
+        const html = solicitudesPendientes.map((sol, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:5px;">
+                <span style="font-size:12px; font-weight:700;">${escapeHTML(sol.nombre)} <span style="color:var(--text-muted); font-weight:400;">#${escapeHTML(sol.tag)}</span></span>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-aceptar-sol" data-idx="${idx}" style="background:var(--success-green); color:#000; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-check" style="pointer-events:none;"></i></button>
+                    <button class="btn-rechazar-sol" data-idx="${idx}" style="background:var(--danger); color:#fff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-x" style="pointer-events:none;"></i></button>
+                </div>
+            </div>
+        `).join('');
+        listas.forEach(l => l.innerHTML = html);
+    } else {
+        badges.forEach(b => b.style.display = 'none');
+        document.querySelectorAll('.panel-solicitudes').forEach(p => p.style.display = 'none');
+        listas.forEach(l => l.innerHTML = '');
+    }
+}
 
 function escucharAmigos() {
     misAmigos.forEach(amigo => {
@@ -826,40 +865,33 @@ function escucharAmigos() {
 }
 
 function renderizarAmigos() {
-    const contenedor = document.getElementById('lista-amigos');
-    if (!contenedor) return;
+    const contenedores = document.querySelectorAll('.contenedor-lista-amigos');
+    if (contenedores.length === 0) return;
     
     if (misAmigos.length === 0) {
-        contenedor.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">Aún no tienes compañeros de batalla.</p>';
+        const msgVacio = '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">Aún no tienes compañeros de batalla.</p>';
+        contenedores.forEach(c => c.innerHTML = msgVacio);
         return;
     }
 
-    contenedor.innerHTML = misAmigos.map(amigo => {
+    const html = misAmigos.map(amigo => {
         const dataVivo = datosAmigosEnVivo[amigo.uid] || {};
         const estado = dataVivo.estadoSocial || 'offline';
         const ultConexion = dataVivo.ultimaConexion || 0;
         
-        let textoEstado = "";
-        let claseEstado = "offline";
-        
-        if (estado === 'online') {
-            textoEstado = "Online"; claseEstado = "online";
-        } else if (estado === 'entrenando') {
-            textoEstado = "Entrenando..."; claseEstado = "entrenando";
-        } else {
+        let textoEstado = ""; let claseEstado = "offline";
+        if (estado === 'online') { textoEstado = "Online"; claseEstado = "online"; } 
+        else if (estado === 'entrenando') { textoEstado = "Entrenando..."; claseEstado = "entrenando"; } 
+        else {
             if(ultConexion > 0) {
-                const diffMs = Date.now() - ultConexion;
-                const mins = Math.floor(diffMs / 60000);
+                const mins = Math.floor((Date.now() - ultConexion) / 60000);
                 const horas = Math.floor(mins / 60);
                 const dias = Math.floor(horas / 24);
-                
                 if (dias > 0) textoEstado = `hace ${dias}d`;
                 else if (horas > 0) textoEstado = `hace ${horas}h`;
                 else if (mins > 0) textoEstado = `hace ${mins}m`;
                 else textoEstado = "Desconectado";
-            } else {
-                textoEstado = "Desconectado";
-            }
+            } else { textoEstado = "Desconectado"; }
             claseEstado = "offline";
         }
 
@@ -877,42 +909,9 @@ function renderizarAmigos() {
         </div>
         `;
     }).join('');
+
+    contenedores.forEach(c => c.innerHTML = html);
 }
-
-document.getElementById('lista-amigos').addEventListener('click', async (e) => {
-    if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
-        const item = e.target.closest('.amigo-item');
-        const amigoUid = item.querySelector('.btn-eliminar-amigo').getAttribute('data-uid');
-        const amigoNombre = item.querySelector('.amigo-nombre').childNodes[0].nodeValue.trim(); 
-        
-        if(typeof iniciarLlamada === 'function') iniciarLlamada(amigoUid, amigoNombre);
-    }
-
-    if (e.target.classList.contains('btn-eliminar-amigo') || e.target.closest('.btn-eliminar-amigo')) {
-        const btn = e.target.classList.contains('btn-eliminar-amigo') ? e.target : e.target.closest('.btn-eliminar-amigo');
-        const amigoUid = btn.getAttribute('data-uid');
-        if (confirm('¿Seguro que quieres eliminar a este compañero de tu lista?')) {
-            misAmigos = misAmigos.filter(a => a.uid !== amigoUid);
-            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { misAmigos });
-            try {
-                const amigoRef = doc(db, "usuarios", amigoUid);
-                const amigoSnap = await getDoc(amigoRef);
-                if (amigoSnap.exists()) {
-                    let amigosDeMiAmigo = amigoSnap.data().misAmigos || [];
-                    amigosDeMiAmigo = amigosDeMiAmigo.filter(a => a.uid !== auth.currentUser.uid);
-                    await updateDoc(amigoRef, { misAmigos: amigosDeMiAmigo });
-                }
-            } catch (error) { console.error(error); }
-
-            if (listenersAmigos[amigoUid]) {
-                listenersAmigos[amigoUid](); 
-                delete listenersAmigos[amigoUid];
-                delete datosAmigosEnVivo[amigoUid];
-            }
-            renderizarAmigos();
-        }
-    }
-});
 
 // ==========================================
 // SECCIÓN 10: MOTOR DE VIDEOLLAMADAS (WEBRTC)
@@ -1101,6 +1100,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
