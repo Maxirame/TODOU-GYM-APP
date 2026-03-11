@@ -126,7 +126,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     box-shadow: 0 4px 10px rgba(217, 245, 34, 0.3), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -2px 3px rgba(0,0,0,0.2);
 }
 
-/* Nuevos Botones Mini (Editar y Salir) */
 .btn-mini-top {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); 
     border-radius: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.3s; padding: 0; cursor: pointer;
@@ -135,7 +134,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-mini-top.salir { width: auto; padding: 0 12px; font-size: 11px; font-weight: 900; color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
 .btn-mini-top.salir:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
 
-/* Rango y Graffiti */
 .contenedor-rango {
     position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px;
 }
@@ -153,7 +151,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
    SECCIÓN 5: CALENDARIO INFINITO Y TARJETAS
    ========================================== */
 #contenedor-tarjetas { 
-    position: relative; /* ¡ESTO FALTABA PARA EL CENTRADO! */
+    position: relative; /* FIX: Esto es crucial para que el centrado funcione a la perfección */
     display: flex; gap: 12px; flex-shrink: 0; margin-bottom: 25px; 
     overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; 
     padding: 10px 5px; -webkit-overflow-scrolling: touch;
@@ -171,7 +169,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 }
 .tarjeta-dia:hover { transform: translateY(-4px); background: rgba(255,255,255,0.08); }
 
-/* Día Actual (Hoy) */
 .tarjeta-dia.hoy {
     min-width: 85px; height: 115px; 
     border-color: var(--accent-neon);
@@ -187,7 +184,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .num-dia { font-size: 20px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; font-family: 'Montserrat', sans-serif;}
 .tarjeta-dia.hoy .num-dia { font-size: 26px; }
 
-/* Fueguito (Racha) Duolingo Style */
 .fueguito {
     font-size: 24px;
     background: -webkit-linear-gradient(-45deg, #ff4500, #ff8c00, #ffb300);
@@ -203,7 +199,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     100% { filter: drop-shadow(0 4px 10px rgba(255, 140, 0, 0.8)) scale(1.1); }
 }
 
-/* Botón WSP Global (Arriba a la derecha) */
 .btn-wsp-global {
     position: absolute; right: 25px; top: 50%; transform: translateY(-50%);
     background: linear-gradient(145deg, #25D366 0%, #128C7E 100%); border: none; color: #fff; 
@@ -211,7 +206,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s; z-index: 10;
 }
 .btn-wsp-global:hover { transform: translateY(-50%) scale(1.1); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6); }
-
 
 /* ==========================================
    SECCIÓN 6: INTERIOR DEL DÍA Y CRONÓMETRO
@@ -229,7 +223,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-crono-pausa { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: var(--warning); }
 .btn-crono-reset { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: rgba(255,255,255,0.2); }
 
-/* PANEL FLOTANTE AÑADIR */
 .burbuja-panel {
     position: absolute; top: 100%; left: 0; margin-top: 12px; width: 340px; z-index: 100;
     background: rgba(28, 28, 30, 0.6); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
@@ -238,28 +231,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     transform: translateY(-20px) scale(0.95); opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .burbuja-panel.visible { transform: translateY(0) scale(1); opacity: 1; visibility: visible; }
-
-/* ==========================================
-   SECCIÓN 7: ISLA DE DESCANSO
-   ========================================== */
-.isla-descanso {
-    position: absolute; top: 100%; left: 50%; margin-top: 12px;
-    background: rgba(28, 28, 30, 0.6); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid var(--accent-neon); border-radius: 30px; padding: 10px 20px;
-    display: flex; align-items: center; gap: 15px; 
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.3);
-    transform: translate(-50%, -20px) scale(0.8); opacity: 0; visibility: hidden; pointer-events: none;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: -1;
-}
-.isla-descanso.visible { transform: translate(-50%, 0) scale(1); opacity: 1; visibility: visible; pointer-events: auto; z-index: 100; }
-.isla-descanso.fin-descanso { border-color: var(--success-green); animation: pulse-green 1.5s infinite alternate; }
-@keyframes pulse-green { from { box-shadow: 0 0 10px rgba(50, 215, 75, 0.3); } to { box-shadow: 0 0 30px rgba(50, 215, 75, 0.8); } }
-
-#tiempo-descanso-display { font-size: 22px; font-weight: 900; color: var(--accent-neon); width: 65px; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-.isla-descanso.fin-descanso #tiempo-descanso-display { color: var(--success-green); }
-#btn-config-descanso, #btn-cerrar-descanso { background: transparent; border: none; color: rgba(255,255,255,0.7); font-size: 20px; padding: 4px; transition: 0.2s; }
-#btn-config-descanso:hover { color: #fff; transform: scale(1.15); text-shadow: 0 0 10px rgba(255,255,255,0.5);}
-#btn-cerrar-descanso:hover { color: var(--danger); transform: scale(1.15); text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);}
 
 /* ==========================================
    SECCIÓN 8: LAYOUT Y CARTAS 3D (FLIP)
@@ -277,7 +248,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .ejercicio-card-front { transform: rotateY(0deg); }
 .ejercicio-card-back { transform: rotateY(180deg); display: flex; flex-direction: column; }
 
-/* Tarjetas de Ejercicios Liquid Glass - MÁS COMPACTAS */
 .ejercicio-item { 
     background: linear-gradient(145deg, #1e1e22 0%, #151518 100%);
     padding: 15px; border-radius: 20px; border: var(--glass-border); 
@@ -286,11 +256,9 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .titulo-ejercicio { font-size: 15px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
 
-/* Fallo PR más chico y con trofeo dorado */
 .badge-pr { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; font-weight: 700; margin-bottom: 12px; transition: color 0.3s;}
 .badge-pr i { color: #ffd700; font-size: 14px; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
 
-/* Botón de info siempre amarillo por defecto */
 .btn-info-carta { 
     background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); border: none; color: #000; 
     border-radius: 50%; width: 24px; height: 24px; font-size: 14px; font-weight: 900; transition: 0.3s; flex-shrink: 0; padding:0; display:flex; align-items:center; justify-content:center;
@@ -316,7 +284,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .btn-eliminar-serie { background: transparent; border: none; color: white; font-size: 20px; transition: 0.2s; padding:0; display:flex; align-items:center; justify-content:center;}
 .btn-eliminar-serie:hover { transform: scale(1.2); }
 
-/* Cajas más compactas y minimalistas */
 .caja-serie { 
     display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
     background: var(--bg-input); padding: 6px 10px; border-radius: 10px; border: var(--glass-border); 
@@ -354,7 +321,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     box-shadow: 0 4px 10px rgba(50, 215, 75, 0.4), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -2px 3px rgba(0,0,0,0.2);
 }
 
-/* NUEVO BOTÓN AGREGAR SERIE - Redondo Liquid Glass */
 .btn-add-serie { 
     background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border: var(--glass-border); color: var(--text-muted); 
@@ -384,37 +350,21 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     display: flex; align-items: center; gap: 12px; 
     background: var(--glass-bg); backdrop-filter: blur(10px); padding: 12px 15px; border-radius: 16px; border: var(--glass-border); transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
-
 .amigo-avatar { 
     width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 18px; color: #fff; position: relative; flex-shrink: 0;
     background: var(--border-color); 
 }
-
-/* Círculos de estado más pequeños y minimalistas (10px en vez de 14px) */
 .amigo-avatar::after { 
     content: ''; position: absolute; bottom: 0px; right: 0px; width: 10px; height: 10px; 
     border-radius: 50%; border: 2px solid var(--bg-card); transition: 0.3s; 
-    background-color: var(--text-muted); /* Gris mate sólido por defecto */
-    opacity: 1; z-index: 5;
+    background-color: var(--text-muted); opacity: 1; z-index: 5;
 }
-
-/* ONLINE (Azul) */
-.amigo-item.online .amigo-avatar::after { 
-    background-color: #3b82f6 !important; 
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
-}
+.amigo-item.online .amigo-avatar::after { background-color: #3b82f6 !important; box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);}
 .amigo-item.online .amigo-estado { color: #3b82f6; }
-
-/* ENTRENANDO (Verde) */
 .amigo-item.entrenando { border-color: var(--success-green); background: linear-gradient(145deg, rgba(50, 215, 75, 0.15) 0%, rgba(50, 215, 75, 0.05) 100%); }
 .amigo-item.entrenando .amigo-avatar { background: rgba(50, 215, 75, 0.2); color: var(--success-green); } 
-.amigo-item.entrenando .amigo-avatar::after { 
-    background-color: var(--success-green) !important; 
-    box-shadow: 0 0 10px var(--success-green);
-}
+.amigo-item.entrenando .amigo-avatar::after { background-color: var(--success-green) !important; box-shadow: 0 0 10px var(--success-green);}
 .amigo-item.entrenando .amigo-estado { color: var(--success-green); animation: pulse-text 1.5s infinite alternate; }
-
-/* OFFLINE (Gris) */
 .amigo-item.offline .amigo-avatar { opacity: 0.7; }
 .amigo-item.offline .amigo-avatar::after { background-color: var(--text-muted) !important; }
 .amigo-item.offline .amigo-estado { color: var(--text-muted); font-weight: 600; }
@@ -486,17 +436,15 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 15px;} 
     .sala-video { bottom: 110px; right: 20px; width: 130px; height: 195px; }
     
-    /* FIX DEFINITIVO: Scroll Horizontal Táctil */
     .dashboard-grid { 
         display: flex !important; flex-direction: row !important; 
         overflow-x: auto !important; overflow-y: visible !important; 
         scroll-snap-type: x mandatory; padding-bottom: 20px; 
         scroll-behavior: smooth; gap: 15px;
-        -webkit-overflow-scrolling: touch; /* Fundamental para iOS/Safari */
+        -webkit-overflow-scrolling: touch; 
         width: 100%;
     }
    
-    /* Oculta la barrita de scroll en mobile para que se vea más limpio */
     .dashboard-grid::-webkit-scrollbar { display: none; }
     
     .dashboard-grid > div { 
@@ -524,11 +472,3 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .contenido-modulo {
     flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; font-weight: 700; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
-
-
-
-
-
-
-
-
