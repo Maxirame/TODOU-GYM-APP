@@ -38,6 +38,8 @@ let totalEntrenamientos = 0;
 let fallosHistoricos = {}; 
 let pesosMaximos = {}; 
 let historialGlobal = []; 
+let ultimoResetSemanal = 0; // Control de reseteo automático
+let logrosDesbloqueados = []; // Array temporal para cuando haya logros
 
 // VARIABLES SOCIALES REAL-TIME
 let miTag = ""; 
@@ -71,6 +73,35 @@ const infoEjercicios = {
     "Elevaciones Laterales": { youtubeId: "UQkdNBpjFDo" },
     "Elevaciones Frontales": { youtubeId: "HciAFZSN2Qo" }
 };
+
+// --- NUEVAS FUNCIONES DE SISTEMA ---
+function verificarResetSemanal() {
+    const ahora = new Date();
+    const diaSemana = ahora.getDay(); 
+    // Calcular el lunes de la semana actual a las 00:00
+    const diff = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+    const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), diff);
+    lunes.setHours(0,0,0,0);
+    
+    if (ultimoResetSemanal < lunes.getTime()) {
+        estadoDias = {};
+        ultimoResetSemanal = Date.now();
+        guardarDatosEnNube();
+    }
+}
+
+function actualizarRango() {
+    let rango = "Cadete";
+    if (totalEntrenamientos >= 730) {
+        // La condición es 730 días y todos los logros hechos (Asumimos 10 logros totales temporalmente)
+        rango = (logrosDesbloqueados && logrosDesbloqueados.length >= 10) ? "Satoru Gojo" : "Avanzado";
+    } else if (totalEntrenamientos >= 365) {
+        rango = "Intermedio";
+    } else if (totalEntrenamientos >= 180) {
+        rango = "Principiante";
+    }
+    document.getElementById('titulo-rango').innerHTML = `${rango} <span style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);">${totalEntrenamientos} DÍAS</span>`;
+}
 
 // ==========================================
 // SECCIÓN 3: SISTEMA DE AUTENTICACIÓN
@@ -1070,6 +1101,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
