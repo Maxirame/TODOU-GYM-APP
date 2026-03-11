@@ -22,24 +22,28 @@ setPersistence(auth, browserSessionPersistence);
 // ==========================================
 // SECCIÓN 2: ESTADO GLOBAL Y SEGURIDAD
 // ==========================================
-// SANITIZADOR DE SEGURIDAD (Evita hackeos XSS)
 function escapeHTML(str) {
     return str ? String(str).replace(/[&<>'"]/g, tag => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag])) : '';
 }
 
-const diasDeLaSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+// NUEVO: Obtener fecha exacta YYYY-MM-DD según zona horaria local
+function obtenerFechaLocal(fecha = new Date()) {
+    const tzoffset = fecha.getTimezoneOffset() * 60000; 
+    return new Date(fecha - tzoffset).toISOString().split('T')[0];
+}
+
 const TOTAL_IMAGENES_MOTIVACION = 8; 
 
 let baseDeDatosLocal = {};
-let estadoDias = {};
+let estadoDias = {}; // AHORA GUARDA: { "2026-03-11": true }
 let totalEntrenamientos = 0;
 let fallosHistoricos = {}; 
 let pesosMaximos = {}; 
 let historialGlobal = []; 
-let ultimoResetSemanal = 0; // Control de reseteo automático
-let logrosDesbloqueados = []; // Array temporal para cuando haya logros
+let ultimoResetSemanal = 0; 
+let logrosDesbloqueados = []; 
 
 // VARIABLES SOCIALES REAL-TIME
 let miTag = ""; 
@@ -54,6 +58,8 @@ let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 let tiempoDescansoGlobal = 180; 
 let timerDescansoInterval;
 let descansoRestante = 0;
+
+// ... (acá dejá todo tu diccionario de const infoEjercicios = { ... } gigante que hicimos en el paso anterior) ...
 
 const infoEjercicios = {
     // --- PECTORALES ---
@@ -294,40 +300,51 @@ function editarNombre() {
 document.getElementById('btn-editar-nombre').addEventListener('click', editarNombre);
 
 // ==========================================
-// SECCIÓN 5: RENDERIZADO Y EVENTOS VISTA SEMANAL
+// SECCIÓN 5: RENDERIZADO DEL CALENDARIO
 // ==========================================
-function renderizarSemana() {
+function renderizarSemana() { // Mantenemos el nombre para compatibilidad
     const contenedor = document.getElementById('contenedor-tarjetas');
-    contenedor.innerHTML = diasDeLaSemana.map(dia => {
-        const checkStatus = estadoDias[dia] ? 'checked' : '';
-        const claseColor = estadoDias[dia] ? 'dia-verde' : '';
-        return `
-            <div class="tarjeta-dia ${claseColor}" data-dia="${dia}">
-                <span class="nombre-dia">${dia.substring(0,3).toUpperCase()}</span>
-                <button class="btn-wsp" title="Avisarle a mi bro" style="z-index: 10;">
-                    <svg viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.122.553 4.161 1.6 5.967L.25 23.582l5.736-1.503c1.745.966 3.711 1.474 5.762 1.474 6.645 0 12.03-5.385 12.03-12.03S18.676 0 12.031 0zm-.016 21.603c-1.782 0-3.52-.478-5.045-1.383l-.36-.214-3.75.982.998-3.655-.235-.373c-1-1.583-1.528-3.414-1.528-5.312 0-5.568 4.531-10.1 10.1-10.1 5.568 0 10.1 4.531 10.1 10.1s-4.531 10.1-10.1 10.1zm5.55-7.584c-.304-.152-1.802-.888-2.081-.992-.278-.103-.482-.152-.686.152-.204.304-.787.992-.966 1.196-.179.204-.358.228-.662.076-.304-.152-1.285-.473-2.45-1.517-.905-.812-1.516-1.815-1.695-2.119-.179-.304-.019-.469.133-.621.137-.137.304-.358.456-.538.152-.18.204-.304.304-.508.103-.204.051-.383-.025-.535-.076-.152-.686-1.65-.94-2.258-.247-.591-.497-.512-.686-.521-.179-.009-.384-.009-.588-.009-.204 0-.538.076-.821.383-.284.307-1.09 1.063-1.09 2.593 0 1.53 1.116 3.012 1.272 3.22.156.208 2.193 3.35 5.313 4.694.743.32 1.323.511 1.774.654.747.237 1.428.203 1.965.123.6-.088 1.802-.736 2.056-1.446.254-.71.254-1.319.179-1.446-.076-.127-.28-.203-.584-.355z"/></svg>
-                </button>
-                <input type="checkbox" class="checkbox-dia" data-checkdia="${dia}" ${checkStatus}>
+    const hoyStr = obtenerFechaLocal();
+    const hoyObj = new Date();
+    
+    let html = '';
+    // Genera 20 días para atrás y 5 para adelante (Calendario dinámico)
+    for (let i = -20; i <= 5; i++) {
+        let d = new Date();
+        d.setDate(hoyObj.getDate() + i);
+        
+        const fechaStr = obtenerFechaLocal(d);
+        const esHoy = fechaStr === hoyStr;
+        const tieneFuego = estadoDias[fechaStr]; // True si entrenó más de 10 min
+        
+        const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const nombreDia = diasNombres[d.getDay()];
+        const numDia = d.getDate();
+
+        html += `
+            <div class="tarjeta-dia ${esHoy ? 'hoy' : ''}" data-dia="${fechaStr}">
+                <span class="nombre-dia">${nombreDia}</span>
+                <span class="num-dia">${numDia}</span>
+                ${tieneFuego ? '<i class="ph-fill ph-fire fueguito"></i>' : '<div class="fuego-placeholder"></div>'}
             </div>
         `;
-    }).join('');
+    }
+    contenedor.innerHTML = html;
     actualizarRango();
+
+    // Auto-scroll para dejar el día de HOY centrado al abrir la app
+    setTimeout(() => {
+        const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
+        if(tarjetaHoy) {
+            const scrollPos = tarjetaHoy.offsetLeft - (contenedor.offsetWidth / 2) + (tarjetaHoy.offsetWidth / 2);
+            contenedor.scrollTo({ left: scrollPos, behavior: 'smooth' });
+        }
+    }, 150);
 }
 
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
-    if (e.target.closest('.btn-wsp')) return window.open("https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw", '_blank');
-    if (e.target.classList.contains('checkbox-dia')) return; 
     const tarjeta = e.target.closest('.tarjeta-dia');
     if (tarjeta) abrirDia(tarjeta.getAttribute('data-dia'));
-});
-
-document.getElementById('contenedor-tarjetas').addEventListener('change', (e) => {
-    if (e.target.classList.contains('checkbox-dia')) {
-        const dia = e.target.getAttribute('data-checkdia');
-        if (e.target.checked && !estadoDias[dia]) totalEntrenamientos++;
-        estadoDias[dia] = e.target.checked; 
-        guardarDatosEnNube(); renderizarSemana();
-    }
 });
 
 // ==========================================
@@ -654,99 +671,71 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
 });
 
 // ==========================================
-// SECCIÓN 7: CRONÓMETRO E ISLA DE DESCANSO
+// SECCIÓN 7: CRONÓMETRO Y DESCANSOS (LÓGICA 10 MIN)
 // ==========================================
-function formatTime(ms) {
-    let secs = Math.floor(ms / 1000);
-    return `${String(Math.floor(secs / 3600)).padStart(2,'0')}:${String(Math.floor((secs % 3600) / 60)).padStart(2,'0')}:${String(secs % 60).padStart(2,'0')}`;
+function formatearTiempo(ms) {
+    let seg = Math.floor((ms / 1000) % 60);
+    let min = Math.floor((ms / (1000 * 60)) % 60);
+    let hrs = Math.floor((ms / (1000 * 60 * 60)));
+    return `${hrs.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
 }
-function formatTimeDescanso(secs) {
-    let m = Math.floor(secs / 60);
-    let s = secs % 60;
-    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+function actualizarDisplayCrono() {
+    document.getElementById('display-cronometro').innerText = formatearTiempo(elapsedTime);
 }
-function actualizarDisplayCrono() { document.getElementById('display-cronometro').innerText = formatTime(elapsedTime + (isRunning ? Date.now() - startTime : 0)); }
 
 document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
-    const btn = document.getElementById('btn-comenzar-pausa');
-    if (isRunning) { 
-        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false; 
-        btn.innerHTML = '<i class="ph-fill ph-play"></i> REANUDAR'; btn.classList.remove('btn-crono-pausa');
-        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' }); 
-    } else { 
-        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true; 
-        btn.innerHTML = '<i class="ph-fill ph-pause"></i> PAUSAR'; btn.classList.add('btn-crono-pausa'); 
-        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'entrenando' }); 
+    if (isRunning) {
+        clearInterval(timerInterval);
+        document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-play"></i> CONTINUAR';
+        isRunning = false;
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' });
+    } else {
+        startTime = Date.now() - elapsedTime;
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'entrenando' });
+        
+        timerInterval = setInterval(() => {
+            elapsedTime = Date.now() - startTime;
+            actualizarDisplayCrono();
+            
+            // LÓGICA DE JUEGO: 10 minutos = 600,000 milisegundos. Gana el Fueguito.
+            const hoyStr = obtenerFechaLocal();
+            // Verifica que esté en el día de hoy, haya superado los 10 min y no tenga el fuego ya.
+            if (diaActivo === hoyStr && elapsedTime >= 600000 && !estadoDias[hoyStr]) {
+                estadoDias[hoyStr] = true;
+                totalEntrenamientos++;
+                guardarDatosEnNube();
+                renderizarSemana(); // Refresca el panel de atrás
+                alert("🔥 ¡MÁS DE 10 MINUTOS DE ESFUERZO! 🔥\nHas ganado tu llama diaria y sumaste 1 día de entrenamiento a tu récord.");
+            }
+        }, 1000);
+        
+        document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-pause"></i> PAUSA';
+        isRunning = true;
     }
 });
+
 document.getElementById('btn-reset-crono').addEventListener('click', () => {
-    if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) { 
-        clearInterval(timerInterval); isRunning = false; elapsedTime = 0; 
-        document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-play"></i> COMENZAR'; 
-        document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); 
+    if (confirm('¿Reiniciar cronómetro a cero?')) {
+        clearInterval(timerInterval);
+        elapsedTime = 0;
+        isRunning = false;
+        actualizarDisplayCrono();
+        document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-play"></i> COMENZAR';
         if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' });
     }
 });
 
-function inicializarIslaDescanso() {
-    const cronoContainer = document.querySelector('.cronometro-container');
-    if (cronoContainer && !document.getElementById('isla-descanso')) {
-        const isla = document.createElement('div');
-        isla.id = 'isla-descanso';
-        isla.className = 'isla-descanso';
-        isla.innerHTML = `
-            <span id="tiempo-descanso-display">00:00</span>
-            <button id="btn-config-descanso" title="Configurar tiempo"><i class="ph-fill ph-gear"></i></button>
-            <button id="btn-cerrar-descanso" title="Omitir descanso"><i class="ph-fill ph-x-circle"></i></button>
-        `;
-        cronoContainer.appendChild(isla);
-
-        document.getElementById('btn-config-descanso').addEventListener('click', () => {
-            let minActuales = tiempoDescansoGlobal / 60;
-            let input = prompt(`Configurar descanso en MINUTOS:\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, minActuales);
-            if (input !== null && input.trim() !== "") {
-                let nuevosMinutos = parseFloat(input.replace(',', '.'));
-                if (!isNaN(nuevosMinutos) && nuevosMinutos > 0) {
-                    tiempoDescansoGlobal = Math.round(nuevosMinutos * 60); 
-                    guardarDatosEnNube();
-                    if (document.getElementById('isla-descanso').classList.contains('visible')) iniciarRestTimer(); 
-                }
-            }
-        });
-
-        document.getElementById('btn-cerrar-descanso').addEventListener('click', () => {
-            clearInterval(timerDescansoInterval);
-            document.getElementById('isla-descanso').classList.remove('visible');
-            document.getElementById('isla-descanso').classList.remove('fin-descanso');
-        });
-    }
-}
-
-function iniciarRestTimer() {
-    const isla = document.getElementById('isla-descanso');
-    if (!isla) return;
-    clearInterval(timerDescansoInterval);
-    descansoRestante = tiempoDescansoGlobal;
-    document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
-    isla.classList.remove('fin-descanso');
-    isla.classList.add('visible');
-    timerDescansoInterval = setInterval(() => {
-        descansoRestante--;
-        document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
-        if (descansoRestante <= 0) {
-            clearInterval(timerDescansoInterval);
-            isla.classList.add('fin-descanso'); 
-            setTimeout(() => { isla.classList.remove('visible'); isla.classList.remove('fin-descanso'); }, 4000); 
-        }
-    }, 1000);
-}
-
-// ==========================================
-// SECCIÓN 8: FLUJO DE VENTANAS E HISTORIAL
-// ==========================================
 function abrirDia(dia) {
     diaActivo = dia;
-    document.getElementById('titulo-dia').innerText = `${dia} de Guerra`;
+    
+    // Formateo visual de la fecha para el título
+    const [year, month, day] = dia.split('-');
+    const fechaObj = new Date(year, month - 1, day);
+    const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const titulo = `${diasNombres[fechaObj.getDay()]} ${day}/${month}`;
+    
+    document.getElementById('titulo-dia').innerText = `${titulo}`;
     document.getElementById('vista-semana').style.display = 'none';
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
@@ -1168,6 +1157,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
