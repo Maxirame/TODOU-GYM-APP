@@ -56,22 +56,76 @@ let timerDescansoInterval;
 let descansoRestante = 0;
 
 const infoEjercicios = {
+    // --- PECTORALES ---
+    "Aperturas Mancuerna": { youtubeId: "OtW0EYqBczI" },
     "Press Banca": { youtubeId: "TAH8RxOS0VI" },
-    "Press Banca Mancuernas": { youtubeId: "TAH8RxOS0VI" },
+    "Press Banca Mancuerna": { youtubeId: "TAH8RxOS0VI" },
     "Press Inclinado": { youtubeId: "-zbesyTNztQ" },
-    "Press Inclinado Mancuernas": { youtubeId: "-zbesyTNztQ" },
-    "Apertura Mancuernas": { youtubeId: "OtW0EYqBczI" },
-    "Press Frances": { youtubeId: "L3bEz-vcdGU" },
-    "Extensiones Tricep": { youtubeId: "" },
-    "Dominadas": { youtubeId: "BT3CSQKeEww" },
-    "Dominadas Neutras": { youtubeId: "" },
-    "Dominadas Supino": { youtubeId: "" },
-    "Curl Predicador Mancuernas": { youtubeId: "" },
-    "Curl Predicador": { youtubeId: "" },
-    "Curl 21": { youtubeId: "" },
+    "Press Inclinado Mancuerna": { youtubeId: "-zbesyTNztQ" },
+    "Press Declinado": { youtubeId: "" },
+    "Press Declinado Mancuerna": { youtubeId: "" },
+    "Flexiones de Brazo": { youtubeId: "" },
+    "Flexiones Inclinadas": { youtubeId: "" },
+    "Flexiones Declinadas": { youtubeId: "" },
+    "Flexiones Diamante": { youtubeId: "" },
+    "Fondo de Pecho": { youtubeId: "" },
+
+    // --- HOMBROS ---
+    "Vuelo Lateral": { youtubeId: "UQkdNBpjFDo" }, // Antes Elevaciones Laterales
     "Press Militar": { youtubeId: "DdITN8U-kFI" },
-    "Elevaciones Laterales": { youtubeId: "UQkdNBpjFDo" },
-    "Elevaciones Frontales": { youtubeId: "HciAFZSN2Qo" }
+    "Press Militar Mancuerna": { youtubeId: "" },
+    "Press Arnold": { youtubeId: "" },
+    "Elevacion Frontal": { youtubeId: "HciAFZSN2Qo" }, // Antes Elevaciones Frontales
+    "Cuerda Combate Alternada": { youtubeId: "" },
+
+    // --- TRICEPS ---
+    "Press Banca Cerrado": { youtubeId: "" },
+    "Fondo en Banco": { youtubeId: "" },
+    "Patada Triceps": { youtubeId: "" },
+    "Extension Triceps Polea Alta": { youtubeId: "" },
+    "Fondos Triceps": { youtubeId: "" },
+    "Press Frances": { youtubeId: "L3bEz-vcdGU" },
+    "Extension Triceps": { youtubeId: "" }, // Antes Extensiones Tricep
+
+    // --- ESPALDA ---
+    "Dominadas": { youtubeId: "BT3CSQKeEww" },
+    "Dominadas Neutro": { youtubeId: "" }, // Antes Dominadas Neutras
+    "Dominadas Supino": { youtubeId: "" },
+    "Natacion": { youtubeId: "" },
+
+    // --- BICEPS ---
+    "Curl Biceps": { youtubeId: "" },
+    "Curl Biceps Mancuerna": { youtubeId: "" },
+    "Curl Predicador": { youtubeId: "" },
+    "Curl Predicador Mancuerna": { youtubeId: "" },
+    "Curl Biceps Concentrado": { youtubeId: "" },
+    "Curl Biceps Inclinado": { youtubeId: "" },
+    "Curl Martillo": { youtubeId: "" },
+    "Curl 21": { youtubeId: "" },
+
+    // --- CUADRICEPS ---
+    "Bicicleta": { youtubeId: "" },
+    "Caminar": { youtubeId: "" },
+    "Trotar": { youtubeId: "" },
+    "Step UP": { youtubeId: "" },
+    "Burpee": { youtubeId: "" },
+
+    // --- GLUTEOS ---
+    "Escalera": { youtubeId: "" },
+    "Puente Gluteos": { youtubeId: "" },
+    "Patada Gluteos Polea": { youtubeId: "" },
+
+    // --- GEMELOS ---
+    "Soga": { youtubeId: "" },
+    "Elevacion Talones": { youtubeId: "" },
+
+    // --- ABDOMINALES ---
+    "Abs": { youtubeId: "" },
+    "Abs declinado": { youtubeId: "" },
+    "Plancha": { youtubeId: "" }, // Corregido el typo "Planca" a "Plancha"
+    "Giros Rusos": { youtubeId: "" },
+    "Elevacion Piernas": { youtubeId: "" },
+    "Elevacion Piernas Colgando": { youtubeId: "" }
 };
 
 // --- NUEVAS FUNCIONES DE SISTEMA ---
@@ -1114,6 +1168,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
