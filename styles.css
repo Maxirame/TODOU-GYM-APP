@@ -1,6 +1,8 @@
 /* ==========================================
    SECCIÓN 1: VARIABLES Y RESET GLOBALES
    ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Permanent+Marker&display=swap');
+
 :root {
     --bg-body: #0a0a0c; 
     --bg-card: #18181b; 
@@ -110,10 +112,11 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
    SECCIÓN 4: HEADER, PERFIL Y ESTADÍSTICAS
    ========================================== */
 #banner-stats { 
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-shrink: 0;
+    position: relative; display: flex; justify-content: flex-start; align-items: center; margin-bottom: 25px; flex-shrink: 0;
     background: linear-gradient(145deg, #1e1e22 0%, #151518 100%);
-    padding: 25px 35px; border-radius: 24px; border: var(--glass-border);
+    padding: 20px 30px; border-radius: 24px; border: var(--glass-border);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+    min-height: 90px;
 }
 .btn-perfil { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); border: var(--glass-border); padding: 8px 20px 8px 8px; border-radius: 50px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); transition: 0.3s;}
 .btn-perfil:hover { background: rgba(0,0,0,0.4); border-color: var(--accent-neon); }
@@ -122,11 +125,26 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); color: #000;
     box-shadow: 0 4px 10px rgba(217, 245, 34, 0.3), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -2px 3px rgba(0,0,0,0.2);
 }
-.icono-editar { font-size: 12px; color: var(--text-muted); margin-left: 8px; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.05);}
-.stats-info { display: flex; align-items: center; gap: 30px;}
-#contador-total { font-size: 60px; font-weight: 900; color: var(--accent-neon); text-shadow: 0 0 20px rgba(217, 245, 34, 0.4); line-height: 1; margin: 0;}
-.btn-reset-total { background: transparent; border: none; font-size: 24px; color: var(--text-muted); padding: 0; transition: 0.2s;}
-.btn-reset-total:hover { color: var(--danger); transform: rotate(-180deg); }
+
+/* Nuevos Botones Mini (Editar y Salir) */
+.btn-mini-top {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); 
+    border-radius: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.3s; padding: 0; cursor: pointer;
+}
+.btn-mini-top:hover { background: rgba(255,255,255,0.15); color: #fff; transform: scale(1.1); }
+.btn-mini-top.salir { width: auto; padding: 0 12px; font-size: 11px; font-weight: 900; color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+.btn-mini-top.salir:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+
+/* Rango y Graffiti */
+.contenedor-rango {
+    position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.texto-graffiti {
+    font-family: 'Permanent Marker', cursive; font-size: 38px; color: var(--accent-neon); margin: 0; line-height: 1; text-shadow: 0 4px 15px rgba(217, 245, 34, 0.4); text-transform: none; letter-spacing: 2px; font-weight: 400;
+}
+.badge-dias {
+    font-size: 11px; font-weight: 900; color: var(--text-main); background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); letter-spacing: 1px;
+}
 
 /* ==========================================
    SECCIÓN 5: GRILLA SEMANAL Y TARJETAS DÍA
@@ -390,17 +408,30 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
    ========================================== */
 @media (max-width: 768px) {
     body { padding: 15px; padding-bottom: 100px; height: auto; overflow: auto; display: block; }
-    #banner-stats { flex-direction: column; text-align: center; gap: 20px; padding: 25px 20px;}
-    #banner-stats > div { flex-direction: column; width: 100%; gap: 15px; } 
-    .btn-perfil { width: 100%; justify-content: center; }
-    .stats-info { flex-direction: row; gap: 20px; justify-content: center; width: 100%; align-items: center;}
-    #contador-total { font-size: 48px; } 
+    
+    /* Header Responsive */
+    #banner-stats { flex-direction: column; align-items: center; gap: 20px; padding: 25px 20px; text-align: center; }
+    .contenedor-rango { position: relative; left: auto; transform: none; margin-top: 5px; }
+    #banner-stats > div:first-child { flex-direction: column; width: 100%; justify-content: center; } 
+    #banner-stats > div:first-child > div { justify-content: center; } 
+    
     #contenedor-tarjetas { grid-template-columns: repeat(2, 1fr); overflow-y: visible; gap: 15px;}
     .tarjeta-dia { min-height: 120px; padding: 20px 15px; }
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
     .burbuja-panel { left: 50%; transform: translate(-50%, -20px) scale(0.95); width: 90vw; max-width: 360px; }
     .burbuja-panel.visible { transform: translate(-50%, 0) scale(1); }
-    .cronometro-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; z-index: 1000; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.1); background: rgba(28, 28, 30, 0.7); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255,255,255,0.15); padding: 12px 20px; border-radius: 24px;}
+    
+    /* Cronómetro Fix Mobile */
+    .cronometro-container { 
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; z-index: 1000; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.1); 
+        background: rgba(28, 28, 30, 0.7); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); 
+        border: 1px solid rgba(255,255,255,0.15); padding: 12px 15px; border-radius: 24px;
+        display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 8px;
+    }
+    #display-cronometro { font-size: 20px; }
+    .btn-crono { padding: 8px 10px; font-size: 11px; flex: 1; white-space: nowrap; }
+
     .isla-descanso { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 15px; left: 50%; right: auto; transform: translate(-50%, 20px) scale(0.9); }
     .isla-descanso.visible { transform: translate(-50%, 0) scale(1); }
     .layout-dia { flex-direction: column; overflow: visible; gap: 25px;}
@@ -408,9 +439,16 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .columna-scroll { overflow: visible; padding: 0;}
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 15px;} 
     .sala-video { bottom: 110px; right: 20px; width: 130px; height: 195px; }
-    .dashboard-grid { grid-template-columns: 1fr; overflow-y: visible; gap: 15px;}
-    .panel-comunidad-main { min-height: 350px; }
-    .panel-modulo { min-height: 120px; }
+    
+    /* Dashboard Extras - Scroll Horizontal Táctil */
+    .dashboard-grid { 
+        display: flex; flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; 
+        padding-bottom: 15px; scroll-behavior: smooth; gap: 15px;
+    }
+    .dashboard-grid > div { 
+        min-width: 85vw; scroll-snap-align: center; flex-shrink: 0; 
+    }
+    .panel-comunidad-main { min-height: 300px; }
 }
 
 /* ==========================================
@@ -432,6 +470,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .contenido-modulo {
     flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; font-weight: 700; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
+
 
 
 
