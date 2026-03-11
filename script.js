@@ -28,16 +28,18 @@ function escapeHTML(str) {
     }[tag])) : '';
 }
 
-// NUEVO: Obtener fecha exacta YYYY-MM-DD según zona horaria local
+// FIX DEFINITIVO: Generador de fechas absoluto (Evita que los días se clonen)
 function obtenerFechaLocal(fecha = new Date()) {
-    const tzoffset = fecha.getTimezoneOffset() * 60000; 
-    return new Date(fecha - tzoffset).toISOString().split('T')[0];
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 const TOTAL_IMAGENES_MOTIVACION = 8; 
 
 let baseDeDatosLocal = {};
-let estadoDias = {}; // AHORA GUARDA: { "2026-03-11": true }
+let estadoDias = {}; 
 let totalEntrenamientos = 0;
 let fallosHistoricos = {}; 
 let pesosMaximos = {}; 
@@ -58,8 +60,6 @@ let startTime, elapsedTime = 0, timerInterval, isRunning = false;
 let tiempoDescansoGlobal = 180; 
 let timerDescansoInterval;
 let descansoRestante = 0;
-
-// ... (acá dejá todo tu diccionario de const infoEjercicios = { ... } gigante que hicimos en el paso anterior) ...
 
 const infoEjercicios = {
     // --- PECTORALES ---
@@ -308,9 +308,8 @@ function renderizarSemana() {
     const hoyObj = new Date();
     
     let html = '';
-    // Genera 20 días para atrás y 5 para adelante (Calendario dinámico aislado)
+    // Genera 20 días para atrás y 5 para adelante
     for (let i = -20; i <= 5; i++) {
-        // Corrección de fechas para evitar que las rutinas se peguen a otros días
         let d = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + i);
         
         const fechaStr = obtenerFechaLocal(d);
@@ -332,19 +331,21 @@ function renderizarSemana() {
     contenedor.innerHTML = html;
     actualizarRango();
 
-    // Auto-scroll perfecto para centrar el día de HOY
+    // FIX: Centrado perfecto con un pequeño delay para asegurar que el HTML se haya dibujado
     setTimeout(() => {
         const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
         if(tarjetaHoy) {
-            tarjetaHoy.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            const scrollPos = tarjetaHoy.offsetLeft - (contenedor.offsetWidth / 2) + (tarjetaHoy.offsetWidth / 2);
+            contenedor.scrollTo({ left: scrollPos, behavior: 'smooth' });
         }
-    }, 150);
+    }, 200); 
 }
 
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
     const tarjeta = e.target.closest('.tarjeta-dia');
     if (tarjeta) abrirDia(tarjeta.getAttribute('data-dia'));
 });
+
 
 // ==========================================
 // SECCIÓN 6: VISTA DEL DÍA Y LÓGICA DE EJERCICIOS
@@ -697,14 +698,13 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             elapsedTime = Date.now() - startTime;
             actualizarDisplayCrono();
             
-            // LÓGICA DE JUEGO: 10 minutos = 600,000 milisegundos.
-            // Ahora se lo da al "diaActivo" (el que estás viendo), no importa si es hoy o el lunes pasado.
-            if (elapsedTime >= 600000 && diaActivo && !estadoDias[diaActivo]) {
+            // FIX DE TESTEO: Está seteado a 60000 (1 minuto). Para la versión final ponele 600000 (10 minutos)
+            if (elapsedTime >= 60000 && diaActivo && !estadoDias[diaActivo]) {
                 estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
                 guardarDatosEnNube();
                 renderizarSemana(); // Refresca el panel para que aparezca el fuego al instante
-                alert("🔥 ¡MÁS DE 10 MINUTOS DE ESFUERZO! 🔥\nHas ganado tu llama diaria y sumaste 1 día de entrenamiento a tu récord.");
+                alert("🔥 ¡MÁS DE 1 MINUTO DE ESFUERZO! 🔥\nHas ganado tu llama diaria y sumaste 1 día de entrenamiento a tu récord.");
             }
         }, 1000);
         
@@ -753,8 +753,12 @@ document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () 
 document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
     
-    // Refuerzo: Si al guardar pasaste los 10 min, forzamos el fueguito por si acaso.
-    if (elapsedTime >= 600000 && !estadoDias[diaActivo]) {
+    // Refuerzo: Si al guardar pasaste el tiempo, forzamos el fueguito (acordate de cambiar este 60000 por 600000 luego)
+
+
+
+  
+    if (elapsedTime >= 60000 && !estadoDias[diaActivo]) {
         estadoDias[diaActivo] = true;
         totalEntrenamientos++;
         renderizarSemana();
@@ -1168,6 +1172,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
