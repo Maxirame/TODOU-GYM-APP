@@ -309,7 +309,9 @@ function actualizarInterfazDia() {
         }
         
         htmlSeries += `
-            <button class="btn-add-serie" data-ej="${idx}"><i class="ph ph-plus"></i> Agregar Serie</button>
+            <div style="display: flex; justify-content: center; margin-top: 5px;">
+                <button class="btn-add-serie" data-ej="${idx}" title="Agregar Serie"><i class="ph ph-plus"></i></button>
+            </div>
         `;
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
@@ -341,7 +343,7 @@ function actualizarInterfazDia() {
                                 <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                                 <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
                             </div>
-                            <button class="btn-eliminar btn-borrar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
+                            <button class="btn-eliminar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                         </div>
                         <div class="badge-pr" id="pr-${idx}"><i class="ph-fill ph-trophy"></i> Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
@@ -357,8 +359,8 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-borrar-ejercicio') || e.target.closest('.btn-borrar-ejercicio')) {
-        const btn = e.target.classList.contains('btn-borrar-ejercicio') ? e.target : e.target.closest('.btn-borrar-ejercicio');
+    if (e.target.classList.contains('btn-eliminar-ejercicio') || e.target.closest('.btn-eliminar-ejercicio')) {
+        const btn = e.target.classList.contains('btn-eliminar-ejercicio') ? e.target : e.target.closest('.btn-eliminar-ejercicio');
         if(confirm('¿Borrar este ejercicio del día?')) {
             baseDeDatosLocal[diaActivo].splice(btn.getAttribute('data-ej'), 1);
             guardarDatosEnNube(); actualizarInterfazDia();
@@ -470,7 +472,7 @@ listaUI.addEventListener('change', (e) => {
                 
                 const badge = document.getElementById(`pr-${ejIdx}`);
                 if(badge) {
-                    badge.innerHTML = `<i class="ph-fill ph-trophy"></i> Fallo: ${currentPeso}kg x ${currentReps} repes`;
+                    badge.innerHTML = `<i class="ph-fill ph-trophy" style="color:#ffd700;"></i> Fallo: ${currentPeso}kg x ${currentReps} repes`;
                     badge.style.color = "var(--success-green)";
                     setTimeout(() => { badge.style.color = "var(--text-muted)"; }, 1500);
                 }
@@ -708,6 +710,14 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
     historialGlobal.unshift({ fecha: new Date().toLocaleDateString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit' }), diaSemana: diaActivo, rutina: JSON.parse(JSON.stringify(baseDeDatosLocal[diaActivo])), tiempo: document.getElementById('display-cronometro').innerText });
     guardarDatosEnNube(); alert(`¡Día guardado con éxito!\nTiempo: ${document.getElementById('display-cronometro').innerText}`);
+});
+
+document.getElementById('btn-reiniciar-historico').addEventListener('click', () => { 
+    if(confirm('⚠️ ¿Reiniciar tus días totales de gloria a cero? Esto afectará tu rango actual.')) { 
+        totalEntrenamientos = 0; 
+        guardarDatosEnNube(); 
+        actualizarRango(); 
+    } 
 });
 
 document.getElementById('btn-borrar-todo').addEventListener('click', () => { if(confirm('⚠️ ¿Estás seguro de borrar TODO tu historial guardado? Esta acción no se puede deshacer.')) { historialGlobal = []; guardarDatosEnNube(); renderizarHistorial(); alert('Historial borrado con éxito.'); } });
@@ -1104,6 +1114,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
