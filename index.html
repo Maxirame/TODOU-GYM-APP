@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div id="vista-semana" style="display: none;">
+    <div id="vista-semana" style="display: none; flex-direction: column; height: 100%;">
         <div id="banner-stats">
             <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
                 <button class="btn-perfil" id="btn-abrir-cuenta">
@@ -53,22 +53,50 @@
                 </div>
                 
                 <div style="margin-left: 20px;">
-                    <h1 style="color: var(--text-main); margin: 0;">Panel de Control</h1>
+                    <h1 id="titulo-rango" style="color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">Cadete <span style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);">0 DÍAS</span></h1>
                     <p style="margin: 5px 0 0 0;">Supera tus límites. Entrena inteligente.</p>
                 </div>
-            </div>
-            <div class="stats-info">
-                <div style="text-align: right;">
-                    <h3 style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Días de Entreno</h3>
-                    <p style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin: 0;">Histórico global</p>
-                </div>
-                <p id="contador-total">0</p>
-                <button class="btn-reset-total" id="btn-reiniciar-historico" title="Reiniciar a cero">↺</button>
             </div>
         </div>
 
         <div id="contenedor-tarjetas"></div>
-        <button class="btn-reiniciar" id="btn-reiniciar-semana">🔄 REINICIAR CHECK SEMANAL</button>
+        
+        <div class="dashboard-grid">
+            <div class="card panel-comunidad-main">
+                <h3 style="font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-top: 0; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    Comunidad
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <button class="btn-ver-solicitudes" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; position: relative; padding: 0;" title="Solicitudes">
+                            <i class="ph ph-bell"></i>
+                            <span class="badge-notif" style="display: none; position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
+                        </button>
+                        <button class="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 0;" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
+                    </div>
+                </h3>
+                
+                <div class="panel-solicitudes" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">Nuevas solicitudes:</h4>
+                    <div class="lista-solicitudes"></div>
+                </div>
+
+                <div class="contenedor-lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+            </div>
+
+            <div class="card panel-modulo">
+                <h3 class="header-modulo"><i class="ph-fill ph-apple-logo" style="color: #ff6b6b;"></i> Nutrición</h3>
+                <div class="contenido-modulo"><p>Próximamente...</p></div>
+            </div>
+
+            <div class="card panel-modulo">
+                <h3 class="header-modulo"><i class="ph-fill ph-book-open" style="color: #4dabf7;"></i> Learning</h3>
+                <div class="contenido-modulo"><p>Próximamente...</p></div>
+            </div>
+
+            <div class="card panel-modulo">
+                <h3 class="header-modulo"><i class="ph-fill ph-medal" style="color: #ffd43b;"></i> Logros</h3>
+                <div class="contenido-modulo"><p>Próximamente...</p></div>
+            </div>
+        </div>
     </div>
 
     <div id="vista-dia" style="display: none;">
@@ -114,21 +142,20 @@
                     <h3 style="font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                         Comunidad
                         <div style="display: flex; gap: 12px; align-items: center;">
-                            <button id="btn-ver-solicitudes" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; position: relative; padding: 0;" title="Solicitudes">
+                            <button class="btn-ver-solicitudes" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; position: relative; padding: 0;" title="Solicitudes">
                                 <i class="ph ph-bell"></i>
-                                <span id="badge-notif" style="display: none; position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
+                                <span class="badge-notif" style="display: none; position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
                             </button>
-                            <button id="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 0;" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
+                            <button class="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 0;" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
                         </div>
                     </h3>
                     
-                    <div id="panel-solicitudes" style="display: none; background: var(--bg-body); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
+                    <div class="panel-solicitudes" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
                         <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">Nuevas solicitudes:</h4>
-                        <div id="lista-solicitudes"></div>
+                        <div class="lista-solicitudes"></div>
                     </div>
 
-                    <div id="lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
-                        </div>
+                    <div class="contenedor-lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
                 </div>
             </div>
 
@@ -145,7 +172,7 @@
                 <button class="btn-volver" id="btn-volver-desde-cuenta" style="margin: 0;">❮ VOLVER AL PANEL</button>
                 <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Atleta</span></h1>
             </div>
-            <button class="btn-borrar-historial" id="btn-borrar-todo">🗑 BORRAR HISTORIAL COMPLETO</button>
+            <button class="btn-borrar-historial" id="btn-borrar-todo" style="background: transparent; color: var(--danger); border: 1px dashed var(--danger); padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;">🗑 BORRAR HISTORIAL</button>
         </div>
 
         <h3 style="color: var(--accent-neon); text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Tu Historial de Batallas</h3>
