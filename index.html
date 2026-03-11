@@ -37,7 +37,7 @@
 
     <div id="vista-semana" style="display: none; flex-direction: column; height: 100%;">
         <div id="banner-stats">
-            <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 15px; align-items: center; z-index: 2; position: relative;">
                 <button class="btn-perfil" id="btn-abrir-cuenta">
                     <div class="icono-perfil" id="letra-avatar">M</div>
                     <div style="text-align: left;">
@@ -47,15 +47,15 @@
                         </span>
                     </div>
                 </button>
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <button id="btn-editar-nombre" class="icono-editar" style="background: transparent;">✎ EDITAR</button>
-                    <button id="btn-cerrar-sesion-main" class="icono-editar" style="background: transparent; color: var(--danger); border-color: var(--danger);">CERRAR SESIÓN</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btn-editar-nombre" class="btn-mini-top" title="Editar Nombre"><i class="ph ph-pencil-simple"></i></button>
+                    <button id="btn-cerrar-sesion-main" class="btn-mini-top salir" title="Cerrar Sesión">SALIR</button>
                 </div>
-                
-                <div style="margin-left: 20px;">
-                    <h1 id="titulo-rango" style="color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">Cadete <span style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);">0 DÍAS</span></h1>
-                    <p style="margin: 5px 0 0 0;">Supera tus límites. Entrena inteligente.</p>
-                </div>
+            </div>
+            
+            <div class="contenedor-rango">
+                <h1 id="titulo-rango" class="texto-graffiti">Cadete</h1>
+                <span class="badge-dias" id="badge-dias-rango">0 DÍAS</span>
             </div>
         </div>
 
