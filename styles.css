@@ -131,10 +131,10 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 /* ==========================================
    SECCIÓN 5: GRILLA SEMANAL Y TARJETAS DÍA
    ========================================== */
-#contenedor-tarjetas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; flex: 1; overflow-y: auto; padding-bottom: 10px;}
+#contenedor-tarjetas { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; flex-shrink: 0; margin-bottom: 25px;}
 .tarjeta-dia { 
-    display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 25px 15px; text-align: center; height: 100%; min-height: 220px; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    background: var(--glass-bg); backdrop-filter: blur(10px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--glass-shadow);
+    display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 15px 10px; text-align: center; height: auto; min-height: 125px; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--glass-bg); backdrop-filter: blur(10px); border: var(--glass-border); border-radius: 20px; box-shadow: var(--glass-shadow);
 }
 .tarjeta-dia:hover { transform: translateY(-4px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.3); }
 .dia-verde { 
@@ -142,17 +142,17 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     background: linear-gradient(145deg, rgba(217, 245, 34, 0.15) 0%, rgba(217, 245, 34, 0.02) 100%);
     box-shadow: 0 10px 30px rgba(217, 245, 34, 0.15), inset 0 1px 2px rgba(255,255,255,0.2), inset 0 -1px 2px rgba(0,0,0,0.2); 
 }
-.nombre-dia { font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-.subtexto { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
+.nombre-dia { font-size: 16px; font-weight: 900; color: var(--text-main); margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+.subtexto { display: none; /* Ocultamos el subtexto "Entrenar" para ganar espacio */ }
 .checkbox-dia { 
-    appearance: none; width: 44px; height: 44px; cursor: pointer; position: relative; margin: 0; margin-top: 15px; transition: 0.3s;
-    background: rgba(0,0,0,0.4); border: var(--glass-border); border-radius: 14px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    appearance: none; width: 34px; height: 34px; cursor: pointer; position: relative; margin: 0; margin-top: 10px; transition: 0.3s;
+    background: rgba(0,0,0,0.4); border: var(--glass-border); border-radius: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
 .checkbox-dia:checked { 
     background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); border: none; 
     box-shadow: 0 5px 15px rgba(217, 245, 34, 0.4), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -2px 3px rgba(0,0,0,0.2);
 }
-.checkbox-dia:checked::after { content: '✔'; position: absolute; color: #000; font-size: 22px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); text-shadow: 0 1px 2px rgba(255,255,255,0.5);}
+.checkbox-dia:checked::after { content: '✔'; position: absolute; color: #000; font-size: 16px; font-weight: bold; top: 50%; left: 50%; transform: translate(-50%, -50%); text-shadow: 0 1px 2px rgba(255,255,255,0.5);}
 
 /* ==========================================
    SECCIÓN 6: INTERIOR DEL DÍA Y CRONÓMETRO
@@ -396,7 +396,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .stats-info { flex-direction: row; gap: 20px; justify-content: center; width: 100%; align-items: center;}
     #contador-total { font-size: 48px; } 
     #contenedor-tarjetas { grid-template-columns: repeat(2, 1fr); overflow-y: visible; gap: 15px;}
-    .tarjeta-dia { min-height: 160px; padding: 20px 15px; }
+    .tarjeta-dia { min-height: 120px; padding: 20px 15px; }
     .header-dia { flex-direction: column; justify-content: center; text-align: center; gap: 15px; align-items: stretch;}
     .burbuja-panel { left: 50%; transform: translate(-50%, -20px) scale(0.95); width: 90vw; max-width: 360px; }
     .burbuja-panel.visible { transform: translate(-50%, 0) scale(1); }
@@ -408,6 +408,29 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .columna-scroll { overflow: visible; padding: 0;}
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 15px;} 
     .sala-video { bottom: 110px; right: 20px; width: 130px; height: 195px; }
+    .dashboard-grid { grid-template-columns: 1fr; overflow-y: visible; gap: 15px;}
+    .panel-comunidad-main { min-height: 350px; }
+    .panel-modulo { min-height: 120px; }
+}
+
+/* ==========================================
+   SECCIÓN 13: DASHBOARD MODULOS EXTRAS
+   ========================================== */
+.dashboard-grid {
+    display: grid; grid-template-columns: 320px repeat(3, 1fr); gap: 20px; flex: 1; min-height: 0; overflow: hidden; margin-top: 5px;
+}
+.panel-comunidad-main {
+    display: flex; flex-direction: column; padding: 20px; overflow: hidden; background: linear-gradient(145deg, #1e1e22 0%, #151518 100%);
+}
+.panel-modulo {
+    display: flex; flex-direction: column; padding: 20px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); transition: 0.3s;
+}
+.panel-modulo:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); transform: translateY(-3px);}
+.header-modulo {
+    font-size: 16px; text-transform: uppercase; color: var(--text-main); margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.contenido-modulo {
+    flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; font-weight: 700; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
 
 
