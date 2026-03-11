@@ -93,14 +93,18 @@ function verificarResetSemanal() {
 function actualizarRango() {
     let rango = "Cadete";
     if (totalEntrenamientos >= 730) {
-        // La condición es 730 días y todos los logros hechos (Asumimos 10 logros totales temporalmente)
         rango = (logrosDesbloqueados && logrosDesbloqueados.length >= 10) ? "Satoru Gojo" : "Avanzado";
     } else if (totalEntrenamientos >= 365) {
         rango = "Intermedio";
     } else if (totalEntrenamientos >= 180) {
         rango = "Principiante";
     }
-    document.getElementById('titulo-rango').innerHTML = `${rango} <span style="font-size: 14px; color: var(--text-muted); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);">${totalEntrenamientos} DÍAS</span>`;
+    
+    const elRango = document.getElementById('titulo-rango');
+    const elDias = document.getElementById('badge-dias-rango');
+    
+    if(elRango) elRango.innerText = rango;
+    if(elDias) elDias.innerText = `${totalEntrenamientos} DÍAS`;
 }
 
 // ==========================================
@@ -1100,6 +1104,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
