@@ -20,8 +20,15 @@ const db = getFirestore(app);
 setPersistence(auth, browserSessionPersistence);
 
 // ==========================================
-// SECCIÓN 2: ESTADO GLOBAL Y DICCIONARIOS
+// SECCIÓN 2: ESTADO GLOBAL Y SEGURIDAD
 // ==========================================
+// SANITIZADOR DE SEGURIDAD (Evita hackeos XSS)
+function escapeHTML(str) {
+    return str ? String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag])) : '';
+}
+
 const diasDeLaSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const TOTAL_IMAGENES_MOTIVACION = 8; 
 
@@ -174,7 +181,6 @@ async function cargarDatosDeNube(uid) {
 
     updateDoc(docRef, { estadoSocial: 'online', ultimaConexion: Date.now() }).catch(e=>console.log(e));
     
-    // NUEVO: Conectamos el "Teléfono" al iniciar sesión
     if(typeof activarEscuchaDeLlamadas === 'function') activarEscuchaDeLlamadas();
 }
 
@@ -248,28 +254,27 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
-            // Agregamos el contenedor de Swipe y el tacho de basura
+            // HTML Sanitizado y con Iconos Phosphor
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
                     <div class="serie-delete-bg">
-                        <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie">🗑️</button>
+                        <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie"><i class="ph ph-trash"></i></button>
                     </div>
                     <div class="caja-serie ${isCompleted}">
                         <span class="numero-serie">S${i + 1}</span>
                         <div class="inputs-fila">
-                            <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${r}">
+                            <input type="number" class="input-datos input-repes" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${escapeHTML(r)}">
                             <span class="etiqueta-x">x</span>
-                            <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${p}">
+                            <input type="number" class="input-datos input-peso" data-ej="${idx}" data-serie="${i}" placeholder="-" value="${escapeHTML(p)}">
                             <span class="etiqueta-kg">kg</span>
                         </div>
-                        <button class="btn-check-serie" data-ej="${idx}" data-serie="${i}">✔</button>
+                        <button class="btn-check-serie" data-ej="${idx}" data-serie="${i}"><i class="ph ph-check"></i></button>
                     </div>
                 </div>`;
         }
         
-        // --- NUEVO: Botón para añadir una serie extra al final de la lista ---
         htmlSeries += `
-            <button class="btn-add-serie" data-ej="${idx}">➕ Agregar Serie</button>
+            <button class="btn-add-serie" data-ej="${idx}"><i class="ph ph-plus"></i> Agregar Serie</button>
         `;
         
         const prReps = fallosHistoricos[ej.nombre] || '--';
@@ -279,15 +284,15 @@ function actualizarInterfazDia() {
         const htmlBack = infoTecnica.youtubeId ? `
             <div class="header-back-carta">
                 <h4 style="color: var(--accent-neon); margin: 0; font-size: 14px; text-transform: uppercase;">Técnica Correcta</h4>
-                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
+                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver"><i class="ph ph-x"></i></button>
             </div>
             <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding-top: 5px;">
-                <iframe width="100%" height="200" src="https://www.youtube.com/embed/${infoTecnica.youtubeId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius: 8px; border: 1px solid var(--border-color);"></iframe>
+                <iframe width="100%" height="200" src="https://www.youtube.com/embed/${escapeHTML(infoTecnica.youtubeId)}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius: 8px; border: 1px solid var(--border-color);"></iframe>
             </div>
         ` : `
             <div class="header-back-carta">
                 <h4 style="color: var(--text-muted); margin: 0; font-size: 14px; text-transform: uppercase;">Sin Información</h4>
-                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver">✖</button>
+                <button class="btn-cerrar-back btn-flip-back" data-ej="${idx}" title="Volver"><i class="ph ph-x"></i></button>
             </div>
             <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Aún no has cargado un enlace de YouTube para este ejercicio.</p>
         `;
@@ -298,12 +303,12 @@ function actualizarInterfazDia() {
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica">!</button>
-                                <h4 class="titulo-ejercicio">${ej.nombre}</h4>
+                                <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
+                                <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                             </div>
-                            <button class="btn-eliminar btn-borrar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio">✖</button>
+                            <button class="btn-eliminar btn-borrar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                         </div>
-                        <div class="badge-pr" id="pr-${idx}">🏆 Fallo: ${prPeso}kg x ${prReps} repes</div>
+                        <div class="badge-pr" id="pr-${idx}"><i class="ph-fill ph-trophy"></i> Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
                     </div>
                     <div class="ejercicio-card-back ejercicio-item">
@@ -317,25 +322,25 @@ function actualizarInterfazDia() {
 const listaUI = document.getElementById('listaEjerciciosUI');
 
 listaUI.addEventListener('click', (e) => {
-    // 1. Eliminar Ejercicio Completo
-    if (e.target.classList.contains('btn-borrar-ejercicio')) {
+    if (e.target.classList.contains('btn-borrar-ejercicio') || e.target.closest('.btn-borrar-ejercicio')) {
+        const btn = e.target.classList.contains('btn-borrar-ejercicio') ? e.target : e.target.closest('.btn-borrar-ejercicio');
         if(confirm('¿Borrar este ejercicio del día?')) {
-            baseDeDatosLocal[diaActivo].splice(e.target.getAttribute('data-ej'), 1);
+            baseDeDatosLocal[diaActivo].splice(btn.getAttribute('data-ej'), 1);
             guardarDatosEnNube(); actualizarInterfazDia();
         }
     }
     
-    // 2. Flip
-    if (e.target.classList.contains('btn-flip')) {
-        const ejIdx = e.target.getAttribute('data-ej');
+    if (e.target.classList.contains('btn-flip') || e.target.closest('.btn-flip')) {
+        const btn = e.target.classList.contains('btn-flip') ? e.target : e.target.closest('.btn-flip');
+        const ejIdx = btn.getAttribute('data-ej');
         document.getElementById(`card-inner-${ejIdx}`).classList.add('flipped');
     }
-    if (e.target.classList.contains('btn-flip-back')) {
-        const ejIdx = e.target.getAttribute('data-ej');
+    if (e.target.classList.contains('btn-flip-back') || e.target.closest('.btn-flip-back')) {
+        const btn = e.target.classList.contains('btn-flip-back') ? e.target : e.target.closest('.btn-flip-back');
+        const ejIdx = btn.getAttribute('data-ej');
         document.getElementById(`card-inner-${ejIdx}`).classList.remove('flipped');
     }
     
-    // 3. Check Serie & Lanzar Isla Descanso
     const btnCheck = e.target.closest('.btn-check-serie');
     if (btnCheck) {
         const ejIdx = btnCheck.getAttribute('data-ej');
@@ -360,7 +365,6 @@ listaUI.addEventListener('click', (e) => {
         }
     }
 
-    // 4. Eliminar UNA Serie (Tacho de basura)
     const btnEliminarSerie = e.target.closest('.btn-eliminar-serie');
     if (btnEliminarSerie) {
         const ejIdx = btnEliminarSerie.getAttribute('data-ej');
@@ -381,12 +385,11 @@ listaUI.addEventListener('click', (e) => {
         }
     }
 
-    // 5. Añadir UNA Serie Extra
-    if (e.target.classList.contains('btn-add-serie')) {
-        const ejIdx = e.target.getAttribute('data-ej');
+    if (e.target.classList.contains('btn-add-serie') || e.target.closest('.btn-add-serie')) {
+        const btn = e.target.classList.contains('btn-add-serie') ? e.target : e.target.closest('.btn-add-serie');
+        const ejIdx = btn.getAttribute('data-ej');
         const ej = baseDeDatosLocal[diaActivo][ejIdx];
         
-        // Sumamos una serie y agregamos espacios vacíos a los arrays
         ej.series++;
         if (!ej.repesRealizadas) ej.repesRealizadas = [];
         if (!ej.pesosRealizados) ej.pesosRealizados = [];
@@ -432,7 +435,7 @@ listaUI.addEventListener('change', (e) => {
                 
                 const badge = document.getElementById(`pr-${ejIdx}`);
                 if(badge) {
-                    badge.innerText = `🏆 Fallo: ${currentPeso}kg x ${currentReps} repes`;
+                    badge.innerHTML = `<i class="ph-fill ph-trophy"></i> Fallo: ${currentPeso}kg x ${currentReps} repes`;
                     badge.style.color = "var(--success-green)";
                     setTimeout(() => { badge.style.color = "var(--text-muted)"; }, 1500);
                 }
@@ -442,7 +445,7 @@ listaUI.addEventListener('change', (e) => {
     }
 });
 
-// LÓGICA DE GESTOS SWIPE FLUIDOS (CELULAR Y PC)
+// LÓGICA DE GESTOS SWIPE FLUIDOS
 let swipeStartX = 0;
 let swipeStartY = 0;
 let currentTranslate = 0;
@@ -451,7 +454,7 @@ let isDragging = false;
 
 const iniciarSwipe = (e, elemento) => {
     if (e.type === 'mousedown' && e.button !== 0) return; 
-    if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button') return;
+    if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return;
 
     if (elemento) {
         isDragging = true;
@@ -512,18 +515,14 @@ const finalizarSwipe = (e) => {
     swipeActiveEl = null;
 };
 
-// Eventos táctiles para celular
 listaUI.addEventListener('touchstart', (e) => iniciarSwipe(e, e.target.closest('.caja-serie')), {passive: true});
 listaUI.addEventListener('touchmove', moverSwipe, {passive: false});
 listaUI.addEventListener('touchend', finalizarSwipe);
-
-// Eventos de mouse para PC
 listaUI.addEventListener('mousedown', (e) => iniciarSwipe(e, e.target.closest('.caja-serie')));
 listaUI.addEventListener('mousemove', moverSwipe);
 listaUI.addEventListener('mouseup', finalizarSwipe);
 listaUI.addEventListener('mouseleave', finalizarSwipe);
 
-// --- NUEVA LÓGICA: BURBUJA DE AÑADIR EJERCICIO ---
 document.getElementById('btn-toggle-add').addEventListener('click', () => {
     document.getElementById('burbuja-add-ejercicio').classList.toggle('visible');
 });
@@ -547,8 +546,6 @@ document.getElementById('btn-agregar-ejercicio').addEventListener('click', () =>
     
     document.getElementById('inputEjercicio').value = ''; document.getElementById('inputSeries').value = '';
     guardarDatosEnNube(); actualizarInterfazDia();
-    
-    // Ocultamos la burbuja automáticamente después de añadir
     document.getElementById('burbuja-add-ejercicio').classList.remove('visible');
 });
 
@@ -582,21 +579,24 @@ function actualizarDisplayCrono() { document.getElementById('display-cronometro'
 document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
     const btn = document.getElementById('btn-comenzar-pausa');
     if (isRunning) { 
-        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false; btn.innerHTML = '▶ REANUDAR'; btn.classList.remove('btn-crono-pausa');
-        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' }); // Volvemos a Online
+        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false; 
+        btn.innerHTML = '<i class="ph-fill ph-play"></i> REANUDAR'; btn.classList.remove('btn-crono-pausa');
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' }); 
     } else { 
-        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true; btn.innerHTML = '⏸ PAUSAR'; btn.classList.add('btn-crono-pausa'); 
-        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'entrenando' }); // Avisamos que estamos Entrenando
+        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true; 
+        btn.innerHTML = '<i class="ph-fill ph-pause"></i> PAUSAR'; btn.classList.add('btn-crono-pausa'); 
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'entrenando' }); 
     }
 });
 document.getElementById('btn-reset-crono').addEventListener('click', () => {
     if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) { 
-        clearInterval(timerInterval); isRunning = false; elapsedTime = 0; document.getElementById('btn-comenzar-pausa').innerHTML = '▶ COMENZAR'; document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); 
+        clearInterval(timerInterval); isRunning = false; elapsedTime = 0; 
+        document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-play"></i> COMENZAR'; 
+        document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); 
         if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' });
     }
 });
 
-// Lógica de la Isla de Descanso (IGUAL QUE ANTES)
 function inicializarIslaDescanso() {
     const cronoContainer = document.querySelector('.cronometro-container');
     if (cronoContainer && !document.getElementById('isla-descanso')) {
@@ -605,8 +605,8 @@ function inicializarIslaDescanso() {
         isla.className = 'isla-descanso';
         isla.innerHTML = `
             <span id="tiempo-descanso-display">00:00</span>
-            <button id="btn-config-descanso" title="Configurar tiempo">⚙️</button>
-            <button id="btn-cerrar-descanso" title="Omitir descanso">✖</button>
+            <button id="btn-config-descanso" title="Configurar tiempo"><i class="ph-fill ph-gear"></i></button>
+            <button id="btn-cerrar-descanso" title="Omitir descanso"><i class="ph-fill ph-x-circle"></i></button>
         `;
         cronoContainer.appendChild(isla);
 
@@ -619,7 +619,6 @@ function inicializarIslaDescanso() {
                     tiempoDescansoGlobal = Math.round(nuevosMinutos * 60); 
                     guardarDatosEnNube();
                     if (document.getElementById('isla-descanso').classList.contains('visible')) iniciarRestTimer(); 
-                    else alert(`⏱️ Tiempo actualizado a ${formatTimeDescanso(tiempoDescansoGlobal)}.`);
                 }
             }
         });
@@ -661,8 +660,6 @@ function abrirDia(dia) {
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
     
-    // NOTA: Eliminamos la carga de la imagen de motivación de aquí.
-    
     inicializarIslaDescanso();
     actualizarInterfazDia(); 
     actualizarDisplayCrono();
@@ -684,13 +681,13 @@ document.getElementById('btn-borrar-todo').addEventListener('click', () => { if(
 
 function renderizarHistorial() {
     const contenedor = document.getElementById('contenedor-historial');
-    if (historialGlobal.length === 0) return contenedor.innerHTML = '<p style="color: var(--text-muted);">Aún no has guardado ningún entrenamiento.</p>';
+    if (historialGlobal.length === 0) return contenedor.innerHTML = '<p style="text-align:center; color: var(--text-muted);">Aún no has guardado ningún entrenamiento.</p>';
     contenedor.innerHTML = historialGlobal.map(registro => `
         <div class="tarjeta-historial">
-            <div class="fecha-historial">${registro.fecha} <span class="badge-dia">${registro.diaSemana} - ⏱ ${registro.tiempo}</span></div>
+            <div class="fecha-historial">${escapeHTML(registro.fecha)} <span class="badge-dia">${escapeHTML(registro.diaSemana)} - <i class="ph ph-clock"></i> ${escapeHTML(registro.tiempo)}</span></div>
             ${registro.rutina.map(ej => `
-                <div class="item-historial-ejercicio"><h4>${ej.nombre}</h4><div class="resumen-series">
-                    ${Array.from({length: ej.series}).map((_, i) => `<div class="mini-serie">S${i+1}: <strong>${(ej.repesRealizadas && ej.repesRealizadas[i]) || '-'}</strong>x<strong>${(ej.pesosRealizados && ej.pesosRealizados[i]) || '-'}kg</strong></div>`).join('')}
+                <div class="item-historial-ejercicio"><h4>${escapeHTML(ej.nombre)}</h4><div class="resumen-series">
+                    ${Array.from({length: ej.series}).map((_, i) => `<div class="mini-serie">S${i+1}: <strong>${escapeHTML((ej.repesRealizadas && ej.repesRealizadas[i]) || '-')}</strong>x<strong>${escapeHTML((ej.pesosRealizados && ej.pesosRealizados[i]) || '-')}kg</strong></div>`).join('')}
                 </div></div>
             `).join('')}
         </div>`).join('');
@@ -699,8 +696,6 @@ function renderizarHistorial() {
 // ==========================================
 // SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
 // ==========================================
-
-// 1. BUSCADOR Y ENVÍO DE SOLICITUDES
 document.getElementById('btn-add-amigo').addEventListener('click', async () => {
     let input = prompt("Añade a tu compañero de entreno\n\nIngresa su nombre y tag exactos (Ejemplo: Maxi #3423):");
     if (!input || !input.includes('#')) return;
@@ -726,19 +721,17 @@ document.getElementById('btn-add-amigo').addEventListener('click', async () => {
 
                 if (misAmigos.some(a => a.uid === amigoId)) return alert("⚠️ Ya son amigos.");
 
-                // Enviamos nuestra información a su bandeja de solicitudes
                 const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
                 await updateDoc(doc(db, "usuarios", amigoId), {
                     solicitudesPendientes: arrayUnion(yo)
                 });
 
-                alert(`✅ Solicitud enviada a ${nombreBuscado}. Esperando a que acepte...`);
+                alert(`✅ Solicitud enviada a ${escapeHTML(nombreBuscado)}. Esperando a que acepte...`);
             });
         }
     } catch (error) { console.error(error); }
 });
 
-// 2. RENDERIZAR BANDEJA DE SOLICITUDES (Campanita)
 document.getElementById('btn-ver-solicitudes').addEventListener('click', () => {
     const panel = document.getElementById('panel-solicitudes');
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -751,11 +744,11 @@ function renderizarSolicitudes() {
     if (solicitudesPendientes.length > 0) {
         badge.style.display = 'block';
         lista.innerHTML = solicitudesPendientes.map((sol, idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:5px;">
-                <span style="font-size:12px; font-weight:800;">${sol.nombre} <span style="color:var(--text-muted); font-weight:400;">#${sol.tag}</span></span>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:5px;">
+                <span style="font-size:12px; font-weight:700;">${escapeHTML(sol.nombre)} <span style="color:var(--text-muted); font-weight:400;">#${escapeHTML(sol.tag)}</span></span>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-aceptar-sol" data-idx="${idx}" style="background:var(--success-green); color:#000; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-weight:800;">✔</button>
-                    <button class="btn-rechazar-sol" data-idx="${idx}" style="background:var(--danger); color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-weight:800;">✖</button>
+                    <button class="btn-aceptar-sol" data-idx="${idx}" style="background:var(--success-green); color:#000; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-check" style="pointer-events:none;"></i></button>
+                    <button class="btn-rechazar-sol" data-idx="${idx}" style="background:var(--danger); color:#fff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:800;"><i class="ph ph-x" style="pointer-events:none;"></i></button>
                 </div>
             </div>
         `).join('');
@@ -766,7 +759,6 @@ function renderizarSolicitudes() {
     }
 }
 
-// 3. ACEPTAR O RECHAZAR SOLICITUD
 document.getElementById('panel-solicitudes').addEventListener('click', async (e) => {
     if (e.target.classList.contains('btn-aceptar-sol')) {
         const idx = e.target.getAttribute('data-idx');
@@ -779,7 +771,7 @@ document.getElementById('panel-solicitudes').addEventListener('click', async (e)
         const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
         await updateDoc(doc(db, "usuarios", amigoData.uid), { misAmigos: arrayUnion(yo) });
         
-        alert(`🤝 ¡Tú y ${amigoData.nombre} ahora son compañeros de entreno!`);
+        alert(`🤝 ¡Tú y ${escapeHTML(amigoData.nombre)} ahora son compañeros de entreno!`);
     }
 
     if (e.target.classList.contains('btn-rechazar-sol')) {
@@ -789,7 +781,6 @@ document.getElementById('panel-solicitudes').addEventListener('click', async (e)
     }
 });
 
-// 4. ESCUCHAR A MIS AMIGOS EN TIEMPO REAL (onSnapshot)
 function escucharAmigos() {
     misAmigos.forEach(amigo => {
         if (!listenersAmigos[amigo.uid]) {
@@ -832,9 +823,9 @@ function renderizarAmigos() {
                 const horas = Math.floor(mins / 60);
                 const dias = Math.floor(horas / 24);
                 
-                if (dias > 0) textoEstado = `últ. vez hace ${dias}d`;
-                else if (horas > 0) textoEstado = `últ. vez hace ${horas}h`;
-                else if (mins > 0) textoEstado = `últ. vez hace ${mins}m`;
+                if (dias > 0) textoEstado = `hace ${dias}d`;
+                else if (horas > 0) textoEstado = `hace ${horas}h`;
+                else if (mins > 0) textoEstado = `hace ${mins}m`;
                 else textoEstado = "Desconectado";
             } else {
                 textoEstado = "Desconectado";
@@ -844,35 +835,32 @@ function renderizarAmigos() {
 
         return `
         <div class="amigo-item ${claseEstado}"> 
-            <div class="amigo-avatar">${amigo.nombre.charAt(0).toUpperCase()}</div>
+            <div class="amigo-avatar">${escapeHTML(amigo.nombre).charAt(0).toUpperCase()}</div>
             <div class="amigo-info">
-                <span class="amigo-nombre">${amigo.nombre} <span class="amigo-tag">#${amigo.tag}</span></span>
+                <span class="amigo-nombre">${escapeHTML(amigo.nombre)} <span class="amigo-tag">#${escapeHTML(amigo.tag)}</span></span>
                 <span class="amigo-estado">${textoEstado}</span>
             </div>
             <div style="display: flex; gap: 5px;">
-                <button class="btn-llamar" title="Entrenar Juntos">📞</button>
-                <button class="btn-eliminar-amigo" data-uid="${amigo.uid}" title="Eliminar Amigo">✖</button>
+                <button class="btn-llamar" title="Entrenar Juntos"><i class="ph-fill ph-video-camera" style="pointer-events:none;"></i></button>
+                <button class="btn-eliminar-amigo" data-uid="${amigo.uid}" title="Eliminar Amigo"><i class="ph ph-user-minus" style="pointer-events:none;"></i></button>
             </div>
         </div>
         `;
     }).join('');
 }
 
-// 5. EVENTOS DE LA LISTA DE AMIGOS (Llamar y Eliminar)
 document.getElementById('lista-amigos').addEventListener('click', async (e) => {
-    // NUEVA LÓGICA DEL BOTÓN LLAMAR
     if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
         const item = e.target.closest('.amigo-item');
         const amigoUid = item.querySelector('.btn-eliminar-amigo').getAttribute('data-uid');
-        // Extraemos el nombre limpio (sin el tag)
         const amigoNombre = item.querySelector('.amigo-nombre').childNodes[0].nodeValue.trim(); 
         
         if(typeof iniciarLlamada === 'function') iniciarLlamada(amigoUid, amigoNombre);
     }
 
-    // BOTÓN ELIMINAR AMIGO (QUEDA IGUAL)
-    if (e.target.classList.contains('btn-eliminar-amigo')) {
-        const amigoUid = e.target.getAttribute('data-uid');
+    if (e.target.classList.contains('btn-eliminar-amigo') || e.target.closest('.btn-eliminar-amigo')) {
+        const btn = e.target.classList.contains('btn-eliminar-amigo') ? e.target : e.target.closest('.btn-eliminar-amigo');
+        const amigoUid = btn.getAttribute('data-uid');
         if (confirm('¿Seguro que quieres eliminar a este compañero de tu lista?')) {
             misAmigos = misAmigos.filter(a => a.uid !== amigoUid);
             await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { misAmigos });
@@ -932,10 +920,8 @@ async function configurarCamara() {
 function crearConexion() {
     pc = new RTCPeerConnection(servidoresG);
     
-    // Inyectamos nuestros videos al canal
     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-    // Recibimos los videos del amigo
     pc.ontrack = event => {
         event.streams[0].getTracks().forEach(track => {
             remoteStream.addTrack(track);
@@ -944,7 +930,7 @@ function crearConexion() {
 }
 
 async function iniciarLlamada(amigoUid, amigoNombre) {
-    alert(`Llamando a ${amigoNombre}... Enciende tu cámara.`);
+    alert(`Llamando a ${escapeHTML(amigoNombre)}... Enciende tu cámara.`);
     await configurarCamara();
     salaVideo.classList.remove('oculto');
     crearConexion();
@@ -971,14 +957,13 @@ async function iniciarLlamada(amigoUid, amigoNombre) {
 
     await setDoc(callDocRef, callData);
 
-    // Escuchamos si contesta o rechaza
     unsubscribeCall = onSnapshot(callDocRef, (docSnap) => {
         const data = docSnap.data();
         if (!pc.currentRemoteDescription && data?.answer) {
             const answerDescription = new RTCSessionDescription(data.answer);
             pc.setRemoteDescription(answerDescription);
         }
-        if (!docSnap.exists()) colgarLlamada(); // Si borró el doc, colgó
+        if (!docSnap.exists()) colgarLlamada(); 
     });
 
     onSnapshot(answerCandidatesRef, (snapshot) => {
@@ -994,7 +979,6 @@ async function iniciarLlamada(amigoUid, amigoNombre) {
 function activarEscuchaDeLlamadas() {
     if(unsubscribeLlamadasEntrantes) unsubscribeLlamadasEntrantes();
     
-    // Buscamos si hay alguna llamada donde nosotros seamos el "callee" (el que recibe)
     const q = query(collection(db, "llamadas"), where("calleeId", "==", auth.currentUser.uid));
     
     unsubscribeLlamadasEntrantes = onSnapshot(q, (snapshot) => {
@@ -1002,11 +986,10 @@ function activarEscuchaDeLlamadas() {
             if (change.type === "added") {
                 const callData = change.doc.data();
                 currentCallDocId = change.doc.id;
-                document.getElementById('texto-llamante').innerText = `${callData.callerName} te está llamando para entrenar...`;
+                document.getElementById('texto-llamante').innerText = `${escapeHTML(callData.callerName)} te está llamando para entrenar...`;
                 modalEntrante.classList.remove('oculto');
             }
             if (change.type === "removed") {
-                // El que nos llamó colgó antes de que contestáramos
                 modalEntrante.classList.add('oculto');
                 if (currentCallDocId === change.doc.id) colgarLlamada(false); 
             }
@@ -1088,4 +1071,3 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
-
