@@ -228,12 +228,14 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
 .badge-pr { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; font-weight: 700; margin-bottom: 15px; transition: color 0.3s;}
 
+/* CAMBIO: Botón de info siempre amarillo por defecto */
 .btn-info-carta { 
-    background: var(--glass-bg); border: 1px solid var(--accent-neon); color: var(--accent-neon); 
+    background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); border: none; color: #000; 
     border-radius: 50%; width: 26px; height: 26px; font-size: 16px; font-weight: 900; transition: 0.3s; flex-shrink: 0; padding:0; display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 4px 10px rgba(217, 245, 34, 0.2), inset 0 1px 2px rgba(255,255,255,0.3);
+    box-shadow: 0 4px 10px rgba(217, 245, 34, 0.4), inset 0 1px 2px rgba(255,255,255,0.3);
 }
-.btn-info-carta:hover { background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); color: #000; transform: scale(1.15); box-shadow: 0 5px 15px rgba(217, 245, 34, 0.4);}
+.btn-info-carta:hover { transform: scale(1.15); box-shadow: 0 5px 15px rgba(217, 245, 34, 0.6);}
+
 .header-back-carta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .btn-cerrar-back { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2); font-size: 16px; border-radius: 50%; width: 32px; height: 32px; transition: 0.3s; padding:0; display:flex; align-items:center; justify-content:center;}
 .btn-cerrar-back:hover { background: rgba(255,255,255,0.2); color: #fff; transform: scale(1.1); }
@@ -407,5 +409,6 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     #listaEjerciciosUI { overflow-y: visible; padding-right: 0; display: flex; flex-direction: column; gap: 15px;} 
     .sala-video { bottom: 110px; right: 20px; width: 130px; height: 195px; }
 }
+
 
 
