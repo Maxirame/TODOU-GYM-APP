@@ -60,6 +60,10 @@
                     <button class="btn-reset-total" id="btn-reiniciar-historico" title="Reiniciar días a cero">↺</button>
                 </div>
             </div>
+
+            <button class="btn-wsp-global" title="Avisarle a la comunidad" onclick="window.open('https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw', '_blank')">
+                <i class="ph-fill ph-whatsapp-logo"></i>
+            </button>
         </div>
 
         <div id="contenedor-tarjetas"></div>
@@ -105,7 +109,7 @@
     <div id="vista-dia" style="display: none;">
         <div class="header-dia">
             <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
-            <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Rutina del Día</h1>
+            <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Entrenamiento</h1>
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap; position: relative;">
                 <button class="btn-icono-accion" id="btn-toggle-add" title="Añadir Ejercicio"><i class="ph ph-plus"></i></button>
@@ -242,12 +246,10 @@
             </div>
         </div>
     </div>
-
     <div id="sala-video" class="sala-video oculto">
         <div class="video-wrapper">
             <video id="video-remoto" autoplay playsinline></video>
             <video id="video-local" autoplay playsinline muted></video>
-            
             <button id="btn-colgar" class="btn-colgar" title="Finalizar entrenamiento"><i class="ph-fill ph-phone-disconnect"></i></button>
         </div>
     </div>
@@ -255,4 +257,3 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
-
