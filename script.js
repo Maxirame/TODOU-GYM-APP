@@ -762,7 +762,7 @@ function renderizarSolicitudes() {
         `).join('');
     } else {
         badge.style.display = 'none';
-        document.getElementById('panel-solicitudes').style.display = 'none'; // Auto oculta si no hay nada
+        document.getElementById('panel-solicitudes').style.display = 'none'; 
         lista.innerHTML = '';
     }
 }
@@ -773,14 +773,10 @@ document.getElementById('panel-solicitudes').addEventListener('click', async (e)
         const idx = e.target.getAttribute('data-idx');
         const amigoData = solicitudesPendientes[idx];
         
-        // Lo sacamos de pendientes
         solicitudesPendientes.splice(idx, 1);
-        
-        // Lo guardamos en nuestros amigos
         misAmigos.push(amigoData);
         await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { solicitudesPendientes, misAmigos });
 
-        // Nos guardamos en los amigos de ÉL para que sea bidireccional
         const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
         await updateDoc(doc(db, "usuarios", amigoData.uid), { misAmigos: arrayUnion(yo) });
         
@@ -800,8 +796,8 @@ function escucharAmigos() {
         if (!listenersAmigos[amigo.uid]) {
             listenersAmigos[amigo.uid] = onSnapshot(doc(db, "usuarios", amigo.uid), (docSnap) => {
                 if (docSnap.exists()) {
-                    datosAmigosEnVivo[amigo.uid] = docSnap.data(); // Guardamos su estado en vivo
-                    renderizarAmigos(); // Repintamos la lista con los nuevos colores
+                    datosAmigosEnVivo[amigo.uid] = docSnap.data(); 
+                    renderizarAmigos(); 
                 }
             });
         }
@@ -831,7 +827,6 @@ function renderizarAmigos() {
         } else if (estado === 'entrenando') {
             textoEstado = "Entrenando..."; claseEstado = "entrenando";
         } else {
-            // Lógica para calcular "hace cuánto" se conectó
             if(ultConexion > 0) {
                 const diffMs = Date.now() - ultConexion;
                 const mins = Math.floor(diffMs / 60000);
@@ -855,14 +850,50 @@ function renderizarAmigos() {
                 <span class="amigo-nombre">${amigo.nombre} <span class="amigo-tag">#${amigo.tag}</span></span>
                 <span class="amigo-estado">${textoEstado}</span>
             </div>
-            <button class="btn-llamar" title="Entrenar Juntos">📞</button>
+            <div style="display: flex; gap: 5px;">
+                <button class="btn-llamar" title="Entrenar Juntos">📞</button>
+                <button class="btn-eliminar-amigo" data-uid="${amigo.uid}" title="Eliminar Amigo">✖</button>
+            </div>
         </div>
         `;
     }).join('');
 }
 
-document.getElementById('lista-amigos').addEventListener('click', (e) => {
+// 5. EVENTOS DE LA LISTA DE AMIGOS (Llamar y Eliminar)
+document.getElementById('lista-amigos').addEventListener('click', async (e) => {
+    // BOTÓN LLAMAR
     if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
         alert('📞 ¡El Gym Virtual (Videollamada WebRTC) es el próximo paso de la Fase 3!');
+    }
+
+    // BOTÓN ELIMINAR AMIGO
+    if (e.target.classList.contains('btn-eliminar-amigo')) {
+        const amigoUid = e.target.getAttribute('data-uid');
+        
+        if (confirm('¿Seguro que quieres eliminar a este compañero de tu lista?')) {
+            // 1. Lo borramos de NUESTRA lista
+            misAmigos = misAmigos.filter(a => a.uid !== amigoUid);
+            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { misAmigos });
+
+            // 2. Nos borramos de SU lista
+            try {
+                const amigoRef = doc(db, "usuarios", amigoUid);
+                const amigoSnap = await getDoc(amigoRef);
+                if (amigoSnap.exists()) {
+                    let amigosDeMiAmigo = amigoSnap.data().misAmigos || [];
+                    amigosDeMiAmigo = amigosDeMiAmigo.filter(a => a.uid !== auth.currentUser.uid);
+                    await updateDoc(amigoRef, { misAmigos: amigosDeMiAmigo });
+                }
+            } catch (error) { console.error("Error limpiando la base de datos mutua", error); }
+
+            // 3. Dejamos de "escuchar" su estado en tiempo real para ahorrar datos
+            if (listenersAmigos[amigoUid]) {
+                listenersAmigos[amigoUid](); 
+                delete listenersAmigos[amigoUid];
+                delete datosAmigosEnVivo[amigoUid];
+            }
+
+            renderizarAmigos();
+        }
     }
 });
