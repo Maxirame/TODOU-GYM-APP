@@ -354,9 +354,13 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
 .amigo-item.offline .amigo-avatar::after { background: var(--text-muted); }
 .amigo-item.offline .amigo-estado { color: var(--text-muted); font-weight: 400; }
 
+/* Botones de acción */
 .btn-llamar { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
 .btn-llamar:hover { background: #3b82f6; border-color: #3b82f6; transform: scale(1.1); }
 .amigo-item.entrenando .btn-llamar:hover { background: var(--success-green); border-color: var(--success-green); color: #000; }
+
+.btn-eliminar-amigo { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 12px; }
+.btn-eliminar-amigo:hover { background: var(--danger); border-color: var(--danger); color: white; transform: scale(1.1); }
 
 @keyframes pulse-text { 
     from { opacity: 0.6; } 
@@ -427,6 +431,7 @@ button { cursor: pointer; font-weight: 800; text-transform: uppercase; letter-sp
     .numero-serie { font-size: 13px; }
     .input-datos { font-size: 16px; width: 40px; }
 }
+
 
 
 
