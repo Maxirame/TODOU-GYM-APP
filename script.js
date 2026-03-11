@@ -302,20 +302,20 @@ document.getElementById('btn-editar-nombre').addEventListener('click', editarNom
 // ==========================================
 // SECCIÓN 5: RENDERIZADO DEL CALENDARIO
 // ==========================================
-function renderizarSemana() { // Mantenemos el nombre para compatibilidad
+function renderizarSemana() { 
     const contenedor = document.getElementById('contenedor-tarjetas');
     const hoyStr = obtenerFechaLocal();
     const hoyObj = new Date();
     
     let html = '';
-    // Genera 20 días para atrás y 5 para adelante (Calendario dinámico)
+    // Genera 20 días para atrás y 5 para adelante (Calendario dinámico aislado)
     for (let i = -20; i <= 5; i++) {
-        let d = new Date();
-        d.setDate(hoyObj.getDate() + i);
+        // Corrección de fechas para evitar que las rutinas se peguen a otros días
+        let d = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + i);
         
         const fechaStr = obtenerFechaLocal(d);
         const esHoy = fechaStr === hoyStr;
-        const tieneFuego = estadoDias[fechaStr]; // True si entrenó más de 10 min
+        const tieneFuego = estadoDias[fechaStr]; 
         
         const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const nombreDia = diasNombres[d.getDay()];
@@ -332,12 +332,11 @@ function renderizarSemana() { // Mantenemos el nombre para compatibilidad
     contenedor.innerHTML = html;
     actualizarRango();
 
-    // Auto-scroll para dejar el día de HOY centrado al abrir la app
+    // Auto-scroll perfecto para centrar el día de HOY
     setTimeout(() => {
         const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
         if(tarjetaHoy) {
-            const scrollPos = tarjetaHoy.offsetLeft - (contenedor.offsetWidth / 2) + (tarjetaHoy.offsetWidth / 2);
-            contenedor.scrollTo({ left: scrollPos, behavior: 'smooth' });
+            tarjetaHoy.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
     }, 150);
 }
@@ -698,14 +697,13 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             elapsedTime = Date.now() - startTime;
             actualizarDisplayCrono();
             
-            // LÓGICA DE JUEGO: 10 minutos = 600,000 milisegundos. Gana el Fueguito.
-            const hoyStr = obtenerFechaLocal();
-            // Verifica que esté en el día de hoy, haya superado los 10 min y no tenga el fuego ya.
-            if (diaActivo === hoyStr && elapsedTime >= 600000 && !estadoDias[hoyStr]) {
-                estadoDias[hoyStr] = true;
+            // LÓGICA DE JUEGO: 10 minutos = 600,000 milisegundos.
+            // Ahora se lo da al "diaActivo" (el que estás viendo), no importa si es hoy o el lunes pasado.
+            if (elapsedTime >= 600000 && diaActivo && !estadoDias[diaActivo]) {
+                estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
                 guardarDatosEnNube();
-                renderizarSemana(); // Refresca el panel de atrás
+                renderizarSemana(); // Refresca el panel para que aparezca el fuego al instante
                 alert("🔥 ¡MÁS DE 10 MINUTOS DE ESFUERZO! 🔥\nHas ganado tu llama diaria y sumaste 1 día de entrenamiento a tu récord.");
             }
         }, 1000);
@@ -726,10 +724,13 @@ document.getElementById('btn-reset-crono').addEventListener('click', () => {
     }
 });
 
+// ==========================================
+// SECCIÓN 8: FLUJO DE VENTANAS E HISTORIAL
+// ==========================================
 function abrirDia(dia) {
     diaActivo = dia;
     
-    // Formateo visual de la fecha para el título
+    // Formateo visual de la fecha para el título ("Mié 11/03")
     const [year, month, day] = dia.split('-');
     const fechaObj = new Date(year, month - 1, day);
     const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -751,6 +752,14 @@ document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () 
 
 document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
+    
+    // Refuerzo: Si al guardar pasaste los 10 min, forzamos el fueguito por si acaso.
+    if (elapsedTime >= 600000 && !estadoDias[diaActivo]) {
+        estadoDias[diaActivo] = true;
+        totalEntrenamientos++;
+        renderizarSemana();
+    }
+
     historialGlobal.unshift({ fecha: new Date().toLocaleDateString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit' }), diaSemana: diaActivo, rutina: JSON.parse(JSON.stringify(baseDeDatosLocal[diaActivo])), tiempo: document.getElementById('display-cronometro').innerText });
     guardarDatosEnNube(); alert(`¡Día guardado con éxito!\nTiempo: ${document.getElementById('display-cronometro').innerText}`);
 });
@@ -758,8 +767,10 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
 document.getElementById('btn-reiniciar-historico').addEventListener('click', () => { 
     if(confirm('⚠️ ¿Reiniciar tus días totales de gloria a cero? Esto afectará tu rango actual.')) { 
         totalEntrenamientos = 0; 
+        estadoDias = {}; // Borra los fueguitos visuales también
         guardarDatosEnNube(); 
         actualizarRango(); 
+        renderizarSemana();
     } 
 });
 
@@ -1157,6 +1168,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
