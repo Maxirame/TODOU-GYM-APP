@@ -254,7 +254,6 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
-            // HTML Sanitizado y con Iconos Phosphor
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
                     <div class="serie-delete-bg">
@@ -303,8 +302,8 @@ function actualizarInterfazDia() {
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
                                 <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
+                                <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
                             </div>
                             <button class="btn-eliminar btn-borrar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                         </div>
@@ -1071,3 +1070,4 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
