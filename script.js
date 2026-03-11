@@ -690,6 +690,7 @@ function iniciarRestTimer() {
 /* CORRECCIÓN: Se arregla el nombre de la clase para la X */
 .btn-borrar-ejercicio { background: transparent; border: none; color: var(--text-muted); font-size: 20px; transition: 0.2s; padding: 0; display: flex; justify-content: center; align-items: center; cursor: pointer;}
 .btn-borrar-ejercicio:hover { color: var(--danger); transform: scale(1.1); }
+};
 
 // ==========================================
 // SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
@@ -1069,5 +1070,6 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
