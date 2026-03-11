@@ -3,7 +3,7 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA91qTTlkWMA5H9cEvI1yja5j3WmkzEbqY",
@@ -31,15 +31,21 @@ let totalEntrenamientos = 0;
 let fallosHistoricos = {}; 
 let pesosMaximos = {}; 
 let historialGlobal = []; 
-let misAmigos = []; // <-- NUEVO: Array para guardar tus amigos
+
+// VARIABLES SOCIALES REAL-TIME
+let miTag = ""; 
+let misAmigos = []; 
+let solicitudesPendientes = [];
+let unsubscribeMisDatos = null; 
+let listenersAmigos = {}; 
+let datosAmigosEnVivo = {}; 
+
 let diaActivo = null;
 let startTime, elapsedTime = 0, timerInterval, isRunning = false;
-
-let tiempoDescansoGlobal = 180;
+let tiempoDescansoGlobal = 180; 
 let timerDescansoInterval;
 let descansoRestante = 0;
 
-// Diccionario de Técnicas (IDs de YouTube)
 const infoEjercicios = {
     "Press Banca": { youtubeId: "TAH8RxOS0VI" },
     "Press Banca Mancuernas": { youtubeId: "TAH8RxOS0VI" },
@@ -116,10 +122,8 @@ document.getElementById('btn-google').addEventListener('click', async () => {
 document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => signOut(auth));
 
 // ==========================================
-// SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
+// SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN (ON-SNAPSHOT)
 // ==========================================
-let miTag = ""; 
-
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
     try {
@@ -128,45 +132,58 @@ async function guardarDatosEnNube() {
             tiempoDescansoGlobal,
             nombre: document.getElementById('nombre-usuario').innerText,
             tag: miTag,
-            misAmigos // <-- Guardamos tu lista de amigos
+            misAmigos
         }, { merge: true });
     } catch (e) { console.warn("Modo local activo"); }
 }
 
 async function cargarDatosDeNube(uid) {
-    try {
-        const docSnap = await getDoc(doc(db, "usuarios", uid));
+    const docRef = doc(db, "usuarios", uid);
+    
+    // Si no tiene cuenta aún, la inicializamos
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+        miTag = Math.floor(1000 + Math.random() * 9000).toString();
+        document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
+        document.getElementById('tag-usuario').innerText = `#${miTag}`;
+        await guardarDatosEnNube();
+    }
+
+    // ESCUCHAMOS NUESTRO PERFIL EN TIEMPO REAL (Para recibir notificaciones al instante)
+    if(unsubscribeMisDatos) unsubscribeMisDatos();
+    unsubscribeMisDatos = onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             baseDeDatosLocal = data.baseDeDatosLocal || {}; estadoDias = data.estadoDias || {};
             totalEntrenamientos = data.totalEntrenamientos || 0; fallosHistoricos = data.fallosHistoricos || {};
             pesosMaximos = data.pesosMaximos || {}; historialGlobal = data.historialGlobal || [];
             tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; 
-            misAmigos = data.misAmigos || []; // <-- Cargamos la lista
             
-            miTag = data.tag || Math.floor(1000 + Math.random() * 9000).toString();
+            misAmigos = data.misAmigos || [];
+            solicitudesPendientes = data.solicitudesPendientes || [];
+            miTag = data.tag || "0000";
             
             document.getElementById('nombre-usuario').innerText = data.nombre || "Atleta";
             document.getElementById('tag-usuario').innerText = `#${miTag}`;
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
-            
-            if (!data.tag) guardarDatosEnNube();
 
-        } else {
-            baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = []; misAmigos = [];
-            miTag = Math.floor(1000 + Math.random() * 9000).toString();
-            document.getElementById('nombre-usuario').innerText = auth.currentUser.displayName ? auth.currentUser.displayName.split(" ")[0] : "Atleta";
-            document.getElementById('tag-usuario').innerText = `#${miTag}`;
-            guardarDatosEnNube();
+            renderizarSemana();
+            if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
+            if(typeof escucharAmigos === 'function') escucharAmigos();
         }
-    } catch (error) {
-        alert("⚠️ Base de datos inactiva. Modo Offline.");
-        baseDeDatosLocal = {}; estadoDias = {}; totalEntrenamientos = 0; fallosHistoricos = {}; pesosMaximos = {}; historialGlobal = []; misAmigos = [];
-    }
-    renderizarSemana();
-    if(typeof renderizarAmigos === 'function') renderizarAmigos(); // Pintamos los amigos al entrar
+    });
+
+    // Al entrar a la app, avisamos a Firebase que estamos ONLINE
+    updateDoc(docRef, { estadoSocial: 'online', ultimaConexion: Date.now() }).catch(e=>console.log(e));
 }
+
+// Al cerrar la pestaña de la app, avisamos que estamos OFFLINE
+window.addEventListener('beforeunload', () => {
+    if(auth.currentUser) {
+        updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'offline', ultimaConexion: Date.now() });
+    }
+});
 
 function editarNombre() {
     let nuevoNombre = prompt("Ingresa tu nombre de atleta:", document.getElementById('nombre-usuario').innerText);
@@ -565,14 +582,22 @@ function actualizarDisplayCrono() { document.getElementById('display-cronometro'
 
 document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
     const btn = document.getElementById('btn-comenzar-pausa');
-    if (isRunning) { elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false; btn.innerHTML = '▶ REANUDAR'; btn.classList.remove('btn-crono-pausa');
-    } else { startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true; btn.innerHTML = '⏸ PAUSAR'; btn.classList.add('btn-crono-pausa'); }
+    if (isRunning) { 
+        elapsedTime += Date.now() - startTime; clearInterval(timerInterval); isRunning = false; btn.innerHTML = '▶ REANUDAR'; btn.classList.remove('btn-crono-pausa');
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' }); // Volvemos a Online
+    } else { 
+        startTime = Date.now(); timerInterval = setInterval(actualizarDisplayCrono, 1000); isRunning = true; btn.innerHTML = '⏸ PAUSAR'; btn.classList.add('btn-crono-pausa'); 
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'entrenando' }); // Avisamos que estamos Entrenando
+    }
 });
 document.getElementById('btn-reset-crono').addEventListener('click', () => {
-    if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) { clearInterval(timerInterval); isRunning = false; elapsedTime = 0; document.getElementById('btn-comenzar-pausa').innerHTML = '▶ COMENZAR'; document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); }
+    if(confirm('¿Seguro que querés reiniciar el tiempo a cero?')) { 
+        clearInterval(timerInterval); isRunning = false; elapsedTime = 0; document.getElementById('btn-comenzar-pausa').innerHTML = '▶ COMENZAR'; document.getElementById('btn-comenzar-pausa').classList.remove('btn-crono-pausa'); actualizarDisplayCrono(); 
+        if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' });
+    }
 });
 
-// Lógica de la Isla de Descanso
+// Lógica de la Isla de Descanso (IGUAL QUE ANTES)
 function inicializarIslaDescanso() {
     const cronoContainer = document.querySelector('.cronometro-container');
     if (cronoContainer && !document.getElementById('isla-descanso')) {
@@ -587,25 +612,15 @@ function inicializarIslaDescanso() {
         cronoContainer.appendChild(isla);
 
         document.getElementById('btn-config-descanso').addEventListener('click', () => {
-            // Mostramos el valor actual convertido a minutos (ej: 180 segs se muestra como 3)
             let minActuales = tiempoDescansoGlobal / 60;
-            let input = prompt(`Configurar descanso en MINUTOS (ej: 3 para tres minutos, 1.5 para un min y medio):\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, minActuales);
-            
+            let input = prompt(`Configurar descanso en MINUTOS:\n\nTiempo actual: ${formatTimeDescanso(tiempoDescansoGlobal)}`, minActuales);
             if (input !== null && input.trim() !== "") {
-                // Reemplazamos coma por punto para evitar errores si escriben "1,5"
                 let nuevosMinutos = parseFloat(input.replace(',', '.'));
-                
                 if (!isNaN(nuevosMinutos) && nuevosMinutos > 0) {
-                    tiempoDescansoGlobal = Math.round(nuevosMinutos * 60); // Lo pasamos a segundos para el sistema
+                    tiempoDescansoGlobal = Math.round(nuevosMinutos * 60); 
                     guardarDatosEnNube();
-                    
-                    if (document.getElementById('isla-descanso').classList.contains('visible')) {
-                        iniciarRestTimer(); 
-                    } else {
-                        alert(`⏱️ Tiempo de descanso actualizado a ${formatTimeDescanso(tiempoDescansoGlobal)}.`);
-                    }
-                } else {
-                    alert("⚠️ Por favor, ingresa un número válido mayor a 0.");
+                    if (document.getElementById('isla-descanso').classList.contains('visible')) iniciarRestTimer(); 
+                    else alert(`⏱️ Tiempo actualizado a ${formatTimeDescanso(tiempoDescansoGlobal)}.`);
                 }
             }
         });
@@ -621,26 +636,18 @@ function inicializarIslaDescanso() {
 function iniciarRestTimer() {
     const isla = document.getElementById('isla-descanso');
     if (!isla) return;
-    
     clearInterval(timerDescansoInterval);
     descansoRestante = tiempoDescansoGlobal;
     document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
-    
     isla.classList.remove('fin-descanso');
     isla.classList.add('visible');
-    
     timerDescansoInterval = setInterval(() => {
         descansoRestante--;
         document.getElementById('tiempo-descanso-display').innerText = formatTimeDescanso(descansoRestante);
-        
         if (descansoRestante <= 0) {
             clearInterval(timerDescansoInterval);
             isla.classList.add('fin-descanso'); 
-            // Ocultar automáticamente luego de 4 segundos finalizado el tiempo
-            setTimeout(() => {
-                isla.classList.remove('visible');
-                isla.classList.remove('fin-descanso');
-            }, 4000); 
+            setTimeout(() => { isla.classList.remove('visible'); isla.classList.remove('fin-descanso'); }, 4000); 
         }
     }, 1000);
 }
@@ -691,97 +698,171 @@ function renderizarHistorial() {
 }
 
 // ==========================================
-// SECCIÓN 9: RED SOCIAL Y AMIGOS
+// SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
 // ==========================================
-function renderizarAmigos() {
-    const contenedor = document.getElementById('lista-amigos');
-    if (!contenedor) return;
-    
-    if (misAmigos.length === 0) {
-        contenedor.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">Aún no has añadido amigos.</p>';
-        return;
-    }
 
-    // Por ahora los pintamos todos Offline hasta que hagamos la Fase 3 del Tiempo Real
-    contenedor.innerHTML = misAmigos.map(amigo => `
-        <div class="amigo-item offline"> 
-            <div class="amigo-avatar">${amigo.nombre.charAt(0).toUpperCase()}</div>
-            <div class="amigo-info">
-                <span class="amigo-nombre">${amigo.nombre} <span class="amigo-tag">#${amigo.tag}</span></span>
-                <span class="amigo-estado">Desconectado</span>
-            </div>
-            <button class="btn-llamar" title="Videollamada en desarrollo">📞</button>
-        </div>
-    `).join('');
-}
-
+// 1. BUSCADOR Y ENVÍO DE SOLICITUDES
 document.getElementById('btn-add-amigo').addEventListener('click', async () => {
-    let input = prompt("Ingresa el nombre y tag de tu amigo exactamente (Ejemplo: Maxi #3423):");
-    if (!input || !input.includes('#')) {
-        if(input) alert("⚠️ Formato incorrecto. Recuerda incluir el # y el número.");
-        return;
-    }
+    let input = prompt("Añade a tu compañero de entreno\n\nIngresa su nombre y tag exactos (Ejemplo: Maxi #3423):");
+    if (!input || !input.includes('#')) return;
 
     let partes = input.split('#');
     let nombreBuscado = partes[0].trim();
     let tagBuscado = partes[1].trim();
 
     if (nombreBuscado.toLowerCase() === document.getElementById('nombre-usuario').innerText.toLowerCase() && tagBuscado === miTag) {
-        return alert("⚠️ No puedes agregarte a ti mismo.");
+        return alert("⚠️ Eres un lobo solitario, pero no puedes agregarte a ti mismo.");
     }
 
     try {
-        // Buscamos en toda la base de datos de Firebase
         const usuariosRef = collection(db, "usuarios");
         const q = query(usuariosRef, where("nombre", "==", nombreBuscado), where("tag", "==", tagBuscado));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            alert("❌ No se encontró a ningún atleta con ese nombre y tag. (Asegúrate de respetar mayúsculas y minúsculas)");
+            alert("❌ No se encontró al atleta. Revisa mayúsculas y minúsculas.");
         } else {
-            querySnapshot.forEach((docSnap) => {
-                const datosAmigo = docSnap.data();
+            querySnapshot.forEach(async (docSnap) => {
                 const amigoId = docSnap.id;
 
-                if (misAmigos.some(a => a.uid === amigoId)) {
-                    alert("⚠️ Ya tienes a este atleta en tu lista.");
-                    return;
-                }
+                if (misAmigos.some(a => a.uid === amigoId)) return alert("⚠️ Ya son amigos.");
 
-                // Si lo encuentra y no lo tenías, lo guarda
-                misAmigos.push({
-                    uid: amigoId,
-                    nombre: datosAmigo.nombre,
-                    tag: datosAmigo.tag
+                // Enviamos nuestra información a su bandeja de solicitudes
+                const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
+                await updateDoc(doc(db, "usuarios", amigoId), {
+                    solicitudesPendientes: arrayUnion(yo)
                 });
 
-                guardarDatosEnNube();
-                renderizarAmigos();
-                alert(`✅ ¡${datosAmigo.nombre} añadido a tu lista de amigos!`);
+                alert(`✅ Solicitud enviada a ${nombreBuscado}. Esperando a que acepte...`);
             });
         }
-    } catch (error) {
-        console.error("Error buscando amigo:", error);
-        alert("⚠️ Hubo un error al buscar. Inténtalo de nuevo.");
+    } catch (error) { console.error(error); }
+});
+
+// 2. RENDERIZAR BANDEJA DE SOLICITUDES (Campanita)
+document.getElementById('btn-ver-solicitudes').addEventListener('click', () => {
+    const panel = document.getElementById('panel-solicitudes');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+function renderizarSolicitudes() {
+    const lista = document.getElementById('lista-solicitudes');
+    const badge = document.getElementById('badge-notif');
+    
+    if (solicitudesPendientes.length > 0) {
+        badge.style.display = 'block';
+        lista.innerHTML = solicitudesPendientes.map((sol, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:8px 12px; border-radius:6px; border:1px solid var(--border-color); margin-bottom:5px;">
+                <span style="font-size:12px; font-weight:800;">${sol.nombre} <span style="color:var(--text-muted); font-weight:400;">#${sol.tag}</span></span>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-aceptar-sol" data-idx="${idx}" style="background:var(--success-green); color:#000; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-weight:800;">✔</button>
+                    <button class="btn-rechazar-sol" data-idx="${idx}" style="background:var(--danger); color:#fff; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-weight:800;">✖</button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        badge.style.display = 'none';
+        document.getElementById('panel-solicitudes').style.display = 'none'; // Auto oculta si no hay nada
+        lista.innerHTML = '';
+    }
+}
+
+// 3. ACEPTAR O RECHAZAR SOLICITUD
+document.getElementById('panel-solicitudes').addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-aceptar-sol')) {
+        const idx = e.target.getAttribute('data-idx');
+        const amigoData = solicitudesPendientes[idx];
+        
+        // Lo sacamos de pendientes
+        solicitudesPendientes.splice(idx, 1);
+        
+        // Lo guardamos en nuestros amigos
+        misAmigos.push(amigoData);
+        await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { solicitudesPendientes, misAmigos });
+
+        // Nos guardamos en los amigos de ÉL para que sea bidireccional
+        const yo = { uid: auth.currentUser.uid, nombre: document.getElementById('nombre-usuario').innerText, tag: miTag };
+        await updateDoc(doc(db, "usuarios", amigoData.uid), { misAmigos: arrayUnion(yo) });
+        
+        alert(`🤝 ¡Tú y ${amigoData.nombre} ahora son compañeros de entreno!`);
+    }
+
+    if (e.target.classList.contains('btn-rechazar-sol')) {
+        const idx = e.target.getAttribute('data-idx');
+        solicitudesPendientes.splice(idx, 1);
+        await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { solicitudesPendientes });
     }
 });
 
-// El botón de llamada lanza un aviso (Lo programaremos en la Fase 3)
+// 4. ESCUCHAR A MIS AMIGOS EN TIEMPO REAL (onSnapshot)
+function escucharAmigos() {
+    misAmigos.forEach(amigo => {
+        if (!listenersAmigos[amigo.uid]) {
+            listenersAmigos[amigo.uid] = onSnapshot(doc(db, "usuarios", amigo.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    datosAmigosEnVivo[amigo.uid] = docSnap.data(); // Guardamos su estado en vivo
+                    renderizarAmigos(); // Repintamos la lista con los nuevos colores
+                }
+            });
+        }
+    });
+    renderizarAmigos();
+}
+
+function renderizarAmigos() {
+    const contenedor = document.getElementById('lista-amigos');
+    if (!contenedor) return;
+    
+    if (misAmigos.length === 0) {
+        contenedor.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;">Aún no tienes compañeros de batalla.</p>';
+        return;
+    }
+
+    contenedor.innerHTML = misAmigos.map(amigo => {
+        const dataVivo = datosAmigosEnVivo[amigo.uid] || {};
+        const estado = dataVivo.estadoSocial || 'offline';
+        const ultConexion = dataVivo.ultimaConexion || 0;
+        
+        let textoEstado = "";
+        let claseEstado = "offline";
+        
+        if (estado === 'online') {
+            textoEstado = "Online"; claseEstado = "online";
+        } else if (estado === 'entrenando') {
+            textoEstado = "Entrenando..."; claseEstado = "entrenando";
+        } else {
+            // Lógica para calcular "hace cuánto" se conectó
+            if(ultConexion > 0) {
+                const diffMs = Date.now() - ultConexion;
+                const mins = Math.floor(diffMs / 60000);
+                const horas = Math.floor(mins / 60);
+                const dias = Math.floor(horas / 24);
+                
+                if (dias > 0) textoEstado = `últ. vez hace ${dias}d`;
+                else if (horas > 0) textoEstado = `últ. vez hace ${horas}h`;
+                else if (mins > 0) textoEstado = `últ. vez hace ${mins}m`;
+                else textoEstado = "Desconectado";
+            } else {
+                textoEstado = "Desconectado";
+            }
+            claseEstado = "offline";
+        }
+
+        return `
+        <div class="amigo-item ${claseEstado}"> 
+            <div class="amigo-avatar">${amigo.nombre.charAt(0).toUpperCase()}</div>
+            <div class="amigo-info">
+                <span class="amigo-nombre">${amigo.nombre} <span class="amigo-tag">#${amigo.tag}</span></span>
+                <span class="amigo-estado">${textoEstado}</span>
+            </div>
+            <button class="btn-llamar" title="Entrenar Juntos">📞</button>
+        </div>
+        `;
+    }).join('');
+}
+
 document.getElementById('lista-amigos').addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-llamar') || e.target.closest('.btn-llamar')) {
-        alert('📞 ¡El Gym Virtual y las videollamadas llegarán en la Fase 3 de desarrollo!');
+        alert('📞 ¡El Gym Virtual (Videollamada WebRTC) es el próximo paso de la Fase 3!');
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
