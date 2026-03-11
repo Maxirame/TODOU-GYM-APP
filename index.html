@@ -151,9 +151,30 @@
         <div id="contenedor-historial" class="historial-grid"></div>
     </div>
 
+    <div id="modal-llamada-entrante" class="modal-video oculto">
+        <div class="card-llamada">
+            <h3 style="margin-top:0; color:var(--accent-neon);">📞 Llamada Entrante</h3>
+            <p id="texto-llamante" style="font-weight:bold; color:var(--text-main);">Alguien quiere entrenar...</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <button id="btn-aceptar-llamada" style="background: var(--success-green); color: #000; padding: 10px 25px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; transition: 0.2s;">ACEPTAR</button>
+                <button id="btn-rechazar-llamada" style="background: var(--danger); color: #fff; padding: 10px 25px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; transition: 0.2s;">RECHAZAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sala-video" class="sala-video oculto">
+        <div class="video-wrapper">
+            <video id="video-remoto" autoplay playsinline></video>
+            <video id="video-local" autoplay playsinline muted></video>
+            
+            <button id="btn-colgar" class="btn-colgar" title="Finalizar entrenamiento">📴 Colgar</button>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
 
 
