@@ -28,12 +28,12 @@ function escapeHTML(str) {
     }[tag])) : '';
 }
 
-// FIX DEFINITIVO: Generador de fechas absoluto (Evita que los días se clonen)
+// FIX DEFINITIVO: Formato absoluto de fechas para evitar días clonados
 function obtenerFechaLocal(fecha = new Date()) {
-    const year = fecha.getFullYear();
-    const month = String(fecha.getMonth() + 1).padStart(2, '0');
-    const day = String(fecha.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
 const TOTAL_IMAGENES_MOTIVACION = 8; 
@@ -77,11 +77,11 @@ const infoEjercicios = {
     "Fondo de Pecho": { youtubeId: "" },
 
     // --- HOMBROS ---
-    "Vuelo Lateral": { youtubeId: "UQkdNBpjFDo" }, // Antes Elevaciones Laterales
+    "Vuelo Lateral": { youtubeId: "UQkdNBpjFDo" }, 
     "Press Militar": { youtubeId: "DdITN8U-kFI" },
     "Press Militar Mancuerna": { youtubeId: "" },
     "Press Arnold": { youtubeId: "" },
-    "Elevacion Frontal": { youtubeId: "HciAFZSN2Qo" }, // Antes Elevaciones Frontales
+    "Elevacion Frontal": { youtubeId: "HciAFZSN2Qo" }, 
     "Cuerda Combate Alternada": { youtubeId: "" },
 
     // --- TRICEPS ---
@@ -91,11 +91,11 @@ const infoEjercicios = {
     "Extension Triceps Polea Alta": { youtubeId: "" },
     "Fondos Triceps": { youtubeId: "" },
     "Press Frances": { youtubeId: "L3bEz-vcdGU" },
-    "Extension Triceps": { youtubeId: "" }, // Antes Extensiones Tricep
+    "Extension Triceps": { youtubeId: "" }, 
 
     // --- ESPALDA ---
     "Dominadas": { youtubeId: "BT3CSQKeEww" },
-    "Dominadas Neutro": { youtubeId: "" }, // Antes Dominadas Neutras
+    "Dominadas Neutro": { youtubeId: "" }, 
     "Dominadas Supino": { youtubeId: "" },
     "Natacion": { youtubeId: "" },
 
@@ -128,7 +128,7 @@ const infoEjercicios = {
     // --- ABDOMINALES ---
     "Abs": { youtubeId: "" },
     "Abs declinado": { youtubeId: "" },
-    "Plancha": { youtubeId: "" }, // Corregido el typo "Planca" a "Plancha"
+    "Plancha": { youtubeId: "" }, 
     "Giros Rusos": { youtubeId: "" },
     "Elevacion Piernas": { youtubeId: "" },
     "Elevacion Piernas Colgando": { youtubeId: "" }
@@ -138,7 +138,6 @@ const infoEjercicios = {
 function verificarResetSemanal() {
     const ahora = new Date();
     const diaSemana = ahora.getDay(); 
-    // Calcular el lunes de la semana actual a las 00:00
     const diff = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
     const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), diff);
     lunes.setHours(0,0,0,0);
@@ -270,7 +269,7 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
 
-            verificarResetSemanal(); // Chequea si es lunes a las 00:00 y borra checks
+            verificarResetSemanal(); 
             renderizarSemana();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
@@ -308,7 +307,6 @@ function renderizarSemana() {
     const hoyObj = new Date();
     
     let html = '';
-    // Genera 20 días para atrás y 5 para adelante
     for (let i = -20; i <= 5; i++) {
         let d = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + i);
         
@@ -331,21 +329,19 @@ function renderizarSemana() {
     contenedor.innerHTML = html;
     actualizarRango();
 
-    // FIX: Centrado perfecto con un pequeño delay para asegurar que el HTML se haya dibujado
+    // FIX DEFINITIVO: Centrado perfecto con scrollIntoView
     setTimeout(() => {
         const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
         if(tarjetaHoy) {
-            const scrollPos = tarjetaHoy.offsetLeft - (contenedor.offsetWidth / 2) + (tarjetaHoy.offsetWidth / 2);
-            contenedor.scrollTo({ left: scrollPos, behavior: 'smooth' });
+            tarjetaHoy.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
-    }, 200); 
+    }, 300);
 }
 
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
     const tarjeta = e.target.closest('.tarjeta-dia');
     if (tarjeta) abrirDia(tarjeta.getAttribute('data-dia'));
 });
-
 
 // ==========================================
 // SECCIÓN 6: VISTA DEL DÍA Y LÓGICA DE EJERCICIOS
@@ -467,7 +463,6 @@ listaUI.addEventListener('click', (e) => {
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
-            iniciarRestTimer();
         } else {
             cajaSerie.classList.remove('completada');
         }
@@ -671,7 +666,7 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
 });
 
 // ==========================================
-// SECCIÓN 7: CRONÓMETRO Y DESCANSOS (LÓGICA 10 MIN)
+// SECCIÓN 7: CRONÓMETRO Y DESCANSOS (LÓGICA FUEGUITO)
 // ==========================================
 function formatearTiempo(ms) {
     let seg = Math.floor((ms / 1000) % 60);
@@ -698,12 +693,13 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             elapsedTime = Date.now() - startTime;
             actualizarDisplayCrono();
             
-            // FIX DE TESTEO: Está seteado a 60000 (1 minuto). Para la versión final ponele 600000 (10 minutos)
+            // LÓGICA DE JUEGO: Modificado a 60.000 (1 minuto) para que puedas probarlo fácil.
+            // Para la versión final ponele 600000 (10 minutos)
             if (elapsedTime >= 60000 && diaActivo && !estadoDias[diaActivo]) {
                 estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
                 guardarDatosEnNube();
-                renderizarSemana(); // Refresca el panel para que aparezca el fuego al instante
+                renderizarSemana(); 
                 alert("🔥 ¡MÁS DE 1 MINUTO DE ESFUERZO! 🔥\nHas ganado tu llama diaria y sumaste 1 día de entrenamiento a tu récord.");
             }
         }, 1000);
@@ -730,7 +726,6 @@ document.getElementById('btn-reset-crono').addEventListener('click', () => {
 function abrirDia(dia) {
     diaActivo = dia;
     
-    // Formateo visual de la fecha para el título ("Mié 11/03")
     const [year, month, day] = dia.split('-');
     const fechaObj = new Date(year, month - 1, day);
     const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -741,7 +736,6 @@ function abrirDia(dia) {
     document.getElementById('vista-cuenta').style.display = 'none';
     document.getElementById('vista-dia').style.display = 'flex';
     
-    inicializarIslaDescanso();
     actualizarInterfazDia(); 
     actualizarDisplayCrono();
 }
@@ -753,11 +747,7 @@ document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () 
 document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
     
-    // Refuerzo: Si al guardar pasaste el tiempo, forzamos el fueguito (acordate de cambiar este 60000 por 600000 luego)
-
-
-
-  
+    // Refuerzo: Si al guardar pasaste el minuto, forzamos el fueguito
     if (elapsedTime >= 60000 && !estadoDias[diaActivo]) {
         estadoDias[diaActivo] = true;
         totalEntrenamientos++;
@@ -771,7 +761,7 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
 document.getElementById('btn-reiniciar-historico').addEventListener('click', () => { 
     if(confirm('⚠️ ¿Reiniciar tus días totales de gloria a cero? Esto afectará tu rango actual.')) { 
         totalEntrenamientos = 0; 
-        estadoDias = {}; // Borra los fueguitos visuales también
+        estadoDias = {}; 
         guardarDatosEnNube(); 
         actualizarRango(); 
         renderizarSemana();
@@ -798,7 +788,6 @@ function renderizarHistorial() {
 // SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
 // ==========================================
 document.addEventListener('click', async (e) => {
-    // BOTÓN AÑADIR AMIGO
     if (e.target.closest('.btn-add-amigo')) {
         let input = prompt("Añade a tu compañero de entreno\n\nIngresa su nombre y tag exactos (Ejemplo: Maxi #3423):");
         if (!input || !input.includes('#')) return;
@@ -833,14 +822,12 @@ document.addEventListener('click', async (e) => {
         } catch (error) { console.error(error); }
     }
 
-    // BOTÓN VER SOLICITUDES
     if (e.target.closest('.btn-ver-solicitudes')) {
         document.querySelectorAll('.panel-solicitudes').forEach(panel => {
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         });
     }
 
-    // ACEPTAR O RECHAZAR SOLICITUD
     if (e.target.closest('.btn-aceptar-sol')) {
         const btn = e.target.closest('.btn-aceptar-sol');
         const idx = btn.getAttribute('data-idx');
@@ -865,7 +852,6 @@ document.addEventListener('click', async (e) => {
         renderizarSolicitudes();
     }
 
-    // LLAMAR O ELIMINAR AMIGO (DESDE LA LISTA)
     if (e.target.closest('.btn-llamar')) {
         const item = e.target.closest('.amigo-item');
         const amigoUid = item.querySelector('.btn-eliminar-amigo').getAttribute('data-uid');
@@ -988,11 +974,7 @@ function renderizarAmigos() {
 // ==========================================
 // SECCIÓN 10: MOTOR DE VIDEOLLAMADAS (WEBRTC)
 // ==========================================
-const servidoresG = {
-    iceServers: [
-        { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-    ]
-};
+const servidoresG = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
 let pc = null;
 let localStream = null;
@@ -1020,14 +1002,8 @@ async function configurarCamara() {
 
 function crearConexion() {
     pc = new RTCPeerConnection(servidoresG);
-    
     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-    pc.ontrack = event => {
-        event.streams[0].getTracks().forEach(track => {
-            remoteStream.addTrack(track);
-        });
-    };
+    pc.ontrack = event => { event.streams[0].getTracks().forEach(track => { remoteStream.addTrack(track); }); };
 }
 
 async function iniciarLlamada(amigoUid, amigoNombre) {
@@ -1042,9 +1018,7 @@ async function iniciarLlamada(amigoUid, amigoNombre) {
 
     currentCallDocId = callDocRef.id;
 
-    pc.onicecandidate = event => {
-        if(event.candidate) addDoc(offerCandidatesRef, event.candidate.toJSON());
-    };
+    pc.onicecandidate = event => { if(event.candidate) addDoc(offerCandidatesRef, event.candidate.toJSON()); };
 
     const offerDescription = await pc.createOffer();
     await pc.setLocalDescription(offerDescription);
@@ -1108,9 +1082,7 @@ document.getElementById('btn-aceptar-llamada').addEventListener('click', async (
     const answerCandidatesRef = collection(callDocRef, "answerCandidates");
     const offerCandidatesRef = collection(callDocRef, "offerCandidates");
 
-    pc.onicecandidate = event => {
-        if(event.candidate) addDoc(answerCandidatesRef, event.candidate.toJSON());
-    };
+    pc.onicecandidate = event => { if(event.candidate) addDoc(answerCandidatesRef, event.candidate.toJSON()); };
 
     const callDocSnap = await getDoc(callDocRef);
     const callData = callDocSnap.data();
@@ -1121,9 +1093,7 @@ document.getElementById('btn-aceptar-llamada').addEventListener('click', async (
     const answerDescription = await pc.createAnswer();
     await pc.setLocalDescription(answerDescription);
 
-    await updateDoc(callDocRef, {
-        answer: { type: answerDescription.type, sdp: answerDescription.sdp }
-    });
+    await updateDoc(callDocRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
 
     onSnapshot(offerCandidatesRef, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
@@ -1134,9 +1104,7 @@ document.getElementById('btn-aceptar-llamada').addEventListener('click', async (
         });
     });
 
-    unsubscribeCall = onSnapshot(callDocRef, (docSnap) => {
-        if (!docSnap.exists()) colgarLlamada();
-    });
+    unsubscribeCall = onSnapshot(callDocRef, (docSnap) => { if (!docSnap.exists()) colgarLlamada(); });
 });
 
 document.getElementById('btn-rechazar-llamada').addEventListener('click', () => {
@@ -1151,36 +1119,10 @@ async function colgarLlamada(borrarDoc = true) {
     salaVideo.classList.add('oculto');
     modalEntrante.classList.add('oculto');
     
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-    }
-    if (remoteStream) {
-        remoteStream.getTracks().forEach(track => track.stop());
-        remoteStream = null;
-    }
-    if (pc) {
-        pc.close();
-        pc = null;
-    }
-    if (unsubscribeCall) {
-        unsubscribeCall();
-        unsubscribeCall = null;
-    }
-    if (borrarDoc && currentCallDocId) {
-        await deleteDoc(doc(db, "llamadas", currentCallDocId));
-    }
+    if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
+    if (remoteStream) { remoteStream.getTracks().forEach(track => track.stop()); remoteStream = null; }
+    if (pc) { pc.close(); pc = null; }
+    if (unsubscribeCall) { unsubscribeCall(); unsubscribeCall = null; }
+    if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
 }
-
-
-
-
-
-
-
-
-
-
-
-
