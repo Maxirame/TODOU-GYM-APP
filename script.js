@@ -649,48 +649,48 @@ function iniciarRestTimer() {
     }, 1000);
 }
 
-/* ==========================================
-   SECCIÓN 8: LAYOUT Y CARTAS 3D (FLIP)
-   ========================================== */
-.layout-dia { display: flex; gap: 25px; flex: 1; overflow: hidden; width: 100%; min-height: 0;}
-.columna-fija { width: 330px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; min-height: 0;}
-.columna-scroll { flex: 1; display: flex; flex-direction: column; background: transparent; overflow: hidden; min-height: 0;}
-
-#listaEjerciciosUI { flex: 1; overflow-y: auto; padding-right: 15px; margin-top: 5px; min-height: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; align-content: start; padding-bottom: 20px;}
-
-.ejercicio-flip-container { perspective: 1200px; width: 100%; }
-.ejercicio-card-inner { position: relative; width: 100%; height: 100%; display: grid; transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
-.ejercicio-card-inner.flipped { transform: rotateY(180deg); }
-.ejercicio-card-front, .ejercicio-card-back { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; height: 100%; }
-.ejercicio-card-front { transform: rotateY(0deg); }
-.ejercicio-card-back { transform: rotateY(180deg); display: flex; flex-direction: column; }
-
-/* Tarjetas de Ejercicios Liquid Glass */
-.ejercicio-item { 
-    background: linear-gradient(145deg, #1e1e22 0%, #151518 100%);
-    padding: 20px; border-radius: 20px; border: var(--glass-border); 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+// ==========================================
+// SECCIÓN 8: FLUJO DE VENTANAS E HISTORIAL
+// ==========================================
+function abrirDia(dia) {
+    diaActivo = dia;
+    document.getElementById('titulo-dia').innerText = `${dia} de Guerra`;
+    document.getElementById('vista-semana').style.display = 'none';
+    document.getElementById('vista-cuenta').style.display = 'none';
+    document.getElementById('vista-dia').style.display = 'flex';
+    
+    inicializarIslaDescanso();
+    actualizarInterfazDia(); 
+    actualizarDisplayCrono();
 }
-.ejercicio-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.titulo-ejercicio { font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-.badge-pr { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; font-weight: 700; margin-bottom: 15px; transition: color 0.3s;}
 
-/* CAMBIO: Botón de info siempre amarillo por defecto */
-.btn-info-carta { 
-    background: linear-gradient(145deg, #eaff4d 0%, #b8d11c 100%); border: none; color: #000; 
-    border-radius: 50%; width: 26px; height: 26px; font-size: 16px; font-weight: 900; transition: 0.3s; flex-shrink: 0; padding:0; display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 4px 10px rgba(217, 245, 34, 0.4), inset 0 1px 2px rgba(255,255,255,0.3);
+document.getElementById('btn-volver-semana').addEventListener('click', () => { diaActivo = null; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
+document.getElementById('btn-abrir-cuenta').addEventListener('click', () => { document.getElementById('vista-semana').style.display = 'none'; document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'flex'; renderizarHistorial(); });
+document.getElementById('btn-volver-desde-cuenta').addEventListener('click', () => { document.getElementById('vista-dia').style.display = 'none'; document.getElementById('vista-cuenta').style.display = 'none'; document.getElementById('vista-semana').style.display = 'flex'; });
+
+document.getElementById('btn-guardar-dia').addEventListener('click', () => {
+    if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
+    historialGlobal.unshift({ fecha: new Date().toLocaleDateString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit' }), diaSemana: diaActivo, rutina: JSON.parse(JSON.stringify(baseDeDatosLocal[diaActivo])), tiempo: document.getElementById('display-cronometro').innerText });
+    guardarDatosEnNube(); alert(`¡Día guardado con éxito!\nTiempo: ${document.getElementById('display-cronometro').innerText}`);
+});
+
+document.getElementById('btn-reiniciar-semana').addEventListener('click', () => { if(confirm('¿Destruir la semana? Tus récords y el historial se conservan.')) { estadoDias = {}; guardarDatosEnNube(); renderizarSemana(); } });
+document.getElementById('btn-reiniciar-historico').addEventListener('click', () => { if(confirm('⚠️ ¿Reiniciar tus días totales de gloria a cero?')) { totalEntrenamientos = 0; guardarDatosEnNube(); renderizarSemana(); } });
+document.getElementById('btn-borrar-todo').addEventListener('click', () => { if(confirm('⚠️ ¿Estás seguro de borrar TODO tu historial guardado? Esta acción no se puede deshacer.')) { historialGlobal = []; guardarDatosEnNube(); renderizarHistorial(); alert('Historial borrado con éxito.'); } });
+
+function renderizarHistorial() {
+    const contenedor = document.getElementById('contenedor-historial');
+    if (historialGlobal.length === 0) return contenedor.innerHTML = '<p style="text-align:center; color: var(--text-muted);">Aún no has guardado ningún entrenamiento.</p>';
+    contenedor.innerHTML = historialGlobal.map(registro => `
+        <div class="tarjeta-historial">
+            <div class="fecha-historial">${escapeHTML(registro.fecha)} <span class="badge-dia">${escapeHTML(registro.diaSemana)} - <i class="ph ph-clock"></i> ${escapeHTML(registro.tiempo)}</span></div>
+            ${registro.rutina.map(ej => `
+                <div class="item-historial-ejercicio"><h4>${escapeHTML(ej.nombre)}</h4><div class="resumen-series">
+                    ${Array.from({length: ej.series}).map((_, i) => `<div class="mini-serie">S${i+1}: <strong>${escapeHTML((ej.repesRealizadas && ej.repesRealizadas[i]) || '-')}</strong>x<strong>${escapeHTML((ej.pesosRealizados && ej.pesosRealizados[i]) || '-')}kg</strong></div>`).join('')}
+                </div></div>
+            `).join('')}
+        </div>`).join('');
 }
-.btn-info-carta:hover { transform: scale(1.15); box-shadow: 0 5px 15px rgba(217, 245, 34, 0.6);}
-
-.header-back-carta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.btn-cerrar-back { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2); font-size: 16px; border-radius: 50%; width: 32px; height: 32px; transition: 0.3s; padding:0; display:flex; align-items:center; justify-content:center;}
-.btn-cerrar-back:hover { background: rgba(255,255,255,0.2); color: #fff; transform: scale(1.1); }
-
-/* CORRECCIÓN: Se arregla el nombre de la clase para la X */
-.btn-borrar-ejercicio { background: transparent; border: none; color: var(--text-muted); font-size: 20px; transition: 0.2s; padding: 0; display: flex; justify-content: center; align-items: center; cursor: pointer;}
-.btn-borrar-ejercicio:hover { color: var(--danger); transform: scale(1.1); }
-};
 
 // ==========================================
 // SECCIÓN 9: RED SOCIAL Y MOTOR EN TIEMPO REAL
@@ -1070,6 +1070,7 @@ async function colgarLlamada(borrarDoc = true) {
     }
     currentCallDocId = null;
 }
+
 
 
 
