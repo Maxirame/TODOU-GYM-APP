@@ -1113,9 +1113,10 @@ async function colgarLlamada(borrarDoc = true) {
 // ==========================================
 // SECCIÓN 11: LÓGICA DE METAS Y EVENTOS
 // ==========================================
+let fechaEventoActivo = null;
+
 document.getElementById('btn-nuevo-evento').addEventListener('click', () => {
     document.getElementById('modal-evento').classList.remove('oculto');
-    // Pre-seleccionar la fecha de mañana por defecto
     const manana = new Date();
     manana.setDate(manana.getDate() + 1);
     document.getElementById('input-fecha-evento').value = obtenerFechaLocal(manana);
@@ -1131,17 +1132,14 @@ document.getElementById('btn-guardar-evento').addEventListener('click', () => {
     
     if(!titulo || !fecha) return alert('Por favor, ingresa el nombre de la meta y selecciona una fecha.');
     
-    // Guardamos el evento
     misEventos[fecha] = titulo;
     guardarDatosEnNube();
     
-    // Forzamos la actualización visual
     renderizarSemana();
     actualizarCountdownEventos();
     
     document.getElementById('modal-evento').classList.add('oculto');
     document.getElementById('input-titulo-evento').value = '';
-    alert('¡Meta programada con éxito! La verás resaltada en color violeta en tu calendario.');
 });
 
 function actualizarCountdownEventos() {
@@ -1153,16 +1151,17 @@ function actualizarCountdownEventos() {
     
     let proximoEvento = null;
     let minDiff = Infinity;
+    fechaEventoActivo = null;
 
     for (const [fechaStr, titulo] of Object.entries(misEventos)) {
         const evObj = new Date(fechaStr + 'T00:00:00');
         const diffTime = evObj.getTime() - hoyObj.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Solo miramos eventos de hoy en adelante
         if (diffDays >= 0 && diffDays < minDiff) {
             minDiff = diffDays;
             proximoEvento = { titulo, dias: diffDays };
+            fechaEventoActivo = fechaStr;
         }
     }
 
@@ -1175,6 +1174,12 @@ function actualizarCountdownEventos() {
     }
 }
 
-
-
-
+// Lógica para el botón de eliminar evento
+document.getElementById('btn-eliminar-evento-activo')?.addEventListener('click', () => {
+    if(fechaEventoActivo && confirm(`¿Seguro que quieres eliminar la meta: "${misEventos[fechaEventoActivo]}"?`)) {
+        delete misEventos[fechaEventoActivo];
+        guardarDatosEnNube();
+        renderizarSemana();
+        actualizarCountdownEventos();
+    }
+});
