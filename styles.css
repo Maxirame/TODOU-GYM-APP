@@ -544,7 +544,7 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     display: flex; align-items: center; gap: 20px; z-index: 10;
 }
 
-/* Fix para forzar que el botón WSP respete el layout flex (anulando el absolute previo) */
+/* Fix para forzar que el botón WSP respete el layout flex */
 .btn-wsp-global {
     position: relative !important; right: auto !important; top: auto !important; transform: none !important; margin: 0 !important;
 }
@@ -583,10 +583,36 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     box-shadow: 0 0 8px #bf5af2;
 }
 
+/* FIX: MODAL ANIMADO "AGUJERO NEGRO" HACIA EL BOTON + */
+.modal-animado {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    z-index: 9999; display: flex; justify-content: center; align-items: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s ease;
+}
+.modal-animado.visible {
+    opacity: 1; visibility: visible;
+}
+.card-meta {
+    border-color: rgba(191, 90, 242, 0.4); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 2px rgba(191, 90, 242, 0.2); 
+    max-width: 340px; padding: 25px; width: 90%;
+    /* Efecto de nacimiento desde la esquina superior derecha (donde está el botón) */
+    transform: translate(35vw, -35vh) scale(0);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+}
+.modal-animado.visible .card-meta {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+}
+
 @media (max-width: 768px) {
     .acciones-banner-right {
         position: relative; right: auto; top: auto; transform: none; margin-top: 15px; 
         flex-wrap: wrap; justify-content: center; width: 100%;
     }
     .info-evento-banner { align-items: center; width: 100%; margin-bottom: 5px; }
+    
+    /* En móvil el botón está al medio, así que el origen de la animación cambia */
+    .card-meta { transform: translate(0, -35vh) scale(0); }
 }
