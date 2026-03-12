@@ -1116,14 +1116,14 @@ async function colgarLlamada(borrarDoc = true) {
 let fechaEventoActivo = null;
 
 document.getElementById('btn-nuevo-evento').addEventListener('click', () => {
-    document.getElementById('modal-evento').classList.remove('oculto');
+    document.getElementById('modal-evento').classList.add('visible'); // Se anima desde el +
     const manana = new Date();
     manana.setDate(manana.getDate() + 1);
     document.getElementById('input-fecha-evento').value = obtenerFechaLocal(manana);
 });
 
 document.getElementById('btn-cerrar-modal-evento').addEventListener('click', () => {
-    document.getElementById('modal-evento').classList.add('oculto');
+    document.getElementById('modal-evento').classList.remove('visible'); // Vuelve al +
 });
 
 document.getElementById('btn-guardar-evento').addEventListener('click', () => {
@@ -1138,7 +1138,7 @@ document.getElementById('btn-guardar-evento').addEventListener('click', () => {
     renderizarSemana();
     actualizarCountdownEventos();
     
-    document.getElementById('modal-evento').classList.add('oculto');
+    document.getElementById('modal-evento').classList.remove('visible'); 
     document.getElementById('input-titulo-evento').value = '';
 });
 
