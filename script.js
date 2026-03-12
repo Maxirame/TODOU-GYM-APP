@@ -748,7 +748,7 @@ document.getElementById('btn-guardar-dia').addEventListener('click', () => {
     if (!diaActivo || !baseDeDatosLocal[diaActivo] || baseDeDatosLocal[diaActivo].length === 0) return alert("No tienes ejercicios cargados hoy para guardar.");
     
     // Refuerzo: Si al guardar pasaste el minuto, forzamos el fueguito
-    if (elapsedTime >= 60000 && !estadoDias[diaActivo]) {
+    if (elapsedTime >= 600000 && !estadoDias[diaActivo]) {
         estadoDias[diaActivo] = true;
         totalEntrenamientos++;
         renderizarSemana();
@@ -1126,3 +1126,4 @@ async function colgarLlamada(borrarDoc = true) {
     if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
 }
+
