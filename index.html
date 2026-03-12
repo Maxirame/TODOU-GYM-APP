@@ -106,7 +106,13 @@
         </div>
     </div>
 
-    <div id="vista-dia" style="display: none;">
+    <div id="vista-dia" style="display: none; position: relative;">
+        <div id="isla-descanso" class="isla-descanso">
+            <i class="ph-fill ph-timer"></i>
+            <span id="tiempo-descanso-ui">03:00</span>
+            <button id="btn-cerrar-descanso" title="Omitir descanso"><i class="ph ph-x"></i></button>
+        </div>
+
         <div class="header-dia">
             <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
             <h1 id="titulo-dia" class="titulo-dia-text">Entrenamiento</h1>
@@ -124,8 +130,18 @@
                         <option value="Aperturas Mancuerna"></option>
                         <option value="Press Banca"></option>
                         <option value="Press Banca Mancuerna"></option>
+                        <option value="Press Inclinado"></option>
+                        <option value="Press Inclinado Mancuerna"></option>
                         <option value="Flexiones de Brazo"></option>
-                        </datalist>
+                        <option value="Vuelo Lateral"></option>
+                        <option value="Press Militar"></option>
+                        <option value="Press Frances"></option>
+                        <option value="Dominadas"></option>
+                        <option value="Curl Biceps"></option>
+                        <option value="Sentadilla"></option>
+                        <option value="Peso Muerto"></option>
+                        <option value="Abs"></option>
+                    </datalist>
 
                     <div class="selector-series-wrapper">
                         <span>Series:</span>
@@ -208,3 +224,4 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
