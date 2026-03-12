@@ -516,4 +516,25 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; font-weight: 700; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
 }
 
+/* ==========================================
+   SECCIÓN 14: DYNAMIC ISLAND (Descanso)
+   ========================================== */
+.isla-descanso {
+    position: absolute; top: 15px; left: 50%; transform: translate(-50%, -20px) scale(0.9);
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px;
+    padding: 10px 20px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.2);
+    z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.isla-descanso.visible { 
+    transform: translate(-50%, 0) scale(1); opacity: 1; visibility: visible; 
+    border-color: rgba(217, 245, 34, 0.4); box-shadow: 0 10px 30px rgba(217, 245, 34, 0.15);
+}
+.isla-descanso i.ph-timer { color: var(--accent-neon); font-size: 22px; animation: pulse-text 2s infinite alternate;}
+#tiempo-descanso-ui { color: var(--text-main); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: 1px;}
+#btn-cerrar-descanso { background: rgba(255,255,255,0.1); border: none; color: var(--text-muted); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-left: 5px; cursor: pointer; transition: 0.2s; padding: 0;}
+#btn-cerrar-descanso:hover { background: rgba(239, 68, 68, 0.2); color: var(--danger); transform: scale(1.1);}
+
+
 
