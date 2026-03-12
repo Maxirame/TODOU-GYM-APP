@@ -254,7 +254,7 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
 
-            verificarResetSemanal(); 
+            // ELIMINADO EL LLAMADO AL RESET SEMANAL AQUÍ
             renderizarSemana();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
@@ -291,10 +291,17 @@ function renderizarSemana() {
     const hoyStr = obtenerFechaLocal();
     const hoyObj = new Date();
     
+    // FECHA DE INICIO ABSOLUTA: Lunes 9 de Marzo de 2026 (mes 2 porque arranca en 0)
+    const fechaInicio = new Date(2026, 2, 9);
+    
+    // Genera hasta 15 días en el futuro desde HOY, así siempre hay margen.
+    const fechaFin = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + 15);
+    
     let html = '';
-    for (let i = -20; i <= 5; i++) {
-        let d = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + i);
-        
+    let d = new Date(fechaInicio);
+    
+    // Bucle: Desde el 9/03/2026 hasta el futuro
+    while (d <= fechaFin) {
         const fechaStr = obtenerFechaLocal(d);
         const esHoy = fechaStr === hoyStr;
         const tieneFuego = estadoDias[fechaStr]; 
@@ -310,17 +317,22 @@ function renderizarSemana() {
                 ${tieneFuego ? '<i class="ph-fill ph-fire fueguito"></i>' : '<div class="fuego-placeholder"></div>'}
             </div>
         `;
+        
+        // Sumar un día
+        d.setDate(d.getDate() + 1);
     }
+    
     contenedor.innerHTML = html;
     actualizarRango();
 
-    // FIX DEFINITIVO: Centrado perfecto con scrollIntoView
+    // Centrado ultra preciso (Calcula la mitad de tu pantalla exacta)
     setTimeout(() => {
         const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
         if(tarjetaHoy) {
-            tarjetaHoy.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            const posicionCentro = tarjetaHoy.offsetLeft - (contenedor.clientWidth / 2) + (tarjetaHoy.clientWidth / 2);
+            contenedor.scrollTo({ left: posicionCentro, behavior: 'smooth' });
         }
-    }, 300);
+    }, 200);
 }
 
 document.getElementById('contenedor-tarjetas').addEventListener('click', (e) => {
@@ -1111,5 +1123,6 @@ async function colgarLlamada(borrarDoc = true) {
     if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
 }
+
 
 
