@@ -63,13 +63,19 @@
 
             <div class="acciones-banner-right">
                 <div id="contenedor-proximo-evento" class="info-evento-banner" style="display:none;">
-                    <span class="evento-etiqueta">EVENTOS</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2px;">
+                        <span class="evento-etiqueta">EVENTOS</span>
+                        <button id="btn-eliminar-evento-activo" class="btn-borrar-meta" title="Eliminar esta meta"><i class="ph ph-trash"></i></button>
+                    </div>
                     <span id="texto-proximo-evento" class="evento-texto">Faltan -- días para: --</span>
                 </div>
-                <button id="btn-nuevo-evento" class="btn-evento-violeta" title="Programar Meta/Evento"><i class="ph ph-plus"></i></button>
-                <button class="btn-wsp-global" title="Avisarle a la comunidad" onclick="window.open('https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw', '_blank')">
-                    <i class="ph-fill ph-whatsapp-logo"></i>
-                </button>
+                
+                <div style="display: flex; gap: 25px; align-items: center;">
+                    <button id="btn-nuevo-evento" class="btn-evento-violeta" title="Programar Meta/Evento"><i class="ph ph-plus"></i></button>
+                    <button class="btn-wsp-global" title="Avisarle a la comunidad" onclick="window.open('https://chat.whatsapp.com/GPtrTGFtMhk8icwQlcMbfw', '_blank')">
+                        <i class="ph-fill ph-whatsapp-logo"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -268,16 +274,16 @@
     </div>
 
     <div id="modal-evento" class="modal-video oculto">
-        <div class="card-llamada" style="border-color: rgba(191, 90, 242, 0.4); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 2px rgba(191, 90, 242, 0.2);">
-            <h3 style="margin-top:0; color:#bf5af2; display:flex; align-items:center; justify-content:center; gap:8px;"><i class="ph-fill ph-calendar-star"></i> Nueva Meta</h3>
+        <div class="card-llamada" style="border-color: rgba(191, 90, 242, 0.4); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 2px rgba(191, 90, 242, 0.2); max-width: 340px; padding: 25px; width: 90%;">
+            <h3 style="margin-top:0; color:#bf5af2; display:flex; align-items:center; justify-content:center; gap:8px; font-size: 18px;"><i class="ph-fill ph-calendar-star"></i> Nueva Meta</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Programa una fecha especial en tu calendario.</p>
             
             <input type="text" id="input-titulo-evento" placeholder="Ej: Examen de Guardavidas" class="input-burbuja" style="background: rgba(0,0,0,0.5);">
             <input type="date" id="input-fecha-evento" class="input-burbuja" style="background: rgba(0,0,0,0.5); margin-top: 10px; color-scheme: dark;">
             
             <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
-                <button id="btn-guardar-evento" class="btn-aceptar-call" style="background: #bf5af2; color: #fff;"><i class="ph-fill ph-check"></i> GUARDAR</button>
-                <button id="btn-cerrar-modal-evento" class="btn-rechazar-call" style="background: #3f3f46;"><i class="ph ph-x"></i> CANCELAR</button>
+                <button id="btn-guardar-evento" class="btn-aceptar-call" style="background: #bf5af2; color: #fff; width: 100%;"><i class="ph-fill ph-check"></i> GUARDAR</button>
+                <button id="btn-cerrar-modal-evento" class="btn-rechazar-call" style="background: #3f3f46; width: 100%;"><i class="ph ph-x"></i> CANCELAR</button>
             </div>
         </div>
     </div>
