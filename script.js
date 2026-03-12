@@ -134,21 +134,6 @@ const infoEjercicios = {
     "Elevacion Piernas Colgando": { youtubeId: "" }
 };
 
-// --- NUEVAS FUNCIONES DE SISTEMA ---
-function verificarResetSemanal() {
-    const ahora = new Date();
-    const diaSemana = ahora.getDay(); 
-    const diff = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-    const lunes = new Date(ahora.getFullYear(), ahora.getMonth(), diff);
-    lunes.setHours(0,0,0,0);
-    
-    if (ultimoResetSemanal < lunes.getTime()) {
-        estadoDias = {};
-        ultimoResetSemanal = Date.now();
-        guardarDatosEnNube();
-    }
-}
-
 function actualizarRango() {
     let rango = "Cadete";
     if (totalEntrenamientos >= 730) {
@@ -1126,4 +1111,5 @@ async function colgarLlamada(borrarDoc = true) {
     if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
 }
+
 
