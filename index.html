@@ -20,13 +20,13 @@
             <button class="btn-accion" id="btn-login">INICIAR SESIÓN</button>
             <button class="btn-volver" id="btn-register" style="width: 100%; margin-top: 15px; border-style: dashed;">Crear nueva cuenta</button>
             
-            <div style="display: flex; align-items: center; margin: 15px 0;">
-                <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
-                <span style="margin: 0 10px; font-size: 12px; color: var(--text-muted);">O</span>
-                <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+            <div class="auth-divider">
+                <div class="divider-line"></div>
+                <span>O</span>
+                <div class="divider-line"></div>
             </div>
 
-            <button id="btn-google" style="background: white; color: #000; border: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <button id="btn-google" class="btn-google-auth">
                 <svg width="20" height="20" viewBox="0 0 48 48" fill="none"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.73 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 Continuar con Google
             </button>
@@ -37,17 +37,17 @@
 
     <div id="vista-semana" style="display: none; flex-direction: column; height: 100%;">
         <div id="banner-stats">
-            <div style="display: flex; gap: 15px; align-items: center; z-index: 2; position: relative;">
+            <div class="banner-perfil-wrapper">
                 <button class="btn-perfil" id="btn-abrir-cuenta">
                     <div class="icono-perfil" id="letra-avatar">M</div>
-                    <div style="text-align: left;">
-                        <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">CUENTA</span>
-                        <span style="font-size: 16px; font-weight: 800; color: var(--text-main);">
-                            <span id="nombre-usuario">Atleta</span><span id="tag-usuario" style="color: var(--text-muted); font-size: 12px; margin-left: 4px;">#0000</span>
+                    <div class="perfil-text-info">
+                        <span class="perfil-label">CUENTA</span>
+                        <span class="perfil-nombre">
+                            <span id="nombre-usuario">Atleta</span><span id="tag-usuario" class="perfil-tag">#0000</span>
                         </span>
                     </div>
                 </button>
-                <div style="display: flex; gap: 8px;">
+                <div class="perfil-acciones">
                     <button id="btn-editar-nombre" class="btn-mini-top" title="Editar Nombre"><i class="ph ph-pencil-simple"></i></button>
                     <button id="btn-cerrar-sesion-main" class="btn-mini-top salir" title="Cerrar Sesión">SALIR</button>
                 </div>
@@ -70,23 +70,23 @@
         
         <div class="dashboard-grid">
             <div class="card panel-comunidad-main">
-                <h3 style="font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-top: 0; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h3 class="header-comunidad">
                     Comunidad
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <button class="btn-ver-solicitudes" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; position: relative; padding: 0;" title="Solicitudes">
+                        <button class="btn-ver-solicitudes" title="Solicitudes">
                             <i class="ph ph-bell"></i>
-                            <span class="badge-notif" style="display: none; position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
+                            <span class="badge-notif" style="display: none;"></span>
                         </button>
-                        <button class="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 0;" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
+                        <button class="btn-add-amigo" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
                     </div>
                 </h3>
                 
-                <div class="panel-solicitudes" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">Nuevas solicitudes:</h4>
+                <div class="panel-solicitudes" style="display: none;">
+                    <h4>Nuevas solicitudes:</h4>
                     <div class="lista-solicitudes"></div>
                 </div>
 
-                <div class="contenedor-lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+                <div class="contenedor-lista-amigos"></div>
             </div>
 
             <div class="card panel-modulo">
@@ -109,80 +109,31 @@
     <div id="vista-dia" style="display: none;">
         <div class="header-dia">
             <button class="btn-volver" id="btn-volver-semana">❮ VOLVER</button>
-            <h1 id="titulo-dia" style="color: var(--accent-neon); margin: 0;">Entrenamiento</h1>
+            <h1 id="titulo-dia" class="titulo-dia-text">Entrenamiento</h1>
             
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; position: relative;">
+            <div class="acciones-dia-wrapper">
                 <button class="btn-icono-accion" id="btn-toggle-add" title="Añadir Ejercicio"><i class="ph ph-plus"></i></button>
                 <button class="btn-icono-accion" id="btn-guardar-dia" title="Guardar Entrenamiento"><i class="ph ph-floppy-disk"></i></button>
                 <button class="btn-icono-accion" id="btn-limpiar-checks" title="Limpiar Checks"><i class="ph ph-broom"></i></button>
 
                 <div id="burbuja-add-ejercicio" class="burbuja-panel">
-                    <h3 style="margin-top: 0; margin-bottom: 20px; text-transform: uppercase; color: var(--accent-neon);">Añadir Ejercicio</h3>
+                    <h3 class="titulo-burbuja">Añadir Ejercicio</h3>
                     
-                    <input type="text" id="inputEjercicio" list="listaEjercicios" placeholder="Ej: Press Banca" style="width: 100%; margin-bottom: 15px;">
+                    <input type="text" id="inputEjercicio" list="listaEjercicios" placeholder="Ej: Press Banca" class="input-burbuja">
                     <datalist id="listaEjercicios">
                         <option value="Aperturas Mancuerna"></option>
                         <option value="Press Banca"></option>
                         <option value="Press Banca Mancuerna"></option>
-                        <option value="Press Inclinado"></option>
-                        <option value="Press Inclinado Mancuerna"></option>
-                        <option value="Press Declinado"></option>
-                        <option value="Press Declinado Mancuerna"></option>
                         <option value="Flexiones de Brazo"></option>
-                        <option value="Flexiones Inclinadas"></option>
-                        <option value="Flexiones Declinadas"></option>
-                        <option value="Flexiones Diamante"></option>
-                        <option value="Fondo de Pecho"></option>
-                        <option value="Vuelo Lateral"></option>
-                        <option value="Press Militar"></option>
-                        <option value="Press Militar Mancuerna"></option>
-                        <option value="Press Arnold"></option>
-                        <option value="Elevacion Frontal"></option>
-                        <option value="Cuerda Combate Alternada"></option>
-                        <option value="Press Banca Cerrado"></option>
-                        <option value="Fondo en Banco"></option>
-                        <option value="Patada Triceps"></option>
-                        <option value="Extension Triceps Polea Alta"></option>
-                        <option value="Fondos Triceps"></option>
-                        <option value="Press Frances"></option>
-                        <option value="Extension Triceps"></option>
-                        <option value="Dominadas"></option>
-                        <option value="Dominadas Neutro"></option>
-                        <option value="Dominadas Supino"></option>
-                        <option value="Natacion"></option>
-                        <option value="Curl Biceps"></option>
-                        <option value="Curl Biceps Mancuerna"></option>
-                        <option value="Curl Predicador"></option>
-                        <option value="Curl Predicador Mancuerna"></option>
-                        <option value="Curl Biceps Concentrado"></option>
-                        <option value="Curl Biceps Inclinado"></option>
-                        <option value="Curl Martillo"></option>
-                        <option value="Curl 21"></option>
-                        <option value="Bicicleta"></option>
-                        <option value="Caminar"></option>
-                        <option value="Trotar"></option>
-                        <option value="Step UP"></option>
-                        <option value="Burpee"></option>
-                        <option value="Escalera"></option>
-                        <option value="Puente Gluteos"></option>
-                        <option value="Patada Gluteos Polea"></option>
-                        <option value="Soga"></option>
-                        <option value="Elevacion Talones"></option>
-                        <option value="Abs"></option>
-                        <option value="Abs declinado"></option>
-                        <option value="Plancha"></option>
-                        <option value="Giros Rusos"></option>
-                        <option value="Elevacion Piernas"></option>
-                        <option value="Elevacion Piernas Colgando"></option>
-                    </datalist>
+                        </datalist>
 
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                        <span style="font-weight: 800; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Series:</span>
-                        <input type="number" id="inputSeries" placeholder="Nº" min="1" style="flex: 1;">
+                    <div class="selector-series-wrapper">
+                        <span>Series:</span>
+                        <input type="number" id="inputSeries" placeholder="Nº" min="1">
                     </div>
                     
                     <button class="btn-accion" id="btn-agregar-ejercicio" style="margin-top: 0;"><i class="ph ph-plus"></i> AÑADIR A LA RUTINA</button>
-                    <button class="btn-volver" id="btn-cerrar-add" style="width: 100%; margin-top: 10px; border: none;">Cancelar</button>
+                    <button class="btn-volver btn-cancelar-burbuja" id="btn-cerrar-add">Cancelar</button>
                 </div>
             </div>
 
@@ -196,43 +147,43 @@
         <div class="layout-dia">
             <div class="columna-fija">
                 <div class="card" style="flex: 1; display: flex; flex-direction: column; padding: 15px;">
-                    <h3 style="font-size: 14px; text-transform: uppercase; color: var(--accent-neon); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 class="header-comunidad">
                         Comunidad
                         <div style="display: flex; gap: 12px; align-items: center;">
-                            <button class="btn-ver-solicitudes" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; position: relative; padding: 0;" title="Solicitudes">
+                            <button class="btn-ver-solicitudes" title="Solicitudes">
                                 <i class="ph ph-bell"></i>
-                                <span class="badge-notif" style="display: none; position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
+                                <span class="badge-notif" style="display: none;"></span>
                             </button>
-                            <button class="btn-add-amigo" style="background: transparent; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 0;" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
+                            <button class="btn-add-amigo" title="Añadir amigo"><i class="ph ph-user-plus"></i></button>
                         </div>
                     </h3>
                     
-                    <div class="panel-solicitudes" style="display: none; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--text-muted);">Nuevas solicitudes:</h4>
+                    <div class="panel-solicitudes" style="display: none;">
+                        <h4>Nuevas solicitudes:</h4>
                         <div class="lista-solicitudes"></div>
                     </div>
 
-                    <div class="contenedor-lista-amigos" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+                    <div class="contenedor-lista-amigos"></div>
                 </div>
             </div>
 
             <div class="columna-scroll">
-                <h3 style="text-transform: uppercase; margin: 0; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">Tus Ejercicios</h3>
+                <h3 class="titulo-seccion-scroll">Tus Ejercicios</h3>
                 <div id="listaEjerciciosUI"></div>
             </div>
         </div>
     </div>
 
     <div id="vista-cuenta" style="display: none;">
-        <div class="header-dia" style="margin-bottom: 30px; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div class="header-dia header-cuenta">
+            <div class="cuenta-volver-wrapper">
                 <button class="btn-volver" id="btn-volver-desde-cuenta" style="margin: 0;">❮ VOLVER AL PANEL</button>
                 <h1 style="color: var(--text-main); margin: 0;">Perfil de <span id="titulo-perfil-nombre">Atleta</span></h1>
             </div>
-            <button class="btn-borrar-historial" id="btn-borrar-todo" style="background: transparent; color: var(--danger); border: 1px dashed var(--danger); padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;">🗑 BORRAR HISTORIAL</button>
+            <button class="btn-borrar-historial" id="btn-borrar-todo">🗑 BORRAR HISTORIAL</button>
         </div>
 
-        <h3 style="color: var(--accent-neon); text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Tu Historial de Batallas</h3>
+        <h3 class="titulo-historial-seccion">Tu Historial de Batallas</h3>
         <div id="contenedor-historial" class="historial-grid"></div>
     </div>
 
@@ -241,8 +192,8 @@
             <h3 style="margin-top:0; color:var(--accent-neon); display:flex; align-items:center; justify-content:center; gap:8px;"><i class="ph-fill ph-phone-call"></i> Llamada Entrante</h3>
             <p id="texto-llamante" style="font-weight:bold; color:var(--text-main);">Alguien quiere entrenar...</p>
             <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
-                <button id="btn-aceptar-llamada" style="background: var(--success-green); color: #000; padding: 12px 25px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;"><i class="ph-fill ph-phone"></i> ACEPTAR</button>
-                <button id="btn-rechazar-llamada" style="background: var(--danger); color: #fff; padding: 12px 25px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;"><i class="ph-fill ph-phone-disconnect"></i> RECHAZAR</button>
+                <button id="btn-aceptar-llamada" class="btn-aceptar-call"><i class="ph-fill ph-phone"></i> ACEPTAR</button>
+                <button id="btn-rechazar-llamada" class="btn-rechazar-call"><i class="ph-fill ph-phone-disconnect"></i> RECHAZAR</button>
             </div>
         </div>
     </div>
