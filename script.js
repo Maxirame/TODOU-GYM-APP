@@ -28,7 +28,6 @@ function escapeHTML(str) {
     }[tag])) : '';
 }
 
-// FIX DEFINITIVO: Formato absoluto de fechas para evitar días clonados
 function obtenerFechaLocal(fecha = new Date()) {
     const y = fecha.getFullYear();
     const m = String(fecha.getMonth() + 1).padStart(2, '0');
@@ -46,6 +45,7 @@ let pesosMaximos = {};
 let historialGlobal = []; 
 let ultimoResetSemanal = 0; 
 let logrosDesbloqueados = []; 
+let misEventos = {}; // NUEVO: Diccionario para guardar metas/eventos
 
 // VARIABLES SOCIALES REAL-TIME
 let miTag = ""; 
@@ -62,76 +62,16 @@ let timerDescansoInterval;
 let descansoRestante = 0;
 
 const infoEjercicios = {
-    // --- PECTORALES ---
     "Aperturas Mancuerna": { youtubeId: "OtW0EYqBczI" },
     "Press Banca": { youtubeId: "TAH8RxOS0VI" },
     "Press Banca Mancuerna": { youtubeId: "TAH8RxOS0VI" },
     "Press Inclinado": { youtubeId: "-zbesyTNztQ" },
     "Press Inclinado Mancuerna": { youtubeId: "-zbesyTNztQ" },
-    "Press Declinado": { youtubeId: "" },
-    "Press Declinado Mancuerna": { youtubeId: "" },
-    "Flexiones de Brazo": { youtubeId: "" },
-    "Flexiones Inclinadas": { youtubeId: "" },
-    "Flexiones Declinadas": { youtubeId: "" },
-    "Flexiones Diamante": { youtubeId: "" },
-    "Fondo de Pecho": { youtubeId: "" },
-
-    // --- HOMBROS ---
     "Vuelo Lateral": { youtubeId: "UQkdNBpjFDo" }, 
     "Press Militar": { youtubeId: "DdITN8U-kFI" },
-    "Press Militar Mancuerna": { youtubeId: "" },
-    "Press Arnold": { youtubeId: "" },
     "Elevacion Frontal": { youtubeId: "HciAFZSN2Qo" }, 
-    "Cuerda Combate Alternada": { youtubeId: "" },
-
-    // --- TRICEPS ---
-    "Press Banca Cerrado": { youtubeId: "" },
-    "Fondo en Banco": { youtubeId: "" },
-    "Patada Triceps": { youtubeId: "" },
-    "Extension Triceps Polea Alta": { youtubeId: "" },
-    "Fondos Triceps": { youtubeId: "" },
     "Press Frances": { youtubeId: "L3bEz-vcdGU" },
-    "Extension Triceps": { youtubeId: "" }, 
-
-    // --- ESPALDA ---
-    "Dominadas": { youtubeId: "BT3CSQKeEww" },
-    "Dominadas Neutro": { youtubeId: "" }, 
-    "Dominadas Supino": { youtubeId: "" },
-    "Natacion": { youtubeId: "" },
-
-    // --- BICEPS ---
-    "Curl Biceps": { youtubeId: "" },
-    "Curl Biceps Mancuerna": { youtubeId: "" },
-    "Curl Predicador": { youtubeId: "" },
-    "Curl Predicador Mancuerna": { youtubeId: "" },
-    "Curl Biceps Concentrado": { youtubeId: "" },
-    "Curl Biceps Inclinado": { youtubeId: "" },
-    "Curl Martillo": { youtubeId: "" },
-    "Curl 21": { youtubeId: "" },
-
-    // --- CUADRICEPS ---
-    "Bicicleta": { youtubeId: "" },
-    "Caminar": { youtubeId: "" },
-    "Trotar": { youtubeId: "" },
-    "Step UP": { youtubeId: "" },
-    "Burpee": { youtubeId: "" },
-
-    // --- GLUTEOS ---
-    "Escalera": { youtubeId: "" },
-    "Puente Gluteos": { youtubeId: "" },
-    "Patada Gluteos Polea": { youtubeId: "" },
-
-    // --- GEMELOS ---
-    "Soga": { youtubeId: "" },
-    "Elevacion Talones": { youtubeId: "" },
-
-    // --- ABDOMINALES ---
-    "Abs": { youtubeId: "" },
-    "Abs declinado": { youtubeId: "" },
-    "Plancha": { youtubeId: "" }, 
-    "Giros Rusos": { youtubeId: "" },
-    "Elevacion Piernas": { youtubeId: "" },
-    "Elevacion Piernas Colgando": { youtubeId: "" }
+    "Dominadas": { youtubeId: "BT3CSQKeEww" }
 };
 
 function actualizarRango() {
@@ -217,7 +157,7 @@ async function guardarDatosEnNube() {
     try {
         await setDoc(doc(db, "usuarios", auth.currentUser.uid), {
             baseDeDatosLocal, estadoDias, totalEntrenamientos, fallosHistoricos, pesosMaximos, historialGlobal,
-            tiempoDescansoGlobal, ultimoResetSemanal, logrosDesbloqueados,
+            tiempoDescansoGlobal, ultimoResetSemanal, logrosDesbloqueados, misEventos,
             nombre: document.getElementById('nombre-usuario').innerText,
             tag: miTag,
             misAmigos
@@ -246,6 +186,7 @@ async function cargarDatosDeNube(uid) {
             tiempoDescansoGlobal = data.tiempoDescansoGlobal || 180; 
             ultimoResetSemanal = data.ultimoResetSemanal || 0;
             logrosDesbloqueados = data.logrosDesbloqueados || [];
+            misEventos = data.misEventos || {};
             
             misAmigos = data.misAmigos || [];
             solicitudesPendientes = data.solicitudesPendientes || [];
@@ -257,6 +198,7 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
 
             renderizarSemana();
+            if(typeof actualizarCountdownEventos === 'function') actualizarCountdownEventos();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
         }
@@ -300,41 +242,42 @@ function renderizarSemana() {
     const hoyStr = obtenerFechaLocal();
     const hoyObj = new Date();
     
-    // FECHA DE INICIO ABSOLUTA: Lunes 9 de Marzo de 2026 (mes 2 porque arranca en 0)
     const fechaInicio = new Date(2026, 2, 9);
-    
-    // Genera hasta 15 días en el futuro desde HOY, así siempre hay margen.
     const fechaFin = new Date(hoyObj.getFullYear(), hoyObj.getMonth(), hoyObj.getDate() + 15);
     
     let html = '';
     let d = new Date(fechaInicio);
     
-    // Bucle: Desde el 9/03/2026 hasta el futuro
     while (d <= fechaFin) {
         const fechaStr = obtenerFechaLocal(d);
         const esHoy = fechaStr === hoyStr;
         const tieneFuego = estadoDias[fechaStr]; 
+        const eventoTitulo = misEventos[fechaStr]; 
         
         const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const nombreDia = diasNombres[d.getDay()];
         const numDia = d.getDate();
 
+        // Si es hoy, gana la clase 'hoy'. Si no es hoy pero tiene evento, gana 'evento-especial'.
+        let claseTarjeta = '';
+        if (esHoy) claseTarjeta = 'hoy';
+        else if (eventoTitulo) claseTarjeta = 'evento-especial';
+
         html += `
-            <div class="tarjeta-dia ${esHoy ? 'hoy' : ''}" data-dia="${fechaStr}">
+            <div class="tarjeta-dia ${claseTarjeta}" data-dia="${fechaStr}">
                 <span class="nombre-dia">${nombreDia}</span>
                 <span class="num-dia">${numDia}</span>
                 ${tieneFuego ? '<i class="ph-fill ph-fire fueguito"></i>' : '<div class="fuego-placeholder"></div>'}
+                ${eventoTitulo && !esHoy ? `<div class="punto-evento" title="${escapeHTML(eventoTitulo)}"></div>` : ''}
             </div>
         `;
         
-        // Sumar un día
         d.setDate(d.getDate() + 1);
     }
     
     contenedor.innerHTML = html;
     actualizarRango();
 
-    // Centrado ultra preciso (Calcula la mitad de tu pantalla exacta)
     setTimeout(() => {
         const tarjetaHoy = contenedor.querySelector('.tarjeta-dia.hoy');
         if(tarjetaHoy) {
@@ -1165,6 +1108,71 @@ async function colgarLlamada(borrarDoc = true) {
     if (unsubscribeCall) { unsubscribeCall(); unsubscribeCall = null; }
     if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
+}
+
+// ==========================================
+// SECCIÓN 11: LÓGICA DE METAS Y EVENTOS
+// ==========================================
+document.getElementById('btn-nuevo-evento').addEventListener('click', () => {
+    document.getElementById('modal-evento').classList.remove('oculto');
+    // Pre-seleccionar la fecha de mañana por defecto
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    document.getElementById('input-fecha-evento').value = obtenerFechaLocal(manana);
+});
+
+document.getElementById('btn-cerrar-modal-evento').addEventListener('click', () => {
+    document.getElementById('modal-evento').classList.add('oculto');
+});
+
+document.getElementById('btn-guardar-evento').addEventListener('click', () => {
+    const titulo = document.getElementById('input-titulo-evento').value.trim();
+    const fecha = document.getElementById('input-fecha-evento').value;
+    
+    if(!titulo || !fecha) return alert('Por favor, ingresa el nombre de la meta y selecciona una fecha.');
+    
+    // Guardamos el evento
+    misEventos[fecha] = titulo;
+    guardarDatosEnNube();
+    
+    // Forzamos la actualización visual
+    renderizarSemana();
+    actualizarCountdownEventos();
+    
+    document.getElementById('modal-evento').classList.add('oculto');
+    document.getElementById('input-titulo-evento').value = '';
+    alert('¡Meta programada con éxito! La verás resaltada en color violeta en tu calendario.');
+});
+
+function actualizarCountdownEventos() {
+    const contenedor = document.getElementById('contenedor-proximo-evento');
+    const texto = document.getElementById('texto-proximo-evento');
+    
+    const hoyStr = obtenerFechaLocal();
+    const hoyObj = new Date(hoyStr + 'T00:00:00'); 
+    
+    let proximoEvento = null;
+    let minDiff = Infinity;
+
+    for (const [fechaStr, titulo] of Object.entries(misEventos)) {
+        const evObj = new Date(fechaStr + 'T00:00:00');
+        const diffTime = evObj.getTime() - hoyObj.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Solo miramos eventos de hoy en adelante
+        if (diffDays >= 0 && diffDays < minDiff) {
+            minDiff = diffDays;
+            proximoEvento = { titulo, dias: diffDays };
+        }
+    }
+
+    if (proximoEvento) {
+        contenedor.style.display = 'flex';
+        let txtDias = proximoEvento.dias === 0 ? "¡Es HOY!" : (proximoEvento.dias === 1 ? "Falta 1 día" : `Faltan ${proximoEvento.dias} días`);
+        texto.innerText = `${txtDias} para: ${proximoEvento.titulo}`;
+    } else {
+        contenedor.style.display = 'none';
+    }
 }
 
 
