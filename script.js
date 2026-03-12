@@ -210,6 +210,8 @@ document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () =
 // ==========================================
 // SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
 // ==========================================
+let latidoInterval = null;
+
 async function guardarDatosEnNube() {
     if (!auth.currentUser) return;
     try {
@@ -254,7 +256,6 @@ async function cargarDatosDeNube(uid) {
             document.getElementById('titulo-perfil-nombre').innerText = data.nombre || "Atleta";
             document.getElementById('letra-avatar').innerText = (data.nombre || "A").charAt(0).toUpperCase();
 
-            // ELIMINADO EL LLAMADO AL RESET SEMANAL AQUÍ
             renderizarSemana();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
@@ -262,6 +263,14 @@ async function cargarDatosDeNube(uid) {
     });
 
     updateDoc(docRef, { estadoSocial: 'online', ultimaConexion: Date.now() }).catch(e=>console.log(e));
+    
+    if(latidoInterval) clearInterval(latidoInterval);
+    latidoInterval = setInterval(() => {
+        if (auth.currentUser) {
+            updateDoc(docRef, { ultimaConexion: Date.now() }).catch(e=>console.warn("Error en latido"));
+        }
+    }, 60000);
+
     if(typeof activarEscuchaDeLlamadas === 'function') activarEscuchaDeLlamadas();
 }
 
@@ -403,11 +412,11 @@ function actualizarInterfazDia() {
                 <div class="ejercicio-card-inner" id="card-inner-${idx}">
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
+                            <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                                 <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
+                                <button class="btn-eliminar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                             </div>
-                            <button class="btn-eliminar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                         </div>
                         <div class="badge-pr" id="pr-${idx}"><i class="ph-fill ph-trophy"></i> Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
@@ -460,6 +469,7 @@ listaUI.addEventListener('click', (e) => {
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
+            if (typeof iniciarDescansoGlobal === 'function') iniciarDescansoGlobal();
         } else {
             cajaSerie.classList.remove('completada');
         }
@@ -545,7 +555,6 @@ listaUI.addEventListener('change', (e) => {
     }
 });
 
-// LÓGICA DE GESTOS SWIPE FLUIDOS
 let swipeStartX = 0;
 let swipeStartY = 0;
 let currentTranslate = 0;
@@ -690,8 +699,6 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             elapsedTime = Date.now() - startTime;
             actualizarDisplayCrono();
             
-            // LÓGICA DE JUEGO: Modificado a 60.000 (1 minuto) para que puedas probarlo fácil.
-            // Para la versión final ponele 600000 (10 minutos)
             if (elapsedTime >= 60000 && diaActivo && !estadoDias[diaActivo]) {
                 estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
@@ -715,6 +722,35 @@ document.getElementById('btn-reset-crono').addEventListener('click', () => {
         document.getElementById('btn-comenzar-pausa').innerHTML = '<i class="ph-fill ph-play"></i> COMENZAR';
         if(auth.currentUser) updateDoc(doc(db, "usuarios", auth.currentUser.uid), { estadoSocial: 'online' });
     }
+});
+
+function iniciarDescansoGlobal() {
+    clearInterval(timerDescansoInterval);
+    descansoRestante = tiempoDescansoGlobal; 
+    const isla = document.getElementById('isla-descanso');
+    isla.classList.add('visible');
+    actualizarUIISla();
+    
+    timerDescansoInterval = setInterval(() => {
+        descansoRestante--;
+        actualizarUIISla();
+        if (descansoRestante <= 0) {
+            clearInterval(timerDescansoInterval);
+            isla.classList.remove('visible');
+        }
+    }, 1000);
+}
+
+function actualizarUIISla() {
+    let m = Math.floor(descansoRestante / 60).toString().padStart(2, '0');
+    let s = (descansoRestante % 60).toString().padStart(2, '0');
+    const display = document.getElementById('tiempo-descanso-ui');
+    if(display) display.innerText = `${m}:${s}`;
+}
+
+document.getElementById('btn-cerrar-descanso')?.addEventListener('click', () => {
+    clearInterval(timerDescansoInterval);
+    document.getElementById('isla-descanso').classList.remove('visible');
 });
 
 // ==========================================
@@ -931,15 +967,22 @@ function renderizarAmigos() {
 
     const html = misAmigos.map(amigo => {
         const dataVivo = datosAmigosEnVivo[amigo.uid] || {};
-        const estado = dataVivo.estadoSocial || 'offline';
+        const nombreMostrar = dataVivo.nombre || amigo.nombre; 
+        
+        let estado = dataVivo.estadoSocial || 'offline';
         const ultConexion = dataVivo.ultimaConexion || 0;
+        const ahora = Date.now();
+        
+        if (estado !== 'offline' && (ahora - ultConexion > 180000)) {
+            estado = 'offline';
+        }
         
         let textoEstado = ""; let claseEstado = "offline";
         if (estado === 'online') { textoEstado = "Online"; claseEstado = "online"; } 
         else if (estado === 'entrenando') { textoEstado = "Entrenando..."; claseEstado = "entrenando"; } 
         else {
             if(ultConexion > 0) {
-                const mins = Math.floor((Date.now() - ultConexion) / 60000);
+                const mins = Math.floor((ahora - ultConexion) / 60000);
                 const horas = Math.floor(mins / 60);
                 const dias = Math.floor(horas / 24);
                 if (dias > 0) textoEstado = `hace ${dias}d`;
@@ -952,9 +995,9 @@ function renderizarAmigos() {
 
         return `
         <div class="amigo-item ${claseEstado}"> 
-            <div class="amigo-avatar">${escapeHTML(amigo.nombre).charAt(0).toUpperCase()}</div>
+            <div class="amigo-avatar">${escapeHTML(nombreMostrar).charAt(0).toUpperCase()}</div>
             <div class="amigo-info">
-                <span class="amigo-nombre">${escapeHTML(amigo.nombre)} <span class="amigo-tag">#${escapeHTML(amigo.tag)}</span></span>
+                <span class="amigo-nombre">${escapeHTML(nombreMostrar)} <span class="amigo-tag">#${escapeHTML(amigo.tag)}</span></span>
                 <span class="amigo-estado">${textoEstado}</span>
             </div>
             <div style="display: flex; gap: 5px;">
@@ -1123,6 +1166,7 @@ async function colgarLlamada(borrarDoc = true) {
     if (borrarDoc && currentCallDocId) { await deleteDoc(doc(db, "llamadas", currentCallDocId)); }
     currentCallDocId = null;
 }
+
 
 
 
