@@ -306,7 +306,6 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
-            // FIX: El botón btn-eliminar-serie ahora es todo el fondo rojo
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
                     <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie">
@@ -413,6 +412,8 @@ listaUI.addEventListener('click', (e) => {
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
+            // FIX: Restaurado el llamado a la Isla de Descanso
+            if (typeof iniciarDescansoGlobal === 'function') iniciarDescansoGlobal();
         } else {
             cajaSerie.classList.remove('completada');
         }
@@ -643,6 +644,8 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             elapsedTime = Date.now() - startTime;
             actualizarDisplayCrono();
             
+            // LÓGICA DE JUEGO: Modificado a 60.000 (1 minuto) para que puedas probarlo fácil.
+            // Para la versión final ponele 600000 (10 minutos)
             if (elapsedTime >= 60000 && diaActivo && !estadoDias[diaActivo]) {
                 estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
@@ -668,19 +671,23 @@ document.getElementById('btn-reset-crono').addEventListener('click', () => {
     }
 });
 
+// --- LÓGICA DE LA ISLA DE DESCANSO (RESTAURADA) ---
 function iniciarDescansoGlobal() {
     clearInterval(timerDescansoInterval);
     descansoRestante = tiempoDescansoGlobal; 
     const isla = document.getElementById('isla-descanso');
-    isla.classList.add('visible');
-    actualizarUIISla();
+    
+    if (isla) {
+        isla.classList.add('visible');
+        actualizarUIISla();
+    }
     
     timerDescansoInterval = setInterval(() => {
         descansoRestante--;
         actualizarUIISla();
         if (descansoRestante <= 0) {
             clearInterval(timerDescansoInterval);
-            isla.classList.remove('visible');
+            if(isla) isla.classList.remove('visible');
         }
     }, 1000);
 }
@@ -694,7 +701,8 @@ function actualizarUIISla() {
 
 document.getElementById('btn-cerrar-descanso')?.addEventListener('click', () => {
     clearInterval(timerDescansoInterval);
-    document.getElementById('isla-descanso').classList.remove('visible');
+    const isla = document.getElementById('isla-descanso');
+    if(isla) isla.classList.remove('visible');
 });
 
 // ==========================================
