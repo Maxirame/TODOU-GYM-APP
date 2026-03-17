@@ -664,7 +664,7 @@ document.getElementById('btn-comenzar-pausa').addEventListener('click', () => {
             
             // LÓGICA DE JUEGO: Modificado a 60.000 (1 minuto) para que puedas probarlo fácil.
             // Para la versión final ponele 600000 (10 minutos)
-            if (elapsedTime >= 60000 && diaActivo && !estadoDias[diaActivo]) {
+            if (elapsedTime >= 600000 && diaActivo && !estadoDias[diaActivo]) {
                 estadoDias[diaActivo] = true;
                 totalEntrenamientos++;
                 guardarDatosEnNube();
