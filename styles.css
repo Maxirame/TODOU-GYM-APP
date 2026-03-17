@@ -37,7 +37,6 @@ input[type=number] { -moz-appearance: textfield; }
    SECCIÓN 2: ESTRUCTURA MAESTRA Y TIPOGRAFÍA
    ========================================== */
 body { 
-    /* Tipografía nativa (estilo Apple / iOS System Font) */
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-body); color: var(--text-main); 
     padding: 20px 40px; max-width: 1600px; margin: auto; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
@@ -57,7 +56,6 @@ p { color: var(--text-muted); }
     box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
 }
 
-/* Clases de Utilidad extraídas del HTML */
 .auth-divider { display: flex; align-items: center; margin: 15px 0; }
 .divider-line { flex: 1; height: 1px; background: var(--border-color); }
 .auth-divider span { margin: 0 10px; font-size: 12px; color: var(--text-muted); }
@@ -101,7 +99,8 @@ p { color: var(--text-muted); }
 .auth-card p { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 0; margin-bottom: 20px;}
 .error-msg { color: var(--danger); font-size: 12px; text-align: center; margin-top: 10px; min-height: 15px;}
 
-input[type="text"], input[type="number"], input[type="email"], input[type="password"] { 
+/* FIX: AÑADIMOS 'SELECT' PARA ESTILIZAR LA LISTA DESPLEGABLE */
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], select { 
     font-family: inherit; 
     border-radius: 16px; 
     border: 1px solid rgba(255,255,255,0.1); 
@@ -109,8 +108,17 @@ input[type="text"], input[type="number"], input[type="email"], input[type="passw
     color: var(--text-main); padding: 14px 15px; font-weight: 600; width: 100%; font-size: 16px;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
+    appearance: none;
 }
-input:focus { outline: none; border-color: var(--accent-neon); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(217, 245, 34, 0.2); }
+input:focus, select:focus { outline: none; border-color: var(--accent-neon); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(217, 245, 34, 0.2); }
+
+select {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23a1a1aa" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 40px;
+}
+
 button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px;}
 
 /* ==========================================
