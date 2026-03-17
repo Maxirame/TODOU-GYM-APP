@@ -478,13 +478,24 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     #display-cronometro { font-size: 20px; }
     .btn-crono { padding: 8px 10px; font-size: 11px; flex: 1; white-space: nowrap; }
 
-    /* FIX: ISLA DE DESCANSO DESPRENDIÉNDOSE DEL CRONÓMETRO HACIA ARRIBA */
+    /* FIX: ISLA DE DESCANSO ESTILO BURBUJA DESDE EL CRONÓMETRO */
     .isla-descanso { 
-        position: fixed; top: auto; bottom: 90px; margin: 0; 
-        left: 50%; right: auto; transform: translate(-50%, 20px) scale(0.9); 
-        z-index: 999;
+        position: fixed !important; 
+        top: unset !important; /* Elimina la restricción superior de escritorio */
+        bottom: 90px !important; /* Se ubica justo arriba del cronómetro */
+        left: 50% !important; 
+        right: auto !important; 
+        height: 46px !important; /* Altura estricta para evitar que se estire por la pantalla */
+        min-height: 0 !important;
+        margin: 0 !important;
+        /* Efecto Burbuja: Arranca 40px más abajo (dentro del crono) y achicado al 50% */
+        transform: translate(-50%, 40px) scale(0.5) !important; 
+        z-index: 999 !important;
     }
-    .isla-descanso.visible { transform: translate(-50%, 0) scale(1); }
+    .isla-descanso.visible { 
+        /* Efecto Burbuja: Sube a su posición real inflando su tamaño */
+        transform: translate(-50%, 0) scale(1) !important; 
+    }
     
     .layout-dia { flex-direction: column; overflow: visible; gap: 25px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
