@@ -306,11 +306,12 @@ function actualizarInterfazDia() {
             const p = (ej.pesosRealizados && ej.pesosRealizados[i]) || ''; 
             const isCompleted = (ej.seriesCompletadas && ej.seriesCompletadas[i]) ? 'completada' : '';
 
+            // FIX: El botón btn-eliminar-serie ahora es todo el fondo rojo
             htmlSeries += `
                 <div class="serie-swipe-wrapper">
-                    <div class="serie-delete-bg">
-                        <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie"><i class="ph ph-trash"></i></button>
-                    </div>
+                    <button class="btn-eliminar-serie" data-ej="${idx}" data-serie="${i}" title="Eliminar Serie">
+                        <i class="ph ph-trash"></i>
+                    </button>
                     <div class="caja-serie ${isCompleted}">
                         <span class="numero-serie">S${i + 1}</span>
                         <div class="inputs-fila">
@@ -355,11 +356,11 @@ function actualizarInterfazDia() {
                 <div class="ejercicio-card-inner" id="card-inner-${idx}">
                     <div class="ejercicio-card-front ejercicio-item">
                         <div class="ejercicio-header-top">
-                            <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                             <div style="display: flex; align-items: center; gap: 8px;">
+                                <h4 class="titulo-ejercicio">${escapeHTML(ej.nombre)}</h4>
                                 <button class="btn-info-carta btn-flip" data-ej="${idx}" title="Ver Técnica"><i class="ph ph-info"></i></button>
-                                <button class="btn-eliminar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                             </div>
+                            <button class="btn-eliminar-ejercicio" data-ej="${idx}" title="Eliminar Ejercicio"><i class="ph ph-x"></i></button>
                         </div>
                         <div class="badge-pr" id="pr-${idx}"><i class="ph-fill ph-trophy"></i> Fallo: ${prPeso}kg x ${prReps} repes</div>
                         <div class="contenedor-series">${htmlSeries}</div>
@@ -412,7 +413,6 @@ listaUI.addEventListener('click', (e) => {
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
-            if (typeof iniciarDescansoGlobal === 'function') iniciarDescansoGlobal();
         } else {
             cajaSerie.classList.remove('completada');
         }
@@ -498,6 +498,7 @@ listaUI.addEventListener('change', (e) => {
     }
 });
 
+// LÓGICA DE GESTOS SWIPE FLUIDOS
 let swipeStartX = 0;
 let swipeStartY = 0;
 let currentTranslate = 0;
