@@ -430,7 +430,6 @@ listaUI.addEventListener('click', (e) => {
         const cajaSerie = btnCheck.closest('.caja-serie');
         if (nuevoEstado) {
             cajaSerie.classList.add('completada');
-            // FIX: Restaurado el llamado a la Isla de Descanso
             if (typeof iniciarDescansoGlobal === 'function') iniciarDescansoGlobal();
         } else {
             cajaSerie.classList.remove('completada');
@@ -517,7 +516,6 @@ listaUI.addEventListener('change', (e) => {
     }
 });
 
-// LÓGICA DE GESTOS SWIPE FLUIDOS
 let swipeStartX = 0;
 let swipeStartY = 0;
 let currentTranslate = 0;
@@ -597,6 +595,7 @@ listaUI.addEventListener('mouseleave', finalizarSwipe);
 
 document.getElementById('btn-toggle-add').addEventListener('click', () => {
     document.getElementById('burbuja-add-ejercicio').classList.toggle('visible');
+    document.getElementById('burbuja-importar').classList.remove('visible'); // Ocultar el otro si está abierto
 });
 
 document.getElementById('btn-cerrar-add').addEventListener('click', () => {
@@ -632,6 +631,72 @@ document.getElementById('btn-limpiar-checks').addEventListener('click', () => {
         guardarDatosEnNube();
         actualizarInterfazDia();
     }
+});
+
+// --- NUEVA LÓGICA DE IMPORTACIÓN DE RUTINAS ---
+document.getElementById('btn-toggle-importar').addEventListener('click', () => {
+    const select = document.getElementById('select-fecha-importar');
+    select.innerHTML = '';
+    
+    // Obtenemos todas las fechas guardadas que no sean HOY y que tengan ejercicios
+    const fechas = Object.keys(baseDeDatosLocal)
+        .filter(f => f !== diaActivo && baseDeDatosLocal[f] && baseDeDatosLocal[f].length > 0)
+        .sort((a, b) => new Date(b) - new Date(a)); // Ordenamos de más reciente a más antigua
+        
+    if (fechas.length === 0) {
+        select.innerHTML = '<option value="">No hay rutinas previas</option>';
+        document.getElementById('btn-ejecutar-importar').disabled = true;
+        document.getElementById('btn-ejecutar-importar').style.opacity = '0.5';
+    } else {
+        document.getElementById('btn-ejecutar-importar').disabled = false;
+        document.getElementById('btn-ejecutar-importar').style.opacity = '1';
+        
+        // Mostrar solo los últimos 15 entrenamientos para no saturar
+        fechas.slice(0, 15).forEach(f => {
+            const [year, month, day] = f.split('-');
+            const fObj = new Date(year, month - 1, day);
+            const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const nombreDia = dias[fObj.getDay()];
+            const numEjercicios = baseDeDatosLocal[f].length;
+            
+            const opt = document.createElement('option');
+            opt.value = f;
+            opt.textContent = `${nombreDia} ${day}/${month} (${numEjercicios} ejercicios)`;
+            select.appendChild(opt);
+        });
+    }
+    
+    document.getElementById('burbuja-importar').classList.toggle('visible');
+    document.getElementById('burbuja-add-ejercicio').classList.remove('visible'); // Ocultar el otro si está abierto
+});
+
+document.getElementById('btn-cerrar-importar').addEventListener('click', () => {
+    document.getElementById('burbuja-importar').classList.remove('visible');
+});
+
+document.getElementById('btn-ejecutar-importar').addEventListener('click', () => {
+    const fechaElegida = document.getElementById('select-fecha-importar').value;
+    if (!fechaElegida) return;
+    
+    // Hacemos una copia PROFUNDA para no pisar los datos del pasado
+    const rutinaCopiada = JSON.parse(JSON.stringify(baseDeDatosLocal[fechaElegida]));
+    
+    // Resetear las palomitas (checks) para que el atleta las marque de nuevo hoy
+    rutinaCopiada.forEach(ej => {
+        if (ej.seriesCompletadas) ej.seriesCompletadas = new Array(ej.series).fill(false);
+    });
+    
+    if (!baseDeDatosLocal[diaActivo]) baseDeDatosLocal[diaActivo] = [];
+    
+    if (baseDeDatosLocal[diaActivo].length > 0) {
+        if (!confirm("Ya tienes ejercicios anotados hoy. ¿Deseas añadir la rutina importada al final de la lista actual?")) return;
+    }
+    
+    baseDeDatosLocal[diaActivo] = baseDeDatosLocal[diaActivo].concat(rutinaCopiada);
+    
+    guardarDatosEnNube();
+    actualizarInterfazDia();
+    document.getElementById('burbuja-importar').classList.remove('visible');
 });
 
 // ==========================================
