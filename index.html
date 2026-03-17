@@ -139,6 +139,7 @@
             
             <div class="acciones-dia-wrapper">
                 <button class="btn-icono-accion" id="btn-toggle-add" title="Añadir Ejercicio"><i class="ph ph-plus"></i></button>
+                <button class="btn-icono-accion" id="btn-toggle-importar" title="Importar Rutina Anterior"><i class="ph ph-copy"></i></button>
                 <button class="btn-icono-accion" id="btn-guardar-dia" title="Guardar Entrenamiento"><i class="ph ph-floppy-disk"></i></button>
                 <button class="btn-icono-accion" id="btn-limpiar-checks" title="Limpiar Checks"><i class="ph ph-broom"></i></button>
 
@@ -210,6 +211,18 @@
                     <button class="btn-accion" id="btn-agregar-ejercicio" style="margin-top: 0;"><i class="ph ph-plus"></i> AÑADIR A LA RUTINA</button>
                     <button class="btn-volver btn-cancelar-burbuja" id="btn-cerrar-add">Cancelar</button>
                 </div>
+
+                <div id="burbuja-importar" class="burbuja-panel">
+                    <h3 class="titulo-burbuja" style="margin-bottom: 5px;"><i class="ph-fill ph-copy"></i> Importar</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">Copia ejercicios y pesos base de un entrenamiento anterior.</p>
+                    
+                    <select id="select-fecha-importar" class="input-burbuja" style="background: rgba(0,0,0,0.5); color: var(--text-main); margin-bottom: 20px;">
+                        </select>
+                    
+                    <button class="btn-accion" id="btn-ejecutar-importar" style="margin-top: 0;"><i class="ph ph-download-simple"></i> COPIAR RUTINA</button>
+                    <button class="btn-volver btn-cancelar-burbuja" id="btn-cerrar-importar">Cancelar</button>
+                </div>
+
             </div>
 
             <div class="cronometro-container">
