@@ -98,8 +98,10 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         document.getElementById('vista-auth').style.display = 'none';
         document.getElementById('vista-semana').style.display = 'flex';
+        document.getElementById('pantalla-carga').classList.remove('oculta');
         await cargarDatosDeNube(user.uid);
     } else {
+        document.getElementById('pantalla-carga').classList.add('oculta');
         document.getElementById('vista-auth').style.display = 'flex';
         document.getElementById('vista-semana').style.display = 'none';
         document.getElementById('vista-dia').style.display = 'none';
@@ -114,8 +116,12 @@ document.getElementById('btn-login').addEventListener('click', async () => {
     if(!email || !pass) return errorMsg.innerText = "⚠️ Completa ambos campos.";
     try {
         errorMsg.innerText = "Cargando...";
+        document.getElementById('pantalla-carga').classList.remove('oculta');
         await signInWithEmailAndPassword(auth, email, pass);
-    } catch (error) { errorMsg.innerText = "⚠️ Error: Verifica tu correo o contraseña."; }
+    } catch (error) { 
+        document.getElementById('pantalla-carga').classList.add('oculta');
+        errorMsg.innerText = "⚠️ Error: Verifica tu correo o contraseña."; 
+    }
 });
 
 document.getElementById('btn-register').addEventListener('click', async () => {
@@ -125,11 +131,13 @@ document.getElementById('btn-register').addEventListener('click', async () => {
     if(!email || !pass) return errorMsg.innerText = "⚠️ Completa ambos campos.";
     try {
         errorMsg.innerText = "Creando cuenta...";
+        document.getElementById('pantalla-carga').classList.remove('oculta');
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         await sendEmailVerification(userCredential.user);
         alert("¡Cuenta creada exitosamente! Te hemos enviado un correo para verificar tu identidad.");
         setTimeout(() => editarNombre(), 1000); 
     } catch (error) {
+        document.getElementById('pantalla-carga').classList.add('oculta');
         if (error.code === 'auth/weak-password') errorMsg.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
         else if (error.code === 'auth/email-already-in-use') errorMsg.innerText = "⚠️ Ese correo ya está registrado.";
         else errorMsg.innerText = "⚠️ Error: " + error.code;
@@ -145,7 +153,10 @@ document.getElementById('btn-google').addEventListener('click', async () => {
     } catch (error) { errorMsg.innerText = "⚠️ Error al conectar con Google."; }
 });
 
-document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => signOut(auth));
+document.getElementById('btn-cerrar-sesion-main').addEventListener('click', () => {
+    document.getElementById('pantalla-carga').classList.remove('oculta');
+    setTimeout(() => signOut(auth), 500); 
+});
 
 // ==========================================
 // SECCIÓN 4: BASE DE DATOS Y SINCRONIZACIÓN
@@ -201,6 +212,12 @@ async function cargarDatosDeNube(uid) {
             if(typeof actualizarCountdownEventos === 'function') actualizarCountdownEventos();
             if(typeof renderizarSolicitudes === 'function') renderizarSolicitudes();
             if(typeof escucharAmigos === 'function') escucharAmigos();
+
+            // MAGIA DEL SPLASH: Ocultar pantalla de carga una vez que la DB ya pintó todo
+            setTimeout(() => {
+                const loader = document.getElementById('pantalla-carga');
+                if(loader) loader.classList.add('oculta');
+            }, 400); 
         }
     });
 
@@ -233,6 +250,7 @@ function editarNombre() {
     }
 }
 document.getElementById('btn-editar-nombre').addEventListener('click', editarNombre);
+
 
 // ==========================================
 // SECCIÓN 5: RENDERIZADO DEL CALENDARIO
@@ -1192,3 +1210,4 @@ document.getElementById('btn-eliminar-evento-activo')?.addEventListener('click',
         actualizarCountdownEventos();
     }
 });
+
