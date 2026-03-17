@@ -323,14 +323,21 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
 
 .serie-swipe-wrapper { position: relative; width: 100%; border-radius: 10px; overflow: hidden; background: transparent; user-select: none; -webkit-user-select: none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
 
-.serie-delete-bg { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; border-radius: 10px; z-index: 1; }
-.btn-eliminar-serie { background: transparent; border: none; color: white; font-size: 20px; transition: 0.2s; padding:0; display:flex; align-items:center; justify-content:center;}
-.btn-eliminar-serie:hover { transform: scale(1.2); }
+/* FIX: AHORA EL BOTÓN OCUPA TODO EL FONDO ROJO */
+.btn-eliminar-serie { 
+    position: absolute; top: 0; right: 0; width: 100%; height: 100%; 
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); 
+    display: flex; align-items: center; justify-content: flex-end; 
+    padding-right: 20px; border-radius: 10px; z-index: 1; 
+    border: none; color: white; font-size: 20px; transition: 0.2s; cursor: pointer;
+}
+.btn-eliminar-serie i { transition: 0.2s; }
+.btn-eliminar-serie:hover i { transform: scale(1.2); }
 
 .caja-serie { 
     display: flex; flex-direction: row; align-items: center; justify-content: space-between; 
     background: var(--bg-input); padding: 6px 10px; border-radius: 10px; border: var(--glass-border); 
-    position: relative; z-index: 2; width: 100%; touch-action: pan-y; transition: background 0.3s, border-color 0.3s; 
+    position: relative; z-index: 2; width: 100%; touch-action: pan-y; transition: background 0.3s, border-color 0.3s, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
 }
 .caja-serie.swiped { transform: translateX(-70px); }
@@ -471,8 +478,14 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     #display-cronometro { font-size: 20px; }
     .btn-crono { padding: 8px 10px; font-size: 11px; flex: 1; white-space: nowrap; }
 
-    .isla-descanso { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 15px; left: 50%; right: auto; transform: translate(-50%, 20px) scale(0.9); }
+    /* FIX: ISLA DE DESCANSO DESPRENDIÉNDOSE DEL CRONÓMETRO HACIA ARRIBA */
+    .isla-descanso { 
+        position: fixed; top: auto; bottom: 90px; margin: 0; 
+        left: 50%; right: auto; transform: translate(-50%, 20px) scale(0.9); 
+        z-index: 999;
+    }
     .isla-descanso.visible { transform: translate(-50%, 0) scale(1); }
+    
     .layout-dia { flex-direction: column; overflow: visible; gap: 25px;}
     .columna-fija { width: 100%; max-width: 100%; overflow: visible; padding-right: 0;}
     .columna-scroll { overflow: visible; padding: 0;}
@@ -495,6 +508,7 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     }
     .panel-comunidad-main { min-height: 350px; }
 }
+
 
 /* ==========================================
    SECCIÓN 13: DASHBOARD MODULOS EXTRAS
