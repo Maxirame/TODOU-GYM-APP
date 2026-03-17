@@ -641,3 +641,20 @@ button { font-family: inherit; cursor: pointer; font-weight: 700; text-transform
     /* En móvil el botón está al medio, así que el origen de la animación cambia */
     .card-meta { transform: translate(0, -35vh) scale(0); }
 }
+
+/* ==========================================
+   SECCIÓN 16: PANTALLA DE CARGA (SPLASH)
+   ========================================== */
+.pantalla-carga {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: var(--bg-body); z-index: 999999;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 1; visibility: visible; transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.pantalla-carga.oculta {
+    opacity: 0; visibility: hidden;
+}
+.loader-logo {
+    display: flex; flex-direction: column; align-items: center; gap: 15px; color: var(--accent-neon);
+}
+.loader-logo i { font-size: 55px; animation: pulse-text 1s infinite alternate; }
